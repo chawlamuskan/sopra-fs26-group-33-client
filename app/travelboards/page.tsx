@@ -1,8 +1,17 @@
 "use client";
 
+import React, { useEffect } from "react";
+import { Button } from "antd";
 import styles from "./travelboards.module.css";
+import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 
-export default function TravelBoardsPage() {
+const TravelBoardsPage: React.FC = () => {
+    const isAllowed = useProtectedRoute();
+
+    useEffect(() => {
+        if (!isAllowed) return;
+    }, [isAllowed]);
+
   return (
     <div className={styles.container}>
 
@@ -10,9 +19,9 @@ export default function TravelBoardsPage() {
       <div className={styles.header}>
         <h1 className={styles.title}>Travel Boards</h1>
         <div className={styles.buttons}>
-          <button className={styles.btn}>Create</button>
-          <button className={styles.btn}>Manage</button>
-          <button className={styles.btn}>Join</button>
+          <Button className={styles.btn}>Create</Button>
+          <Button className={styles.btn}>Manage</Button>
+          <Button className={styles.btn}>Join</Button>
         </div>
       </div>
 
@@ -24,4 +33,6 @@ export default function TravelBoardsPage() {
 
     </div>
   );
-}
+};
+
+export default TravelBoardsPage;
