@@ -96,7 +96,7 @@ const TravelBoardsPage: React.FC = () => {
         {/* Join modal - actual content for #53 */}
 
         <Modal
-            title="Join a  Travel Board"
+            title="Join a Travel Board"
             open={isJoinModalOpen}
             onCancel={() => setIsJoinModalOpen(false)}
             footer={null}
