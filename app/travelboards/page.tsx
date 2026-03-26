@@ -8,6 +8,7 @@ import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 const TravelBoardsPage: React.FC = () => {
     const isAllowed = useProtectedRoute(); 
     const [isCreatedModalOpen, setIsCreatedModalOpen] = useState(false); // state to control if we need to display the modal to create new board 
+    const [isJoinModalOpen, setIsJoinModalOpen] = useState(false); // state to control if we need to display the modal to join a new board
 
     useEffect(() => {
         if (!isAllowed) return;     // #35
@@ -26,7 +27,10 @@ const TravelBoardsPage: React.FC = () => {
             Create
           </Button>
           <Button className={styles.btn}>Manage</Button>
-          <Button className={styles.btn}>Join</Button>
+          {/* #38 join modal */}
+          <Button className={styles.btn} onClick={() => setIsJoinModalOpen(true)}>
+            Join
+          </Button>
         </div>
       </div>
 
@@ -45,6 +49,17 @@ const TravelBoardsPage: React.FC = () => {
             footer={null}
         >
           <p style={{color: "red"}}>Form coming soon ...</p>
+        </Modal>
+
+        {/* Join modal - actual content for #53 */}
+
+        <Modal
+            title="Join a  Travel Board"
+            open={isJoinModalOpen}
+            onCancel={() => setIsJoinModalOpen(false)}
+            footer={null}
+        >
+          <p style={{color: "red"}}>You can join soon ...</p>
         </Modal>
 
     </div>
