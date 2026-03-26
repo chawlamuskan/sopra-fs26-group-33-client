@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { App as AntdApp, ConfigProvider, theme } from "antd";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import "@/styles/globals.css";
+import { Layout } from "antd";
+import { DM_Sans } from "next/font/google";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,6 +15,13 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+});
+
+const {Header} = Layout;
 
 export const metadata: Metadata = {
   title: "Student XX-XXX-XXX",
@@ -26,42 +35,68 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${dmSans.className}`}>
         <ConfigProvider
           theme={{
             algorithm: theme.defaultAlgorithm,
             token: {
-              // general theme options are set in token, meaning all primary elements (button, menu, ...) will have this color
-              colorPrimary: "#22426b", // selected input field boarder will have this color as well
+              colorPrimary: "#22426b",
               borderRadius: 8,
               colorText: "#fff",
               fontSize: 16,
-
-              // Alias Token
               colorBgContainer: "#16181D",
             },
-            // if a component type needs special styling, setting here will override default options set in token
             components: {
               Button: {
-                colorPrimary: "#75bd9d", // this will color all buttons in #75bd9d, overriding the default primaryColor #22426b set in token line 35
-                algorithm: true, // enable algorithm (redundant with line 33 but here for demo purposes)
+                colorPrimary: "#75bd9d",
+                algorithm: true,
                 controlHeight: 38,
               },
               Input: {
-                colorBorder: "gray", // color boarder selected is not overridden but instead is set by primary color in line 35
+                colorBorder: "gray",
                 colorTextPlaceholder: "#888888",
-                algorithm: false, // disable algorithm (line 32)
+                algorithm: false,
               },
               Form: {
                 labelColor: "#fff",
-                algorithm: theme.defaultAlgorithm, // specify a specifc algorithm instead of true/false
+                algorithm: theme.defaultAlgorithm,
               },
-              Card: {},
             },
           }}
         >
           <AntdRegistry>
-            <AntdApp>{children}</AntdApp>
+            <AntdApp>
+              <Layout>
+                <header
+                  style={{
+                    background: "#0B0696",
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "0 24px",
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 1000,
+                    height: "107px",
+                  }}
+                >
+                  <h1
+                    style={{
+                      color: "#FFF",
+                      fontSize: "48px",
+                      fontFamily: "DM Sans",
+                      fontWeight: 700,
+                      letterSpacing: "-0.293px",
+                      margin: 0,
+                    }}
+                  >
+                    Worldtura
+                  </h1>
+                </header>
+
+                {children}
+              </Layout>
+
+            </AntdApp>
           </AntdRegistry>
         </ConfigProvider>
       </body>
