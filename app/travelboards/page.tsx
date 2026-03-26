@@ -11,7 +11,7 @@ const TravelBoardsPage: React.FC = () => {
     const [isJoinModalOpen, setIsJoinModalOpen] = useState(false); // state to control if we need to display the modal to join a new board
 
     useEffect(() => {
-        if (!isAllowed) return;     // #35
+        if (!isAllowed) return;     // #35 ; #46 works for pop up too 
     }, [isAllowed]);
 
   return (
