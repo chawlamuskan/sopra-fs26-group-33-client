@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Button, Modal } from "antd";
+import { Button, Modal, Input, DatePicker } from "antd";
 import styles from "./travelboards.module.css";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 
@@ -43,13 +43,55 @@ const TravelBoardsPage: React.FC = () => {
         {/* Create modal - actual content for #47 */}
 
         <Modal
-            title="Create a new Travel Board"   
+            title={<span style={{ color: "#3333cc" }}>Create a new board</span>}     // #45 travel board creation page + #47
             open={isCreatedModalOpen}
             onCancel={() => setIsCreatedModalOpen(false)}
             footer={null}
         >
-          <p style={{color: "red"}}>Form coming soon ...</p>    // #45 travel board creation page 
+          <div className={styles.form}>      
+
+            {/* Board name */}
+            <Input 
+              placeholder="New Board Name"
+              className={styles.input}
+            />
+
+            {/* Location */}
+            <Input 
+              placeholder="Choose location"
+              className={styles.input}
+            />
+
+            {/* Date */}
+            <DatePicker.RangePicker
+              className={styles.input}
+              placeholder={["Start date (optional)", "End date (optional)"]}
+            />
+
+            {/* Privacy */}
+            <div className={styles.privacySection}>
+              <p className={styles.sectionLabel}>Privacy setting</p>
+              <div className={styles.privacyButtons}>
+                <Button className={styles.privacyBtn}>Private</Button>
+                <Button className={styles.privacyBtn}>Public</Button>
+              </div>
+            </div>
+
+            {/* Invite friends */}
+            <div className={styles.inviteSection}>
+              <p className={styles.sectionLabel}>Invite friends</p>
+              <div className={styles.inviteButtons}>
+                <Button className={styles.invacyBtn}>Share code</Button>
+                <Button className={styles.privacyBtn}>Pick from friends list</Button>
+              </div>
+            </div>
+
+          </div>
         </Modal>
+            
+          
+              
+       
 
         {/* Join modal - actual content for #53 */}
 
