@@ -34,8 +34,13 @@ reason).
 
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
-| **[@chawlamuskan]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@chawlamuskan]** | [25.03.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/b2d472ba09a069897a793637c1c7f5e19ba37c2c] | [Create new Travel Board Page #34] | [User can see all his Travel Boards] |
+|                    | [25.03.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/7a9096615bd13c5e36e25ab9e48b94ad29e26c68] | [Restrict functionalities for non logged in users #35] | [Only the current user can see his own travel boards] |
+|                    | [25.03.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/1c143c5ef39276059264f09322f1d5cd2a04626e] | ['Create' new board button + redirect via pop up #37] | [user can create a new Travel Board] |
+|                    | [26.03.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/bfc5390f160f565d45551ce86785757bbfed7a58] | ['Join' existing board button + redirect via pop up #38] | [user has option to join boards from others] |
+|                    | [26.03.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/4f4fbc9bc2cd7f7bc34bd1c171e4927a2e5652e4] | [create the actual Creation Page for a new board #45] | [user can see the page / pop up to create a new board] |
+|                    | [26.03.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/db9606bf0fbc77ed128795c34001448f4a1311c6] | [restrict access for creation only to current logged in user #46] | [only current user can create a new board in his own page] |
+|                    | [26.03.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/8df68214e80ce30ddce1c7ee8a13490f1a09c88f] | [Travel Board Creation Page: show form with name, dates, location and privacy setting #47] | [user now can see the creation page and fill out the form] |
 | **[@nadiapan4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@despoinapantazi]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
