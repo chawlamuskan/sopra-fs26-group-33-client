@@ -43,12 +43,12 @@ const TravelBoardsPage: React.FC = () => {
         {/* Create modal - actual content for #47 */}
 
         <Modal
-            title="Create a new Travel Board"
+            title="Create a new Travel Board"   
             open={isCreatedModalOpen}
             onCancel={() => setIsCreatedModalOpen(false)}
             footer={null}
         >
-          <p style={{color: "red"}}>Form coming soon ...</p>
+          <p style={{color: "red"}}>Form coming soon ...</p>    // #45 travel board creation page 
         </Modal>
 
         {/* Join modal - actual content for #53 */}
