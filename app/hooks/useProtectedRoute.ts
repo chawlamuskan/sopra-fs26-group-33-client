@@ -19,7 +19,7 @@ export const useProtectedRoute = () => {
       setIsAllowed(true);
     } else {
       setIsAllowed(false);
-      router.push("/login"); // redirect to login if not authenticated
+      router.push("/"); // redirect to landing page if not authenticated
     }
   }, [token, router]);
 
