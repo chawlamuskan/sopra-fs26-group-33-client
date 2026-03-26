@@ -5,6 +5,7 @@ import { AntdRegistry } from "@ant-design/nextjs-registry";
 import "@/styles/globals.css";
 import { Layout } from "antd";
 import { DM_Sans } from "next/font/google";
+import HeaderButtons from "./HeaderButtons";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,6 +28,9 @@ export const metadata: Metadata = {
   title: "Student XX-XXX-XXX",
   description: "sopra-fs26-template-client",
 };
+
+
+
 
 export default function RootLayout({
   children,
@@ -91,6 +95,7 @@ export default function RootLayout({
                   >
                     Worldtura
                   </h1>
+                  {<HeaderButtons />}
                 </header>
 
                 {children}
