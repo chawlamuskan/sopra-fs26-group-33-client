@@ -95,7 +95,15 @@ const Login: React.FC = () => {
           >
             <Input.Password placeholder="Enter password" className={styles.inputField} variant="borderless" />
           </Form.Item>
-
+          
+          <Form.Item>
+            <div className={styles.btnWrapper}>
+              <button type="submit" className={styles.btnLogin} onClick={() => router.push("/")}> 
+                Login
+              </button>
+            </div>
+          </Form.Item>
+          
          
           <Form.Item>
             <div className={styles.btnWrapper}>
