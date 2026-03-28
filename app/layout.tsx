@@ -5,7 +5,6 @@ import { AntdRegistry } from "@ant-design/nextjs-registry";
 import "@/styles/globals.css";
 import { Layout } from "antd";
 import { DM_Sans } from "next/font/google";
-import HeaderButtons from "./HeaderButtons";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,7 +21,6 @@ const dmSans = DM_Sans({
   weight: ["400", "700"],
 });
 
-const {Header} = Layout;
 
 export const metadata: Metadata = {
   title: "Student XX-XXX-XXX",
@@ -71,32 +69,6 @@ export default function RootLayout({
           <AntdRegistry>
             <AntdApp>
               <Layout>
-                <header
-                  style={{
-                    background: "#0B0696",
-                    display: "flex",
-                    alignItems: "center",
-                    padding: "0 24px",
-                    position: "sticky",
-                    top: 0,
-                    zIndex: 1000,
-                    height: "107px",
-                  }}
-                >
-                  <h1
-                    style={{
-                      color: "#FFF",
-                      fontSize: "48px",
-                      fontFamily: "DM Sans",
-                      fontWeight: 700,
-                      letterSpacing: "-0.293px",
-                      margin: 0,
-                    }}
-                  >
-                    Worldtura
-                  </h1>
-                  {<HeaderButtons />}
-                </header>
 
                 {children}
               </Layout>

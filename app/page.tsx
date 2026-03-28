@@ -9,6 +9,9 @@ import {
   MapMouseEvent,
 } from "@vis.gl/react-google-maps";
 import { useState } from "react";
+import Header from "./components/Header";
+
+
 
 interface CountryInfo {
   name: string;
@@ -59,38 +62,20 @@ export default function Home() {
   };
 
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <div className={styles.ctas}>
-          <Button
-            type="primary"
-            variant="solid"
-            onClick={() => router.push("/login")}
+  <>
+    <Header />
+    <main className={styles.main}>
+      <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
+        <div style={{ height: "100vh", width: "100vw" }}>
+          <Map
+            mapId="3acb2fe9409f1015af87f375"
+            defaultZoom={5}
+            defaultCenter={position}
+            gestureHandling='greedy'
+            disableDefaultUI
+            onClick={handleClick}
           >
-            Go to login
-          </Button>
-
-          <Button
-            type="primary"
-            variant="solid"
-            onClick={() => router.push("/register")}
-          >
-            Go to Register
-          </Button>
-
-        </div>
-
-        <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
-          <div style = {{height: "100vh", width: "80vw" }}> 
-           <Map 
-           mapId="3acb2fe9409f1015af87f375"
-           defaultZoom={5}
-           defaultCenter={position} // Zurich as the center
-           gestureHandling='greedy'
-           disableDefaultUI
-           onClick={handleClick}
-          >
-          {countryInfo && (
+            {countryInfo && (
               <div style={{
                 position: "absolute",
                 top: "50%",
@@ -98,66 +83,63 @@ export default function Home() {
                 transform: "translate(-50%, -50%)",
                 backgroundColor: "#0B0696D1",
                 color: "white",
-                  borderRadius: "16px",
-                  padding: "24px",
-                  width: "320px",
-                  zIndex: 1000,
-                  boxShadow: "0 4px 20px rgba(0,0,0,0.5)"
-                }}>
-                  <button 
+                borderRadius: "16px",
+                padding: "24px",
+                width: "320px",
+                zIndex: 1000,
+                boxShadow: "0 4px 20px rgba(0,0,0,0.5)"
+              }}>
+                <button
                   onClick={() => setCountryInfo(null)}
                   style={{
-                      position: "absolute",
-                      top: "10px",
-                      right: "14px",
-                      background: "none",
-                      border: "none",
-                      color: "white",
-                      fontSize: "18px",
-                      cursor: "pointer"
-                    }}
-                  >✕</button>
-                  <h2 style={{ textAlign: "center", marginBottom: "16px" }}>
-                    {countryInfo.name}
-                  </h2>
-                  <div style={{ display: "flex", gap: "16px", alignItems: "center", marginBottom: "16px" }}>
-                    <span style={{ fontSize: "48px" }}>{countryInfo.flag}</span>
-                    <div>
-                      <p><strong>Capital:</strong> {countryInfo.capital}</p>
-                      <p><strong>Population:</strong> {(countryInfo.population / 1_000_000).toFixed(2)} mill.</p>
-                      <p><strong>Language(s):</strong> {countryInfo.languages.join(", ")}</p>
-                    </div>
-                  </div>
-
-           <div style={{ marginTop: "12px" }}>
-                    <p style={{ textAlign: "center", fontWeight: "bold" }}>Recommended Places</p>
-                    <div style={{
-                      backgroundColor: "#1a3a8f",
-                      borderRadius: "8px",
-                      padding: "10px",
-                      textAlign: "center",
-                      marginBottom: "8px"
-                    }}>
-                      Please <span style={{ textDecoration: "underline", cursor: "pointer" }} onClick={() => router.push("/login")}>Login</span> or <span style={{ textDecoration: "underline", cursor: "pointer" }} onClick={() => router.push("/register")}>Register</span> to view
-                    </div>
-
-                    <p style={{ textAlign: "center", fontWeight: "bold" }}>Community Posts</p>
-                    <div style={{
-                      backgroundColor: "#1a3a8f",
-                      borderRadius: "8px",
-                      padding: "10px",
-                      textAlign: "center"
-                    }}>
-                      Please <span style={{ textDecoration: "underline", cursor: "pointer" }} onClick={() => router.push("/login")}>Login</span> or <span style={{ textDecoration: "underline", cursor: "pointer" }} onClick={() => router.push("/register")}>Register</span> to view
-                    </div>
+                    position: "absolute",
+                    top: "10px",
+                    right: "14px",
+                    background: "none",
+                    border: "none",
+                    color: "white",
+                    fontSize: "18px",
+                    cursor: "pointer"
+                  }}
+                >✕</button>
+                <h2 style={{ textAlign: "center", marginBottom: "16px" }}>
+                  {countryInfo.name}
+                </h2>
+                <div style={{ display: "flex", gap: "16px", alignItems: "center", marginBottom: "16px" }}>
+                  <span style={{ fontSize: "48px" }}>{countryInfo.flag}</span>
+                  <div>
+                    <p><strong>Capital:</strong> {countryInfo.capital}</p>
+                    <p><strong>Population:</strong> {(countryInfo.population / 1_000_000).toFixed(2)} mill.</p>
+                    <p><strong>Language(s):</strong> {countryInfo.languages.join(", ")}</p>
                   </div>
                 </div>
-              )}
-           </Map>
-         </div>
-        </APIProvider>
-        
-      </main>
-    </div>
+                <div style={{ marginTop: "12px" }}>
+                  <p style={{ textAlign: "center", fontWeight: "bold" }}>Recommended Places</p>
+                  <div style={{
+                    backgroundColor: "#1a3a8f",
+                    borderRadius: "8px",
+                    padding: "10px",
+                    textAlign: "center",
+                    marginBottom: "8px"
+                  }}>
+                    Please <span style={{ textDecoration: "underline", cursor: "pointer" }} onClick={() => router.push("/login")}>Login</span> or <span style={{ textDecoration: "underline", cursor: "pointer" }} onClick={() => router.push("/register")}>Register</span> to view
+                  </div>
+                  <p style={{ textAlign: "center", fontWeight: "bold" }}>Community Posts</p>
+                  <div style={{
+                    backgroundColor: "#1a3a8f",
+                    borderRadius: "8px",
+                    padding: "10px",
+                    textAlign: "center"
+                  }}>
+                    Please <span style={{ textDecoration: "underline", cursor: "pointer" }} onClick={() => router.push("/login")}>Login</span> or <span style={{ textDecoration: "underline", cursor: "pointer" }} onClick={() => router.push("/register")}>Register</span> to view
+                  </div>
+                </div>
+              </div>
+            )}
+          </Map>
+        </div>
+      </APIProvider>
+    </main>
+  </>
   );
 }
