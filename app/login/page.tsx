@@ -1,12 +1,10 @@
-"use client"; // For components that need React hooks and browser APIs, SSR (server side rendering) has to be disabled. Read more here: https://nextjs.org/docs/pages/building-your-application/rendering/server-side-rendering
-
-import { useRouter } from "next/navigation"; // use NextJS router for navigation
+"use client";
+import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { User } from "@/types/user";
-import { Button, Form, Input } from "antd";
-// Optionally, you can import a CSS module or file for additional styling:
-// import styles from "@/styles/page.module.css";
+import { Form, Input } from "antd";
+import styles from "@/styles/login.module.css";
 
 interface FormFieldProps {
   label: string;
@@ -17,33 +15,17 @@ const Login: React.FC = () => {
   const router = useRouter();
   const apiService = useApi();
   const [form] = Form.useForm();
-  // useLocalStorage hook example use
-  // The hook returns an object with the value and two functions
-  // Simply choose what you need from the hook:
-  const {
-    // value: token, // is commented out because we do not need the token value
-    set: setToken, // we need this method to set the value of the token to the one we receive from the POST request to the backend server API
-    // clear: clearToken, // is commented out because we do not need to clear the token when logging in
-  } = useLocalStorage<string>("token", ""); // note that the key we are selecting is "token" and the default value we are setting is an empty string
-  // if you want to pick a different token, i.e "usertoken", the line above would look as follows: } = useLocalStorage<string>("usertoken", "");
+
+  const { set: setToken } = useLocalStorage<string>("token", "");
 
   const handleLogin = async (values: FormFieldProps) => {
     try {
-      // Call the API service and let it handle JSON serialization and error handling
-      // const response = await apiService.post<User>("/users", values);
-      const response = await apiService.post<User>("/login", values);     // new - call login not users
-
-
-      // Use the useLocalStorage hook that returned a setter function (setToken in line 41) to store the token if available
+      const response = await apiService.post<User>("/login", values);
       if (response.token) {
         setToken(response.token);
         localStorage.setItem("user", JSON.stringify(response));
       }
-
-      // Navigate to the user overview
-      //router.push("/users");
-      // redirect to user's own profile
-      router.push(`/users/${response.id}`); // changed 
+      router.push(`/users/${response.id}`);
     } catch (error) {
       if (error instanceof Error) {
         alert(`Something went wrong during the login:\n${error.message}`);
@@ -54,47 +36,78 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="login-container">
-      <Form
-        form={form}
-        name="login"
-        size="large"
-        variant="outlined"
-        onFinish={handleLogin}
-        layout="vertical"
-      >
-        <Form.Item
-          name="username"
-          label="Username"
-          rules={[{ required: true, message: "Please input your username!" }]}
+    <div className={styles.container}>
+      <div style={{
+        height: "107px",
+        display: "flex",
+        alignItems: "center",
+        padding: "0 24px",
+        position: "sticky",
+        top: 0,
+        zIndex: 1000,
+      }}>
+        <h1
+          style={{
+            color: "#0B0696",
+            fontSize: "48px",
+            fontFamily: "DM Sans",
+            fontWeight: 700,
+            letterSpacing: "-0.293px",
+            margin: 0,
+            cursor: "pointer",
+          }}
+          onClick={() => router.push("/")}
         >
-          <Input placeholder="Enter username" />
-        </Form.Item>
-       
-        {/* CHANGED THIS — remove name field, add password field, only need name n password to login, not reigster here  */}
-        <Form.Item
-          name="password"
-          label="Password"
-          rules={[{ required: true, message: "Please input your password!" }]}
+          Worldtura
+        </h1>
+      </div>
+
+      {/* Card */}
+      <div className={styles.card}>
+        <h2 className={styles.welcome}>Welcome back!</h2>
+
+        <Form
+          form={form}
+          name="login"
+          onFinish={handleLogin}
+          layout="vertical"
         >
-          <Input.Password placeholder="Enter password" />
-        </Form.Item>
-        
-        <Form.Item>
-          <Button type="primary" htmlType="submit" className="login-button">
-            Login
-          </Button>
-        </Form.Item>
-        <Form.Item>
-        <Button
-          type="primary"
-          className="login-button"
-          onClick={() => router.push("/register")}
-        >
-          No account? Register now
-        </Button>
-      </Form.Item>
-      </Form>
+          <Form.Item
+            name="username"
+            label={
+              <span className={styles.fieldLabel}>
+                Username or email 
+              </span>
+            }
+            rules={[{ required: true, message: "Please input your username!" }]}
+          >
+            <Input
+              placeholder="Enter username"
+              className={styles.inputField}
+              variant="borderless"
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="password"
+            label={<span className={styles.fieldLabel}>Password </span>}
+            rules={[{ required: true, message: "Please input your password!" }]}
+          >
+            <Input.Password placeholder="Enter password" className={styles.inputField} variant="borderless" />
+          </Form.Item>
+
+         
+          <Form.Item>
+            <div className={styles.btnWrapper}>
+              <button className={styles.btnLogin} style ={{height:"60px"}} onClick={() => router.push("/register")}>
+                Not a user? <br /> Sign up
+              </button>
+            </div>
+          </Form.Item>
+            
+          
+        </Form>
+      </div>
     </div>
   );
 };
