@@ -41,7 +41,11 @@ reason).
 |                    | [26.03.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/4f4fbc9bc2cd7f7bc34bd1c171e4927a2e5652e4] | [create the actual Creation Page for a new board #45] | [user can see the page / pop up to create a new board] |
 |                    | [26.03.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/db9606bf0fbc77ed128795c34001448f4a1311c6] | [restrict access for creation only to current logged in user #46] | [only current user can create a new board in his own page] |
 |                    | [26.03.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/8df68214e80ce30ddce1c7ee8a13490f1a09c88f] | [Travel Board Creation Page: show form with name, dates, location and privacy setting #47] | [user now can see the creation page and fill out the form] |
-| **[@nadiapan4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@nadiapan4]** |  [26.03.2026]    | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/8df8346d51958cc4d8c03372d36e778ba5af0b87] | [Create banner on the top #85] | [Creates the banner on top that contains the logo, if the token is saved it will show the user's name and the profile picture (just placeholders for now).] |
+|                    | [26.03.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/9cbfa486aaaabf5414e618a91d44f2ed95d90761] | [Add visible Login and Register buttons to the landing page #5] | [Reactive component based on if the token is saved or not, unique point to login or register.] |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@despoinapantazi]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
