@@ -1,0 +1,82 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+
+.container {
+  width: 100vw;
+  min-height: 100vh;
+  background: white;
+  font-family: 'DM Sans', sans-serif;
+  position: relative;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh
+}
+
+.welcome {
+  color: black;
+  font-size: 40px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.fieldLabel {
+  color: black;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 26px;
+}
+
+
+
+.inputField {
+  width: 328px !important;
+  height: 49px !important;
+  background: #F4EBEB !important;
+  border-radius: 7.49px !important;
+  border: none !important;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+}
+
+.btnWrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.btnLogin {
+  width: 179px;
+  height: 44px;
+  background: #0B0696;
+  border: none;
+  border-radius: 100px;
+  color: white;
+  font-size: 20px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btnSecondary {
+  width: 179px;
+  height: 44px;
+  background: #F4EBEB;
+  border: none;
+  border-radius: 100px;
+  color: #0B0696;
+  font-size: 20px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btnLogin:hover {
+  opacity: 0.85;
+}
