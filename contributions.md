@@ -57,8 +57,11 @@ reason).
 | **[@nsavas8]** | [25.03.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/25bb9abc60232e9fdeea4bd58296f94493d6639d] | [Adding the API key #2 (remark: this is not visible in github, since its in gitignore)] | [Assures we have access to the map API] |
 |                    | [25.03.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/64235878fb23d09169ebf4d88391cbce38882718] | [Added map to landing page #1 ] | [This is the main API we are using, so users can see and use the map] |
 |                    | [27.03.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/b6474bf557114e6ce726114533a8c47d8424daf0] | [Implemented country popup by clicking on a country that shows country specific information using REST countries API #3 ] | [Important functionality on the landing page to get information about a country] |
-| **[@yalini-siva]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@yalini-siva]** | [26.03.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/f23f033a6573e7eb7cd39423c9006f1973a98a8d] | [Created POST endpoint to create a new travel board, including basic input checks and invite code generation. #129] | [Allows users to create new travel boards and ensures the backend supports related data.] |
+|                    | [26.03.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/4a5e606a627c511080ae0c733f8f716d229e43f9] | [Implemented endpoints to rename and delete travel boards, with checks to ensure only the owner can perform these actions. #111, #112, #113] | [Enables owner to manage their boards.] |
+|                    | [26.03.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/5d021cf23b103b1d5a55b0fab9691b337e9efa30] | [Created GET endpoint to fetch travel boards owned by a user. #110] | [Allows users to view their created travel boards.] |
+|                    | [27.03.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/27a60b742e7ac12f8b747992e3c49a47f1ef7688] | [Extended the endpoint to also return boards where the user is a member. #110] | [Ensures users can see all relevant travel boards, including shared ones.] |
+|                    | [28.03.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/0df438177c6858de04f59eef8bcd2ec2be446f9d] | [Created GET endpoint to fetch the invite code of a travel board. #132] | [Allows users to retrieve and share the invite code to join a travel board.] |
 
 ---
 
