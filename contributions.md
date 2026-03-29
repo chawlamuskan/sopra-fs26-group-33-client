@@ -49,9 +49,9 @@ reason).
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@despoinapantazi]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-| **[@nsavas8]** | [25.03.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/25bb9abc60232e9fdeea4bd58296f94493d6639d] | [Adding the API key (remark: this is not visible in github, since its in gitignore)] | [Assures we have access to the map API] |
-|                    | [25.03.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/64235878fb23d09169ebf4d88391cbce38882718] | [Added map to landing page] | [This is the main API we are using, so users can see and use the map] |
-|                    | [27.03.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/b6474bf557114e6ce726114533a8c47d8424daf0] | [Implemented country popup by clicking on a country that shows country specific information using REST countries API] | [Important functionality on the landing page to get information about a country] |
+| **[@nsavas8]** | [25.03.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/25bb9abc60232e9fdeea4bd58296f94493d6639d] | [Adding the API key #2 (remark: this is not visible in github, since its in gitignore)] | [Assures we have access to the map API] |
+|                    | [25.03.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/64235878fb23d09169ebf4d88391cbce38882718] | [Added map to landing page #1 ] | [This is the main API we are using, so users can see and use the map] |
+|                    | [27.03.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/b6474bf557114e6ce726114533a8c47d8424daf0] | [Implemented country popup by clicking on a country that shows country specific information using REST countries API #3 ] | [Important functionality on the landing page to get information about a country] |
 | **[@yalini-siva]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 
