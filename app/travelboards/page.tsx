@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Modal, Input, DatePicker } from "antd";
 import styles from "./travelboards.module.css";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
+import Header from "@/components/Header";
 
 const TravelBoardsPage: React.FC = () => {
     const isAllowed = useProtectedRoute(); 
@@ -15,6 +16,8 @@ const TravelBoardsPage: React.FC = () => {
     }, [isAllowed]);
 
   return (
+    <>
+    <Header /> 
     <div className={styles.container}>
 
       {/* Header */}
@@ -105,6 +108,7 @@ const TravelBoardsPage: React.FC = () => {
         </Modal>
 
     </div>
+    </>
   );
 };
 
