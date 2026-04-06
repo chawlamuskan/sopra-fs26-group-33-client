@@ -122,7 +122,7 @@ const Register: React.FC = () => {
             </button>
 
             <button type="submit" className={styles.btnLogin} style={{ width: "179px" }}>
-              Save profile
+              Register
             </button>
           </div>
 

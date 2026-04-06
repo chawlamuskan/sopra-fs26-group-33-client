@@ -7,8 +7,8 @@ import { Form, Input } from "antd";
 import styles from "@/styles/login.module.css";
 
 interface FormFieldProps {
-  label: string;
-  value: string;
+  username: string;
+  password: string;
 }
 
 const Login: React.FC = () => {
@@ -20,7 +20,15 @@ const Login: React.FC = () => {
 
   const handleLogin = async (values: FormFieldProps) => {
     try {
-      const response = await apiService.post<User>("/login", values);
+      const isEmail = values.username.includes('@');
+
+      const requestBody = {
+        username: isEmail ? null : values.username,
+        email: isEmail ? values.username : null,
+        password: values.password
+      };
+
+      const response = await apiService.post<User>("/login", requestBody);
       if (response.token) {
         setToken(response.token);
         localStorage.setItem("user", JSON.stringify(response));
