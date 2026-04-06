@@ -87,10 +87,10 @@ const Login: React.FC = () => {
                 Username or email 
               </span>
             }
-            rules={[{ required: true, message: "Please input your username!" }]}
+            rules={[{ required: true, message: "Please input your username or email!" }]}
           >
             <Input
-              placeholder="Enter username"
+              placeholder="Enter username or email"
               className={styles.inputField}
               variant="borderless"
             />
