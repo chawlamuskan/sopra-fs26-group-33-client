@@ -18,20 +18,14 @@ export const useLogout = () => {
   // meaning this func can do tasks that take time (fetching data from server) so it will pause the func until we have the data - cause JS runs line by line
 
     try {
-      // Get user info from localStorage
-      const userString = localStorage.getItem("user");
-      const user = userString ? JSON.parse(userString) : null; // userString is a string so to use it as user.name 
-      // we check if it exists and if it does convert to JSON otherwise user set to null
-
-      if (user && user.id) {
-        // Call backend to set status OFFLINE , no need to send if empty - await pauses until server responds
-        // wait until the user is really logged out 
-        await apiService.post(`/logout/${user.id}`, {});
-      }
-      
-      //  Clear token in localStorage
+      // Call backend to invalidate session token & set status OFFLINE
+      await apiService.post(`/users/logout`, {});
+        
+      //  clear token in localStorage
       clearToken();
       localStorage.removeItem("user");
+
+      // Redirect to landing page
       router.push("/");
     } catch (err) {
       console.error("Logout failed", err);
