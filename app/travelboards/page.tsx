@@ -17,7 +17,11 @@ const TravelBoardsPage: React.FC = () => {
 
   return (
     <>
+<<<<<<< HEAD
     <Header />
+=======
+    <Header /> 
+>>>>>>> main
     <div className={styles.container}>
 
       {/* Header */}
