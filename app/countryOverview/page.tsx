@@ -11,6 +11,7 @@ import {
 } from "@vis.gl/react-google-maps";
 import { useState } from "react";
 import Header from "./components/Header";
+import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 
 interface CountryInfo {
   name: string;
@@ -21,6 +22,7 @@ interface CountryInfo {
 }
 
 export default function CountryOverview() {
+    const isAllowed = useProtectedRoute(); 
     const router = useRouter();
     const position = {lat: 47.3769, lng: 8.5417}
     const [countryInfo, setCountryInfo] = useState<CountryInfo | null>(null);
@@ -59,6 +61,10 @@ export default function CountryOverview() {
             console.error("Error fetching country info:", error);
         }
     };  
+
+    useEffect(() => {
+      if (!isAllowed) return;
+    }, [isAllowed]);
 
     return (
       <>
