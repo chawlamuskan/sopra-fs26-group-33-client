@@ -61,3 +61,42 @@ a {
   background-color: rgb(41, 44, 59);
   font-size: 24px;
 }
+
+
+/* datepicker calendar popup override */
+.ant-picker-dropdown .ant-picker-panel-container {
+  background: #F4EBEB !important;
+}
+
+.ant-picker-dropdown .ant-picker-cell-in-view .ant-picker-cell-inner {
+  color: #171717 !important;
+}
+
+.ant-picker-dropdown .ant-picker-cell .ant-picker-cell-inner {
+  color: #171717 !important;
+}
+
+.ant-picker-dropdown .ant-picker-header {
+  background: #F4EBEB !important;
+  color: #171717 !important;
+}
+
+.ant-picker-dropdown .ant-picker-header button {
+  color: #171717 !important;
+}
+
+.ant-picker-dropdown .ant-picker-content th {
+  color: #171717 !important;
+}
+
+.ant-picker-dropdown .ant-picker-body {
+  background: #F4EBEB !important;
+}
+
+.ant-picker-dropdown .ant-picker-cell-disabled .ant-picker-cell-inner {
+  color: #aaaaaa !important;
+}
+
+.ant-picker-dropdown .ant-picker-today-btn {
+  color: #3333cc !important;
+}

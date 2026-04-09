@@ -18,6 +18,7 @@ const TravelBoardsPage: React.FC = () => {
   return (
     <>
     <Header /> 
+    <div className={styles.page}>
     <div className={styles.container}>
 
       {/* Header */}
@@ -50,6 +51,7 @@ const TravelBoardsPage: React.FC = () => {
             open={isCreatedModalOpen}
             onCancel={() => setIsCreatedModalOpen(false)}
             footer={null}
+            
         >
           <div className={styles.form}>      
 
@@ -84,10 +86,16 @@ const TravelBoardsPage: React.FC = () => {
             <div className={styles.inviteSection}>
               <p className={styles.sectionLabel}>Invite friends</p>
               <div className={styles.inviteButtons}>
-                <Button className={styles.invacyBtn}>Share code</Button>
+                <Button className={styles.inviteBtn}>Share code</Button>
                 <Button className={styles.privacyBtn}>Pick from friends list</Button>
               </div>
             </div>
+
+            {/* Save button #50 */}
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <Button className={styles.saveBtn}>Save</Button>
+            </div>
+
 
           </div>
         </Modal>
@@ -107,6 +115,7 @@ const TravelBoardsPage: React.FC = () => {
           <p style={{color: "red"}}>You can join soon ...</p>
         </Modal>
 
+    </div>
     </div>
     </>
   );
