@@ -9,8 +9,8 @@ import {
   Map,
   MapMouseEvent,
 } from "@vis.gl/react-google-maps";
-import { useState } from "react";
-import Header from "./components/Header";
+import { useState, useEffect } from "react";
+import Header from "@/components/Header";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 
 interface CountryInfo {
@@ -70,7 +70,7 @@ export default function CountryOverview() {
       <>
         <Header />
         <main className={styles.main}>
-          <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
+          <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!} language="en">
             <div style={{ height: "100vh", width: "100vw" }}>
               <Map
                 mapId="3acb2fe9409f1015af87f375"
