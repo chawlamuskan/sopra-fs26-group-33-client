@@ -5,15 +5,53 @@ import { Button, Modal, Input, DatePicker } from "antd";
 import styles from "./travelboards.module.css";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 import Header from "@/components/Header";
+import dayjs, { Dayjs } from "dayjs";
+import { ApiService } from "@/api/apiService"; // adjust path if needed
+
+const apiService = new ApiService();
 
 const TravelBoardsPage: React.FC = () => {
     const isAllowed = useProtectedRoute(); 
     const [isCreatedModalOpen, setIsCreatedModalOpen] = useState(false); // state to control if we need to display the modal to create new board 
     const [isJoinModalOpen, setIsJoinModalOpen] = useState(false); // state to control if we need to display the modal to join a new board
 
+    const [boardName, setBoardName] = useState("");
+    const [location, setLocation] = useState("");
+    const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null]>([null, null]);
+    const [isPublic, setIsPublic] = useState<boolean | null>(null);
+
     useEffect(() => {
         if (!isAllowed) return;     // #35 ; #46 works for pop up too 
     }, [isAllowed]);
+
+    const handleSave = async () => {
+    if (!boardName.trim()) {
+      alert("Please enter a board name.");
+      return;
+    }
+
+    const payload = {
+      name: boardName,
+      location: location,
+      startDate: dateRange[0] ? dateRange[0].toISOString() : null,
+      endDate: dateRange[1] ? dateRange[1].toISOString() : null,
+      privacy: isPublic ? "PUBLIC" : "PRIVATE",
+    };
+
+    try {
+      await apiService.post("/travelboards", payload);
+      alert("Board created!");
+      setIsCreatedModalOpen(false);
+      // reset form
+      setBoardName("");
+      setLocation("");
+      setDateRange([null, null]);
+      setIsPublic(null);
+    } catch (err) {
+      alert("Something went wrong. Please try again.");
+      console.error(err);
+    }
+  };
 
   return (
     <>
@@ -47,42 +85,58 @@ const TravelBoardsPage: React.FC = () => {
         {/* Create modal - actual content for #47 */}
 
         <Modal
-            title={<span style={{ color: "#3333cc" }}>Create a new board</span>}     // #45 travel board creation page + #47
-            open={isCreatedModalOpen}
-            onCancel={() => setIsCreatedModalOpen(false)}
-            footer={null}
-            
+          title={<span style={{ color: "#3333cc" }}>Create a new board</span>}
+          open={isCreatedModalOpen}
+          onCancel={() => setIsCreatedModalOpen(false)}
+          footer={null}
         >
-          <div className={styles.form}>      
+          <div className={styles.form}>
 
-            {/* Board name */}
-            <Input 
+            <Input
               placeholder="New Board Name"
               className={styles.input}
+              value={boardName}
+              onChange={(e) => setBoardName(e.target.value)}
             />
 
-            {/* Location */}
-            <Input 
+            <Input
               placeholder="Choose location"
               className={styles.input}
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
             />
 
-            {/* Date */}
             <DatePicker.RangePicker
               className={styles.input}
               placeholder={["Start date (optional)", "End date (optional)"]}
+              value={dateRange}
+              onChange={(dates) =>
+                setDateRange(dates ? [dates[0], dates[1]] : [null, null])
+              }
             />
 
             {/* Privacy */}
-            <div className={styles.privacySection}>
-              <p className={styles.sectionLabel}>Privacy setting</p>
-              <div className={styles.privacyButtons}>
-                <Button className={styles.privacyBtn}>Private</Button>
-                <Button className={styles.privacyBtn}>Public</Button>
+              <div className={styles.privacySection}>
+                <p className={styles.sectionLabel}>Privacy setting</p>
+                <div className={styles.privacyButtons}>
+                  <Button
+                    className={styles.privacyBtn}
+                    type={!isPublic ? "primary" : "default"}
+                    onClick={() => setIsPublic(false)}
+                  >
+                    Private
+                  </Button>
+                  <Button
+                    className={styles.privacyBtn}
+                    type={isPublic ? "primary" : "default"}
+                    onClick={() => setIsPublic(true)}
+                  >
+                    Public
+                  </Button>
+                </div>
               </div>
-            </div>
 
-            {/* Invite friends */}
+            {/* Invite friends — unchanged */}
             <div className={styles.inviteSection}>
               <p className={styles.sectionLabel}>Invite friends</p>
               <div className={styles.inviteButtons}>
@@ -91,11 +145,10 @@ const TravelBoardsPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Save button #50 */}
+            {/* Save button */}
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
-              <Button className={styles.saveBtn}>Save</Button>
+              <Button className={styles.saveBtn} onClick={handleSave}>Save</Button>
             </div>
-
 
           </div>
         </Modal>
