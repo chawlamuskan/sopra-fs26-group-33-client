@@ -26,7 +26,6 @@ export default function Home() {
   const position = {lat: 47.3769, lng: 8.5417}
   const [countryInfo, setCountryInfo] = useState<CountryInfo | null>(null);
   const handleClick = async (event: MapMouseEvent) => {
-    console.log("clicked!", event);
     if (!event.detail.latLng) return;
     const lat = event.detail.latLng.lat;
     const lng = event.detail.latLng.lng;

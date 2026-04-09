@@ -1,17 +1,20 @@
 "use client";
 
-import {useRouter} from "next/navigation";
+import {useRouter, useParams} from "next/navigation";
 import { Button } from "antd";
 import { BookOutlined, CodeOutlined, GlobalOutlined } from "@ant-design/icons";
 import styles from "@/styles/page.module.css";
 import {
   APIProvider,
   Map,
+  useMap,
   MapMouseEvent,
 } from "@vis.gl/react-google-maps";
 import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
+import { useApi } from "@/hooks/useApi";
+import useLocalStorage from "@/hooks/useLocalStorage";
 
 interface CountryInfo {
   name: string;
@@ -21,13 +24,68 @@ interface CountryInfo {
   languages: string[];
 }
 
+interface savedCountry {
+  countryName: string;
+  status: "visited" | "wishlist";
+}
+
+// coloring logic for colored map
+const getColor = (status?: string) => {
+  switch (status) {
+    case "visited":
+      return "#0B0696"; // green
+    case "wishlist":
+      return "#5AA7C3"; // yellow
+    default:
+      return "#a8a8a8"; // gray
+  }
+};
+
+function CountryLayer({ savedCountries }: { savedCountries: savedCountry[] | null }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!map || !savedCountries) return;
+
+    map.data.loadGeoJson(
+      "https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson",
+      undefined,
+      (features) => {
+        features.forEach((f) => {
+    const name = f.getProperty("name");
+    const code = f.getProperty("ISO3166-1-Alpha-2");
+    if ((name as string)?.includes("France") || code === "FR") {
+      console.log("France entry:", name, "->", code);
+    }
+  });
+        map.data.setStyle((feature) => {
+          const name = feature.getProperty("name") as string;
+          const match = savedCountries.find((c: savedCountry) => c.countryName === name);
+          return {
+            fillColor: getColor(match?.status),
+            fillOpacity: 1.0,
+            strokeWeight: 0.5,
+            strokeColor: "#e3c8c8",
+            clickable: false,
+          };
+        });
+      }
+    );
+
+  }, [map, savedCountries]);
+  return null;
+}
+
 export default function CountryOverview() {
     const isAllowed = useProtectedRoute(); 
     const router = useRouter();
     const position = {lat: 47.3769, lng: 8.5417}
     const [countryInfo, setCountryInfo] = useState<CountryInfo | null>(null);
+    const apiService = useApi();
+    const [savedCountries, setSavedCountries] = useState<savedCountry[] | null>(null);
+    const params = useParams();
+    const userId = params.id; 
     const handleClick = async (event: MapMouseEvent) => {
-        console.log("clicked!", event);
         if (!event.detail.latLng) return;
         const lat = event.detail.latLng.lat;
         const lng = event.detail.latLng.lng;
@@ -62,9 +120,37 @@ export default function CountryOverview() {
         }
     };  
 
+
     useEffect(() => {
       if (!isAllowed) return;
     }, [isAllowed]);
+
+    // mock the data until backend is ready
+    useEffect(() => {
+      const mockData: savedCountry[] = [
+        { countryName: "Switzerland", status: "visited" },
+        { countryName: "France", status: "wishlist" },
+        { countryName: "Germany", status: "visited" },
+      ];
+      setSavedCountries(mockData);
+    }, []);
+
+    // useEffect(() => {
+    //   const getSavedCountries = async () => {
+    //     try {
+    //       const data: savedCountry [] = await apiService.get<savedCountry[]>(`/users/${userId}/savedcountries`);
+    //       setSavedCountries(data);
+    //     } catch (error) {
+    //       if (error instanceof Error) {
+    //         alert(`Something went wrong while fetching saved places:\n${error.message}`);
+    //     } else {
+    //       console.error("An unknown error occurred while fetching saved places.");
+    //     }
+    //     }
+    //   };
+    //   getSavedCountries();
+    // }, [apiService]);
+    
 
     return (
       <>
@@ -73,13 +159,14 @@ export default function CountryOverview() {
           <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!} language="en">
             <div style={{ height: "100vh", width: "100vw" }}>
               <Map
-                mapId="3acb2fe9409f1015af87f375"
+                mapId="3acb2fe9409f10157220259c"
                 defaultZoom={5}
                 defaultCenter={position}
                 gestureHandling='greedy'
                 disableDefaultUI
                 onClick={handleClick}
               >
+                <CountryLayer savedCountries={savedCountries} />
                 {countryInfo && (
                   <div style={{
                     position: "absolute",
