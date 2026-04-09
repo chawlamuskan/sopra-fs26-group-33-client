@@ -126,3 +126,81 @@
   padding: 0 2rem !important;
   height: 44px !important;
 }
+
+
+/* ── for displaying all TBs ── */
+
+.boardList {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.boardCard {
+  background: #f4ebeb;
+  border-radius: 20px;
+  border: 1.5px solid #d6cece;
+  padding: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.boardCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.boardName {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #3333cc;
+  margin: 0;
+}
+
+.boardDates {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #3333cc;
+  white-space: nowrap;
+}
+
+.friendsRow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.friendsLabel {
+  font-size: 0.85rem;
+  font-style: italic;
+  font-weight: 600;
+  color: #3333cc;
+}
+
+.placesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.placeBox {
+  background: #ffffff;
+  border-radius: 10px;
+  aspect-ratio: 1;
+  border: 1px solid #e0d6d6;
+}
+
+.seeMoreRow {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.seeMore {
+  font-size: 0.85rem;
+  color: #3333cc;
+  text-decoration: underline;
+  cursor: pointer;
+}

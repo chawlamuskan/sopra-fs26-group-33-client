@@ -20,9 +20,12 @@ const TravelBoardsPage: React.FC = () => {
     const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null]>([null, null]);
     const [isPublic, setIsPublic] = useState<boolean | null>(null);
 
+    const [boards, setBoards] = useState<{id: number, name: string, location: string, startDate: string | null, endDate: string | null, privacy: string}[]>([]); // for displayig TB
+
     useEffect(() => {
         if (!isAllowed) return;     // #35 ; #46 works for pop up too 
-    }, [isAllowed]);
+        fetchBoards();             // #36 fetch TB for display  
+      }, [isAllowed]);
 
     const handleSave = async () => {
     if (!boardName.trim()) {
@@ -41,6 +44,7 @@ const TravelBoardsPage: React.FC = () => {
     try {
       await apiService.post("/travelboards", payload);
       alert("Board created!");
+      fetchBoards(); // refresh the list of boards after creating a new one
       setIsCreatedModalOpen(false);
       // reset form
       setBoardName("");
@@ -50,6 +54,16 @@ const TravelBoardsPage: React.FC = () => {
     } catch (err) {
       alert("Something went wrong. Please try again.");
       console.error(err);
+    }
+  };
+
+    // for displaying TB 
+  const fetchBoards = async () => {
+    try {
+      const data = await apiService.get<{id: number, name: string, location: string, startDate: string | null, endDate: string | null, privacy: string}[]>("/travelboards/my");
+      setBoards(data);
+    } catch (err) {
+      console.error("Could not fetch boards:", err);
     }
   };
 
@@ -77,10 +91,47 @@ const TravelBoardsPage: React.FC = () => {
       </div>
 
       {/* Empty state */}
-      <div className={styles.empty}>
-        <p>You have no travel boards yet.</p>
-        <p>Click <strong>Create</strong> to start planning your first trip!</p>
-      </div>
+      {boards.length === 0 ? (
+        <div className={styles.empty}>
+          <p>You have no travel boards yet.</p>
+          <p>Click <strong>Create</strong> to start planning your first trip!</p>
+        </div>
+      ) : (
+        <div className={styles.boardList}>
+          {boards.map((board) => (
+            <div key={board.id} className={styles.boardCard}>
+              {/* Top row: name + dates */}
+              <div className={styles.boardCardHeader}>
+                <h3 className={styles.boardName}>{board.name}</h3>
+                {board.startDate && (
+                  <span className={styles.boardDates}>
+                    {dayjs(board.startDate).format("D MMM")}
+                    {board.endDate && ` – ${dayjs(board.endDate).format("D MMM")}`}
+                  </span>
+                )}
+              </div>
+
+              {/* Friends joining */}
+              <div className={styles.friendsRow}>
+                <span className={styles.friendsLabel}>Friends joining:</span>
+                {/* placeholder empty circles for now */}
+              </div>
+
+              {/* 6 empty place boxes */}
+              <div className={styles.placesGrid}>
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className={styles.placeBox} />
+                ))}
+              </div>
+              
+              {/* See more */}
+              <div className={styles.seeMoreRow}>
+                <a className={styles.seeMore}>see more</a>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
         {/* Create modal - actual content for #47 */}
 
