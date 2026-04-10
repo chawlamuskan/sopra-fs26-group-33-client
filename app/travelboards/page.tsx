@@ -8,6 +8,16 @@ import Header from "@/components/Header";
 import dayjs, { Dayjs } from "dayjs";
 import { ApiService } from "@/api/apiService"; // adjust path if needed
 
+type TravelBoard = {
+  id: number;
+  name: string;
+  location: string;
+  startDate: string | null;
+  endDate: string | null;
+  privacy: string;
+  ownerId: number;
+};
+
 
 const TravelBoardsPage: React.FC = () => {
     const isAllowed = useProtectedRoute(); 
@@ -20,11 +30,18 @@ const TravelBoardsPage: React.FC = () => {
     const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null]>([null, null]);
     const [isPublic, setIsPublic] = useState<boolean | null>(null);
 
-    const [boards, setBoards] = useState<{id: number, name: string, location: string, startDate: string | null, endDate: string | null, privacy: string}[]>([]); // for displayig TB
+    const [boards, setBoards] = useState<TravelBoard[]>([]); // for displayig TB
 
+
+    const [isManageMode, setIsManageMode] = useState(false);    // for managing 
+    const [currentUserId, setCurrentUserId] = useState<number | null>(null);  // for managing 
     useEffect(() => {
         if (!isAllowed) return;     // #35 ; #46 works for pop up too 
         fetchBoards();             // #36 fetch TB for display  
+
+        // get current user id from localStorage
+        const userId = localStorage.getItem("userId");
+        if (userId) setCurrentUserId(Number(userId));
       }, [isAllowed]);
 
     const handleSave = async () => {
@@ -58,14 +75,32 @@ const TravelBoardsPage: React.FC = () => {
   };
 
     // for displaying TB 
-  const fetchBoards = async () => {
-    try {
-      const data = await apiService.get<{id: number, name: string, location: string, startDate: string | null, endDate: string | null, privacy: string}[]>("/travelboards/my");
-      setBoards(data);
-    } catch (err) {
-      console.error("Could not fetch boards:", err);
-    }
+    const fetchBoards = async () => {
+      try {
+        const data = await apiService.get<{id: number, name: string, location: string, startDate: string | null, endDate: string | null, privacy: string, ownerId: number}[]>("/travelboards/my");
+        setBoards(data);
+      } catch (err) {
+        console.error("Could not fetch boards:", err);
+      }
+    };
+
+    const handleMinus = async (boardId: number, ownerId: number) => {
+
+      if (currentUserId === ownerId) {
+          // user is owner → delete the board
+          try {
+              await apiService.delete(`/travelboards/${boardId}`);
+              fetchBoards(); // refresh list
+          } catch (err) {
+              alert("Could not delete board.");
+              console.error(err);
+          }
+      } else {
+          // user is not owner → just remove from view
+          setBoards(boards.filter(board => board.id !== boardId));
+      }
   };
+
 
   return (
     <>
@@ -82,7 +117,13 @@ const TravelBoardsPage: React.FC = () => {
           <Button className={styles.btn} onClick={() => setIsCreatedModalOpen(true)}>
             Create
           </Button>
-          <Button className={styles.btn}>Manage</Button>
+          <Button 
+              className={styles.btn} 
+              onClick={() => setIsManageMode(!isManageMode)}
+              style={isManageMode ? {background: "#0B0696", color: "white"} : {}}
+          >
+              {isManageMode ? "Done" : "Manage"}
+          </Button>
           {/* #38 join modal */}
           <Button className={styles.btn} onClick={() => setIsJoinModalOpen(true)}>
             Join
@@ -99,7 +140,34 @@ const TravelBoardsPage: React.FC = () => {
       ) : (
         <div className={styles.boardList}>
           {boards.map((board) => (
-            <div key={board.id} className={styles.boardCard}>
+            <div key={board.id} className={styles.boardCard} style={{position: "relative"}}>
+              
+              {/* Minus button - only show in manage mode */}
+              {isManageMode && (
+                  <button
+                    onClick={() => handleMinus(board.id, board.ownerId)}
+                      style={{
+                          position: "absolute",
+                          top: "-10px",
+                          left: "-10px",
+                          width: "24px",
+                          height: "24px",
+                          borderRadius: "50%",
+                          background: "#555",
+                          color: "white",
+                          border: "none",
+                          cursor: "pointer",
+                          fontSize: "16px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          zIndex: 10
+                      }}
+                  >
+                      −
+                  </button>
+              )}
+              
               {/* Top row: name + dates */}
               <div className={styles.boardCardHeader}>
                 <h3 className={styles.boardName}>{board.name}</h3>
