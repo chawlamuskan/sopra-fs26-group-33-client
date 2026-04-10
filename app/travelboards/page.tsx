@@ -50,7 +50,7 @@ const TravelBoardsPage: React.FC = () => {
       setBoardName("");
       setLocation("");
       setDateRange([null, null]);
-      setIsPublic(null);
+      setIsPublic(false);
     } catch (err) {
       alert("Something went wrong. Please try again.");
       console.error(err);
