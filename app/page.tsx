@@ -9,7 +9,7 @@ import {
   MapMouseEvent,
 } from "@vis.gl/react-google-maps";
 import { useState } from "react";
-import Header from "./components/Header";
+import Header from "@/components/Header";
 
 
 
@@ -26,7 +26,6 @@ export default function Home() {
   const position = {lat: 47.3769, lng: 8.5417}
   const [countryInfo, setCountryInfo] = useState<CountryInfo | null>(null);
   const handleClick = async (event: MapMouseEvent) => {
-    console.log("clicked!", event);
     if (!event.detail.latLng) return;
     const lat = event.detail.latLng.lat;
     const lng = event.detail.latLng.lng;
@@ -65,7 +64,7 @@ export default function Home() {
   <>
     <Header />
     <main className={styles.main}>
-      <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
+      <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!} language="en">
         <div style={{ height: "100vh", width: "100vw" }}>
           <Map
             mapId="3acb2fe9409f1015af87f375"
