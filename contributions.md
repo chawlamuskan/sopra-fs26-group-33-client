@@ -75,8 +75,8 @@ reason).
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@despoinapantazi]** | [06.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/644cb537a06394c46d0bddf7a9f59974f6b4f5b9] | [Added tests relevant to the logout (session token deletion, user status update). #165 #167 #168] | [Testing that logout fulfills as expected all relevant changes in the backend.] |
 |                    | [08.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/7ba7f5dcb0507a902194332a5884d6c3a6fcd8cc] | [Add REST endpoints and Service functions to allow creation / fetching / update of user preferences #62] | [Created Controller and Service files that support the user preferences (along with the entity / repository / DTOs created in previous commit).] |
-| **[@nsavas8]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@nsavas8]** | [08.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/05277bb43c9b05ef7ddef7732bebf55deb0f7e01] | [Created country overview page #70] | [Users need this page to have an overview of their saved countries] |
+|                    | [09.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/85e877997c44a18744a51cd3663afd997c03ad19] | [implemented the color coded map, so all visited countries, countries to visit, and the others are displayed in a different color #74] | [Users want to see visually which countries they have visited/want to visit, so they can plan new trips] |
 | **[@yalini-siva]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 
