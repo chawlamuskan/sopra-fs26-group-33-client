@@ -8,13 +8,13 @@ import Header from "@/components/Header";
 import dayjs, { Dayjs } from "dayjs";
 import { ApiService } from "@/api/apiService"; // adjust path if needed
 
-const apiService = new ApiService();
 
 const TravelBoardsPage: React.FC = () => {
     const isAllowed = useProtectedRoute(); 
     const [isCreatedModalOpen, setIsCreatedModalOpen] = useState(false); // state to control if we need to display the modal to create new board 
     const [isJoinModalOpen, setIsJoinModalOpen] = useState(false); // state to control if we need to display the modal to join a new board
-
+    const apiService = new ApiService();
+    
     const [boardName, setBoardName] = useState("");
     const [location, setLocation] = useState("");
     const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null]>([null, null]);
