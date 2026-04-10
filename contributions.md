@@ -82,7 +82,7 @@ reason).
 
 ---
 
-## Contributions Week 3 - [13.04.2026] to [19.04.2026]
+## Contributions Week 4 - [13.04.2026] to [19.04.2026]
 
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
@@ -100,7 +100,7 @@ reason).
 
 ---
 
-## Contributions Week 4 - [20.04.2026] to [26.04.2026]
+## Contributions Week 5 - [20.04.2026] to [26.04.2026]
 
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
@@ -118,7 +118,7 @@ reason).
 
 ---
 
-## Contributions Week 5 - [27.04.2026e] to [03.05.2026]
+## Contributions Week 6 - [27.04.2026e] to [03.05.2026]
 
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
@@ -136,6 +136,6 @@ reason).
 
 ---
 
-## Contributions Week 6 - [Begin Date] to [End Date]
+## Contributions Week 7 - [Begin Date] to [End Date]
 
 _Continue with the same table format as above._
