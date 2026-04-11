@@ -65,7 +65,7 @@ const Preferences: React.FC = () => {
   const handleEndRegistration = async (values: FormFieldProps) => {
     try {
       const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-      const payload = { ...values, profilePicture: imageBase64 };
+      const payload = { ...values, profilePicture: imageBase64, friends: selectedFriends};
       const response = await apiService.put<User>(`/users/${storedUser.id}`, payload);
       if (response.token) {
         setToken(response.token);
@@ -80,6 +80,27 @@ const Preferences: React.FC = () => {
       }
     }
   };
+
+  const [friendSearch, setFriendSearch] = useState("");
+  const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await apiService.get<User[]>("/users");
+        setAllUsers(response);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+    fetchUsers();
+  }, []);
+
+
+  const filteredUsers = allUsers.filter((user) =>
+    user.username?.toLowerCase().includes(friendSearch.toLowerCase())
+  );
 
   return (
     <ConfigProvider
@@ -135,7 +156,7 @@ const Preferences: React.FC = () => {
             {/* Row 1: Bio + Profile picture */}
             <div style={{ display: "flex", gap: "24px" }}>
               <Form.Item
-                name="name"
+                name="bio"
                 label={<span className={styles.fieldLabel}>Write your bio</span>}
                 style={{ flex: 1 }}
               >
@@ -279,19 +300,121 @@ const Preferences: React.FC = () => {
               </Form.Item>
             </div>
 
-            {/* Row 3: Add friends — full width */}
+            {/* Row 3: Add friends*/}
             <Form.Item
-              name="add_friends"
               label={<span className={styles.fieldLabel}>Add friends</span>}
               style={{ width: "100%" }}
             >
+              {/* Search input */}
               <Input
-                placeholder="Enter friends' names"
+                placeholder="Search by username"
                 className={styles.inputField}
                 style={{ width: "100%" }}
                 variant="borderless"
                 prefix={<SearchOutlined style={{ color: "#7D7D7D", marginRight: "4px" }} />}
+                value={friendSearch}
+                onChange={(e) => setFriendSearch(e.target.value)}
               />
+
+              {/* Results list — only show when typing */}
+              {friendSearch.length > 0 && (
+                <div style={{
+                  marginTop: "8px",
+                  background: "white",
+                  borderRadius: "8px",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                  maxHeight: "200px",
+                  overflowY: "auto",
+                }}>
+                  {filteredUsers.length === 0 ? (
+                    <div style={{ padding: "12px 16px", color: "#aaa" }}>No users found</div>
+                  ) : (
+                    filteredUsers.map((user) => {
+                      const isSelected = selectedFriends.includes(user.id);
+                      return (
+                        <div
+                          key={user.id}
+                          onClick={() => {
+                            setSelectedFriends((prev) =>
+                              isSelected ? prev.filter((id) => id !== user.id) : [...prev, user.id as string]
+                            );
+                          }}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                            padding: "10px 16px",
+                            cursor: "pointer",
+                            background: isSelected ? "#F4EBEB" : "white",
+                            borderBottom: "1px solid #f0f0f0",
+                          }}
+                        >
+                          {/* Profile picture */}
+                          {user.profilePicture ? (
+                            <img
+                              src={user.profilePicture}
+                              alt={user.username}
+                              style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover" }}
+                            />
+                          ) : (
+                            <div style={{
+                              width: 36,
+                              height: 36,
+                              borderRadius: "50%",
+                              background: "#f0f0f0",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontSize: 16,
+                            }}>
+                              👤
+                            </div>
+                          )}
+
+                          {/* Username */}
+                          <span style={{ fontFamily: "DM Sans", fontSize: "16px", color: "#000" }}>
+                            {user.username}
+                          </span>
+
+                          {/* Checkmark if selected */}
+                          {isSelected && (
+                            <span style={{ marginLeft: "auto", color: "#0B0696", fontWeight: 700 }}>✓</span>
+                          )}
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              )}
+
+              {/* Selected friends chips */}
+              {selectedFriends.length > 0 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "12px" }}>
+                  {selectedFriends.map((id) => {
+                    const user = allUsers.find((u) => u.id === id);
+                    return (
+                      <div key={id} style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        padding: "4px 10px",
+                        background: "#F4EBEB",
+                        borderRadius: "20px",
+                        fontSize: "14px",
+                        fontFamily: "DM Sans",
+                      }}>
+                        {user?.username}
+                        <span
+                          style={{ cursor: "pointer", color: "#d9534f", fontWeight: 700 }}
+                          onClick={() => setSelectedFriends((prev) => prev.filter((i) => i !== id))}
+                        >
+                          ✕
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </Form.Item>
 
             {/* Row 4: Buttons */}
@@ -305,7 +428,7 @@ const Preferences: React.FC = () => {
               >
                 Skip
               </h3>
-              
+
               <button type="submit" className={styles.btnLogin} style={{ width: "179px" }}>
                 Save profile
               </button>
