@@ -298,10 +298,14 @@ const Preferences: React.FC = () => {
             <div style={{ display: "flex", justifyContent: "right", alignItems: "center", gap: "24px", marginTop: "16px" }}>
               <h3
                 style={{ margin: 0, color: "#7D7D7D", fontSize: "18px", fontFamily: "DM Sans", fontWeight: 500, cursor: "pointer" }}
-               
+                onClick={() => {
+                  const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+                  router.push(`/users/${storedUser.id}`);
+                }}
               >
                 Skip
               </h3>
+              
               <button type="submit" className={styles.btnLogin} style={{ width: "179px" }}>
                 Save profile
               </button>
