@@ -64,18 +64,19 @@ const Preferences: React.FC = () => {
 
   const handleEndRegistration = async (values: FormFieldProps) => {
     try {
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
       const payload = { ...values, profilePicture: imageBase64 };
-      const response = await apiService.post<User>("/users", payload);
+      const response = await apiService.put<User>(`/users/${storedUser.id}`, payload);
       if (response.token) {
         setToken(response.token);
         localStorage.setItem("user", JSON.stringify(response));
       }
-      router.push(`/users/${response.id}`);
+      router.push(`/users/${storedUser.id}`);
     } catch (error) {
       if (error instanceof Error) {
-        alert(`Something went wrong during the registration:\n${error.message}`);
+        alert(`Something went wrong during the update:\n${error.message}`);
       } else {
-        console.error("An unknown error occurred during registration.");
+        console.error("An unknown error occurred during update.");
       }
     }
   };
@@ -259,9 +260,6 @@ const Preferences: React.FC = () => {
                   style={{ width: "100%" }}
                   showSearch
                   className={styles.countrySelect}
-                  filterOption={(input, option) =>
-                    (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-                  }
                 />
               </Form.Item>
 
@@ -277,9 +275,6 @@ const Preferences: React.FC = () => {
                   style={{ width: "100%" }}
                   showSearch
                   className={styles.countrySelect}
-                  filterOption={(input, option) =>
-                    (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-                  }
                 />
               </Form.Item>
             </div>
@@ -303,7 +298,7 @@ const Preferences: React.FC = () => {
             <div style={{ display: "flex", justifyContent: "right", alignItems: "center", gap: "24px", marginTop: "16px" }}>
               <h3
                 style={{ margin: 0, color: "#7D7D7D", fontSize: "18px", fontFamily: "DM Sans", fontWeight: 500, cursor: "pointer" }}
-                onClick={() => router.push("/")}
+               
               >
                 Skip
               </h3>
