@@ -1,13 +1,17 @@
 "use client";
 import { useRouter, usePathname } from "next/navigation";
 import { Button } from "antd";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { User } from "@/types/user";
+import { useLogout } from "@/hooks/useLogout";
 
 export default function HeaderButtons() {
   const router = useRouter();
   const pathname = usePathname();
+  const logout = useLogout();
   const [user, setUser] = useState<User | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
@@ -18,6 +22,17 @@ export default function HeaderButtons() {
       }
     }
   }, [pathname]);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   if (pathname === "/") {
     return (
@@ -59,31 +74,28 @@ export default function HeaderButtons() {
   }
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "16px", marginLeft: "auto" }}>
-      <span
-        style={{
+    <div style={{ marginLeft: "auto", position: "relative" }} ref={menuRef}>
+      {/* Profile picture + username — clickable */}
+      <div
+        style={{ display: "flex", alignItems: "center", gap: "16px", cursor: "pointer" }}
+        onClick={() => setMenuOpen((prev) => !prev)}
+      >
+        <span style={{
           color: "white",
           fontSize: "36px",
           fontFamily: "DM Sans",
           fontWeight: 700,
-        }}
-      >
-        {user?.username ?? ""}
-      </span>
-      {user?.profilePicture ? (
-        <img
-          src={user.profilePicture}
-          alt={user.username ?? ""}
-          style={{
-            width: "80px",
-            height: "80px",
-            borderRadius: "50%",
-            objectFit: "cover",
-          }}
-        />
-      ) : (
-        <div
-          style={{
+        }}>
+          {user?.username ?? ""}
+        </span>
+        {user?.profilePicture ? (
+          <img
+            src={user.profilePicture}
+            alt={user?.username ?? ""}
+            style={{ width: "80px", height: "80px", borderRadius: "50%", objectFit: "cover" }}
+          />
+        ) : (
+          <div style={{
             width: "80px",
             height: "80px",
             borderRadius: "50%",
@@ -92,9 +104,53 @@ export default function HeaderButtons() {
             alignItems: "center",
             justifyContent: "center",
             fontSize: "32px",
-          }}
-        >
-          🌍
+          }}>
+            🌍
+          </div>
+        )}
+      </div>
+
+      {/* Dropdown menu */}
+      {menuOpen && (
+        <div style={{
+          position: "absolute",
+          top: "100px",
+          right: 0,
+          width: "260px",
+          background: "white",
+          borderRadius: "16px",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+          zIndex: 2000,
+          overflow: "hidden",
+        }}>
+          {/* Menu items */}
+          {[
+            { label: "Countries Overview", path: `/users/${user?.id}` }, //need to change these paths once the pages are implemented
+            { label: "Saved Places", path: `/users/${user?.id}` },//need to change these paths once the pages are implemented
+            { label: "Travel boards", path: `/travelboards` },
+            { label: "Community", path: `/users/${user?.id}` },//need to change these paths once the pages are implemented
+            { label: "Posts", path: `/users/${user?.id}` },//need to change these paths once the pages are implemented
+            { label: "Settings", path: `/users/${user?.id}` },//need to change these paths once the pages are implemented
+          ].map((item) => (
+            <div
+              key={item.label}
+              onClick={() => { router.push(item.path); setMenuOpen(false); }}
+              style={{
+                padding: "16px 24px",
+                fontSize: "18px",
+                fontFamily: "DM Sans",
+                fontWeight: 600,
+                color: "#0B0696",
+                cursor: "pointer",
+                borderBottom: "1px solid #f0f0f0",
+                textAlign: "center",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "#f4f4f4")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "white")}
+            >
+              {item.label}
+            </div>
+          ))}
         </div>
       )}
     </div>
