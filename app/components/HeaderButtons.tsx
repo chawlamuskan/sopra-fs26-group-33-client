@@ -151,6 +151,26 @@ export default function HeaderButtons() {
               {item.label}
             </div>
           ))}
+
+          {/* Logout */}
+          <div style={{ padding: "16px", display: "flex", justifyContent: "center" }}>
+            <button
+              onClick={logout}
+              style={{
+                padding: "10px 32px",
+                borderRadius: "40px",
+                border: "none",
+                background: "#0B0696",
+                color: "white",
+                fontSize: "18px",
+                fontFamily: "DM Sans",
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              Logout
+            </button>
+          </div>
         </div>
       )}
     </div>
