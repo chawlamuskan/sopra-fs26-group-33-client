@@ -1,141 +1,176 @@
-// your code here for S2 to display a single user profile after having clicked on it
-// each user has their own slug /[id] (/1, /2, /3, ...) and is displayed using this file
-// try to leverage the component library from antd by utilizing "Card" to display the individual user
-// import { Card } from "antd"; // similar to /app/users/page.tsx
-
 "use client";
-// For components that need React hooks and browser APIs,
-// SSR (server side rendering) has to be disabled.
-// Read more here: https://nextjs.org/docs/pages/building-your-application/rendering/server-side-rendering
-
-import React, { use, useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useLogout } from "@/hooks/useLogout";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { User } from "@/types/user";
-import { Button, Form, Input, Card, Table } from "antd";
-import type { TableProps } from "antd";
-import { useApi } from "@/hooks/useApi";
-
-import { useLogout } from "@/hooks/useLogout";
+import { Button } from "antd";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
+import Header from "@/components/Header";
+import {
+  APIProvider,
+  Map,
+  MapMouseEvent,
+} from "@vis.gl/react-google-maps";
+import styles from "@/styles/page.module.css";
 
-// Columns for the antd table of User objects
-const columns: TableProps<User>["columns"] = [
-  {
-    title: "Username",
-    dataIndex: "username",
-    key: "username",
-  },
-  {
-    title: "Name",
-    dataIndex: "name",
-    key: "name",
-  },
-  {
-    title: "Status",
-    dataIndex: "status",
-    key: "status",
-  },
-  {
-    title: "Bio",
-    dataIndex: "bio",
-    key: "bio",
-  },
-  {
-    title: "Creation Date",
-    dataIndex: "creationDate",
-    key: "creationDate",
-  },
-];
+interface CountryInfo {
+  name: string;
+  capital: string;
+  population: number;
+  flag: string;
+  languages: string[];
+}
 
-const Profile: React.FC = () => {   // react component called Profile ; functiional component ; uses that func definded below 
+const UserDashboard: React.FC = () => {
+  const router = useRouter();
+  const apiService = useApi();
   const logout = useLogout();
-  const router = useRouter();   // for naviagtion
-  const apiService = useApi();  // for backend endpoint
-
-  const params = useParams();  // to get the id from the url - that way i can extract the id of the user from the url and use it to fetch the user data from the backend
-  const userId = Array.isArray(params.id) ? params.id[0] : params.id; // extract the id from the params object - params is the obj and we can extract only the id
-
-  const { value: token} = useLocalStorage<string>("token", ""); // to get the token from localStorage and clear it when logging out  
   const isAllowed = useProtectedRoute();
-  const [user, setUser] = useState<User | null>(null); // to store the user data fetched from the backend
-  const [loggedInUserId, setLoggedInUserId] = useState<string | null>(null);
+  const [countryInfo, setCountryInfo] = useState<CountryInfo | null>(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const position = { lat: 47.3769, lng: 8.5417 };
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (!storedUser) return;
-
-    const currentUser: User = JSON.parse(storedUser);
-    setLoggedInUserId(currentUser.id ? currentUser.id.toString() : null);
-  }, []);
-
-  // fetch users when they are logged in 
   useEffect(() => {
     if (!isAllowed) return;
-    const fetchUsers = async () => {
-      try {
-        const fetchedUser = await apiService.get<User>(`/users/${userId}`); // call the backend endpoint to get the user data by id
-        setUser(fetchedUser); // set the user data in the state -- gave me a error so i had to add the type <User> 
-        // to the apiService.get function to specify that the response will be of type User, that way it knows how
-        //  to handle the data and set it in the state correctly
-      } catch (error) {
-        if (error instanceof Error) {
-          alert(`Something went wrong while fetching users:\n${error.message}`);
-        } else {
-          console.error("An unknown error occurred while fetching users.");
-        }
-      }
-    };
+    const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+    if (storedUser?.id) {
+      setCurrentUser(storedUser);
+    }
+  }, [isAllowed]);
 
-    fetchUsers();
-  }, [apiService, isAllowed]); // dependency array - this effect will run whenever the userId or apiService changes
-
-  // here was logout func before but as it was duplicating, i moved it as a hook in /app/hooks/useLogout.ts 
-  // and imported it here to use it directly without having to define it again - this is the beauty of hooks, 
-  // they are reusable functions that can be used across different components without having to repeat the same code
-  return (
-      <div className="card-container">
-        <Card
-          title="This is my Profile Page" 
-          loading={!user}
-          className="dashboard-container"
-        >
-          {user && (
-            <>
-              {/* antd Table: pass the columns and data, plus a rowKey for stable row identity */}
-              <Table<User>
-                columns={columns}
-                dataSource={[user]}
-                rowKey="id" 
-              />
-          <Form.Item>
-              <Button
-              type="primary"
-              className="login-button"
-              onClick={() => router.push("/users")}
-            >
-              View all Users
-            </Button>
-            </Form.Item>
-            {loggedInUserId === userId && (
-              <Form.Item>
-                <Button
-                  type="primary"
-                  onClick={() => router.push(`/users/${userId}/edit-password`)}
-                >
-                  Edit Password
-                </Button>
-              </Form.Item>
-            )}
-              <Button onClick={logout} type="primary">
-                Logout
-              </Button>
-            </>
-          )}
-        </Card>
-      </div>
+  const fetchCountryInfo = async (countryName: string) => {
+    const countryRes = await fetch(
+      `https://restcountries.com/v3.1/name/${countryName}?fullText=true`
     );
+    const countryData = await countryRes.json();
+    if (!countryData || countryData.status === 404) {
+      console.error("Country not found:", countryName);
+      return;
+    }
+    const country = countryData[0];
+    setCountryInfo({
+      name: country.name.common,
+      capital: country.capital?.[0] ?? "N/A",
+      population: country.population,
+      flag: country.flag,
+      languages: Object.values(country.languages ?? {}),
+    });
   };
-  
 
-export default Profile;
+  const handleClick = async (event: MapMouseEvent) => {
+    if (!event.detail.latLng) return;
+    const lat = event.detail.latLng.lat;
+    const lng = event.detail.latLng.lng;
+    try {
+      const geocodeReverse = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&result_type=country&language=en&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
+      );
+      const geocodeData = await geocodeReverse.json();
+      if (!geocodeData.results || geocodeData.results.length === 0) return;
+      const countryName = geocodeData.results[0].address_components[0].long_name;
+      await fetchCountryInfo(countryName);
+    } catch (error) {
+      console.error("Error fetching country info:", error);
+    }
+  };
+
+  return (
+    <>
+      <Header />
+      <main className={styles.main}>
+        <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
+          <div style={{ height: "100vh", width: "100vw", position: "relative" }}>
+            <Map
+              mapId="3acb2fe9409f1015af87f375"
+              defaultZoom={5}
+              defaultCenter={position}
+              gestureHandling="greedy"
+              disableDefaultUI
+              onClick={handleClick}
+            >
+              {countryInfo && (
+                <div style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  backgroundColor: "#0B0696D1",
+                  color: "white",
+                  borderRadius: "16px",
+                  padding: "24px",
+                  width: "320px",
+                  zIndex: 1000,
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.5)"
+                }}>
+                  <button
+                    onClick={() => setCountryInfo(null)}
+                    style={{
+                      position: "absolute",
+                      top: "10px",
+                      right: "14px",
+                      background: "none",
+                      border: "none",
+                      color: "white",
+                      fontSize: "18px",
+                      cursor: "pointer"
+                    }}
+                  >✕</button>
+                  <h2 style={{ textAlign: "center", marginBottom: "16px" }}>
+                    {countryInfo.name}
+                  </h2>
+                  <div style={{ display: "flex", gap: "16px", alignItems: "center", marginBottom: "16px" }}>
+                    <span style={{ fontSize: "48px" }}>{countryInfo.flag}</span>
+                    <div>
+                      <p><strong>Capital:</strong> {countryInfo.capital}</p>
+                      <p><strong>Population:</strong> {(countryInfo.population / 1_000_000).toFixed(2)} mill.</p>
+                      <p><strong>Language(s):</strong> {countryInfo.languages.join(", ")}</p>
+                    </div>
+                  </div>
+                  <div style={{ marginTop: "12px" }}>
+                    <p style={{ textAlign: "center", fontWeight: "bold" }}>Recommended Places</p>
+                    <div style={{
+                      backgroundColor: "#1a3a8f",
+                      borderRadius: "8px",
+                      padding: "10px",
+                      textAlign: "center",
+                      marginBottom: "8px"
+                    }}>
+                      Content coming soon
+                    </div>
+                    <p style={{ textAlign: "center", fontWeight: "bold" }}>Community Posts</p>
+                    <div style={{
+                      backgroundColor: "#1a3a8f",
+                      borderRadius: "8px",
+                      padding: "10px",
+                      textAlign: "center"
+                    }}>
+                      Content coming soon
+                    </div>
+                  </div>
+                  <div style={{ marginTop: "16px", display: "flex", justifyContent: "center" }}>
+                    <Button
+                      onClick={logout}
+                      style={{
+                        borderRadius: "40px",
+                        background: "white",
+                        color: "#0B0696",
+                        fontWeight: 600,
+                        border: "none",
+                      }}
+                    >
+                      Logout
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </Map>
+          </div>
+        </APIProvider>
+      </main>
+    </>
+  );
+};
+
+export default UserDashboard;
