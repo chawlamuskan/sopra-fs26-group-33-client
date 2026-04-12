@@ -77,8 +77,8 @@ reason).
 |                    | [08.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/7ba7f5dcb0507a902194332a5884d6c3a6fcd8cc] | [Add REST endpoints and Service functions to allow creation / fetching / update of user preferences #62] | [Created Controller and Service files that support the user preferences (along with the entity / repository / DTOs created in previous commit).] |
 | **[@nsavas8]** | [08.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/05277bb43c9b05ef7ddef7732bebf55deb0f7e01] | [Created country overview page #70] | [Users need this page to have an overview of their saved countries] |
 |                    | [09.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/85e877997c44a18744a51cd3663afd997c03ad19] | [implemented the color coded map, so all visited countries, countries to visit, and the others are displayed in a different color #74] | [Users want to see visually which countries they have visited/want to visit, so they can plan new trips] |
-| **[@yalini-siva]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@yalini-siva]** | [07.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/b65de57f1d14e589cc2ac0bb7c774916a89f86ef] | [Added backend support for sending travel board invitations #175, #176, #178] | [Allows users to invite others to travel boards] |
+|                    | [08.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/f03c7ecac274c31d7cf25a20ce8f3aa6444d709d] | [Added accept/decline invitation endpoints #147, #148, #178] | [Allows users to respond to invitations and join travel boards] |
 
 ---
 
