@@ -97,7 +97,7 @@ const TravelBoardsPage: React.FC = () => {
     // for displaying TB 
     const fetchBoards = async () => {
       try {
-        const data = await apiService.get<{id: number, name: string, location: string, startDate: string | null, endDate: string | null, privacy: string, ownerId: number}[]>("/travelboards/my");
+        const data = await apiService.get<TravelBoard[]>("/travelboards/my");
         setBoards(data);
       } catch (err) {
         console.error("Could not fetch boards:", err);
