@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button, Modal, Input, DatePicker } from "antd";
 import styles from "./travelboards.module.css";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
@@ -42,6 +42,12 @@ const TravelBoardsPage: React.FC = () => {
     const [generatedCode, setGeneratedCode] = useState("");
     const [codeCopied, setCodeCopied] = useState(false);
 
+    // to search friends 
+    const [friendSearch, setFriendSearch] = useState("");
+    const [friendResults, setFriendResults] = useState<{id: number; username: string; avatar?: string}[]>([]);
+    const [invitedFriends, setInvitedFriends] = useState<{id: number; username: string}[]>([]);
+    const friendDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+
 
     useEffect(() => {
         if (!isAllowed) return;     // #35 ; #46 works for pop up too 
@@ -64,6 +70,7 @@ const TravelBoardsPage: React.FC = () => {
       startDate: dateRange[0] ? dateRange[0].toISOString() : null,
       endDate: dateRange[1] ? dateRange[1].toISOString() : null,
       privacy: privacy,
+      invitedUserIds: invitedFriends.map((f) => f.id),
     };
 
     try {
@@ -123,6 +130,20 @@ const TravelBoardsPage: React.FC = () => {
     const handleCopyCode = () => {
       navigator.clipboard.writeText(generatedCode);
       setCodeCopied(true);
+    };
+
+    // for friends search 
+    const searchFriends = async (query: string) => {
+      if (query.length < 1) { setFriendResults([]); return; }
+      try {
+        // Adjust endpoint to whatever your backend exposes
+        const results = await apiService.get<{id: number; username: string}[]>(
+          `/travelboards/join}`
+        );
+        setFriendResults(results);
+      } catch {
+        setFriendResults([]);
+      }
     };
 
 
@@ -282,10 +303,6 @@ const TravelBoardsPage: React.FC = () => {
                 <Button className={styles.inviteBtn} onClick={generateInviteCode}>
                   Share code
                 </Button>
-                {/* friends search — see point 6 */}
-                <Button className={styles.inviteBtn} disabled style={{ marginLeft: "0.5rem" }}>
-                  Search friends
-                </Button>
               </div>
 
               {/* Inline code popup */}
@@ -316,6 +333,66 @@ const TravelBoardsPage: React.FC = () => {
                 </div>
               )}
             </div>
+
+            <div style={{ position: "relative", marginTop: "0.5rem" }}>
+              <input
+                style={{
+                  width: "100%", padding: "8px 12px", borderRadius: "20px",
+                  background: "#e8e8e8", border: "none", boxSizing: "border-box",
+                  fontSize: "0.9rem"
+                }}
+                placeholder="Search friends by username or email…"
+                value={friendSearch}
+                onChange={(e) => {
+                  setFriendSearch(e.target.value);
+                  if (friendDebounce.current) clearTimeout(friendDebounce.current);
+                  friendDebounce.current = setTimeout(() => searchFriends(e.target.value), 300);
+                }}
+              />
+              {friendResults.length > 0 && (
+                <ul style={{
+                  position: "absolute", top: "100%", left: 0, right: 0,
+                  background: "#fff", border: "1px solid #d6cece",
+                  borderRadius: "12px", listStyle: "none", margin: 0, padding: "0.4rem 0",
+                  zIndex: 100, boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+                }}>
+                  {friendResults.map((f) => (
+                    <li
+                      key={f.id}
+                      onMouseDown={() => {
+                        if (!invitedFriends.find((x) => x.id === f.id)) {
+                          setInvitedFriends([...invitedFriends, f]);
+                        }
+                        setFriendSearch("");
+                        setFriendResults([]);
+                      }}
+                      style={{ padding: "8px 16px", cursor: "pointer", fontSize: "0.9rem" }}
+                    >
+                      {f.username}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            {/* Invited chips */}
+            {invitedFriends.length > 0 && (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", marginTop: "0.5rem" }}>
+                {invitedFriends.map((f) => (
+                  <span key={f.id} style={{
+                    background: "#3333cc", color: "white", borderRadius: "20px",
+                    padding: "4px 12px", fontSize: "0.8rem", display: "flex",
+                    alignItems: "center", gap: "6px"
+                  }}>
+                    {f.username}
+                    <span
+                      onClick={() => setInvitedFriends(invitedFriends.filter((x) => x.id !== f.id))}
+                      style={{ cursor: "pointer", fontWeight: 700 }}
+                    >×</span>
+                  </span>
+                ))}
+              </div>
+            )}
 
             {/* Save button */}
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
