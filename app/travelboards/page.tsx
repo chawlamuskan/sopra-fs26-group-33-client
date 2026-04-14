@@ -48,6 +48,12 @@ const TravelBoardsPage: React.FC = () => {
     const [invitedFriends, setInvitedFriends] = useState<{id: number; username: string}[]>([]);
     const friendDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+    // join button 
+    const [joinCode, setJoinCode] = useState("");
+    type Notification = { id: number; fromUsername: string; boardName: string; boardId: number };
+    const [joinNotifications, setJoinNotifications] = useState<Notification[]>([]);
+    const [joiningBoard, setJoiningBoard] = useState<{ name: string; location: string } | null>(null);
+
 
     useEffect(() => {
         if (!isAllowed) return;     // #35 ; #46 works for pop up too 
@@ -146,6 +152,42 @@ const TravelBoardsPage: React.FC = () => {
       }
     };
 
+    // Fetch notifications when join modal opens
+    const handleOpenJoin = async () => {
+      setIsJoinModalOpen(true);
+      try {
+        const data = await apiService.get<Notification[]>("/travelboards/invitations");
+        setJoinNotifications(data);
+      } catch { setJoinNotifications([]); }
+    };
+
+    const handleAcceptInvite = async (notif: Notification) => {
+      try {
+        await apiService.post(`/travelboards/${notif.boardId}/accept`, {});
+        setJoinNotifications((prev) => prev.filter((n) => n.id !== notif.id));
+        fetchBoards();
+      } catch { alert("Could not accept invite."); }
+    };
+
+    const handleDeclineInvite = async (notif: Notification) => {
+      try {
+        await apiService.post(`/travelboards/${notif.boardId}/decline`, {});
+        setJoinNotifications((prev) => prev.filter((n) => n.id !== notif.id));
+      } catch { alert("Could not decline invite."); }
+    };
+
+    const handleJoinByCode = async () => {
+      if (!joinCode.trim()) return;
+      try {
+        const board = await apiService.post<{ name: string; location: string }>(
+          "/travelboards/join-by-code",
+          { code: joinCode.trim() }
+        );
+        setJoiningBoard(board);
+        fetchBoards();
+      } catch { alert("Invalid or expired code."); }
+    };
+
 
   return (
     <>
@@ -170,9 +212,7 @@ const TravelBoardsPage: React.FC = () => {
               {isManageMode ? "Done" : "Manage"}
           </Button>
           {/* #38 join modal */}
-          <Button className={styles.btn} onClick={() => setIsJoinModalOpen(true)}>
-            Join
-          </Button>
+          <Button className={styles.btn} onClick={handleOpenJoin}>Join</Button>
         </div>
       </div>
 
@@ -409,12 +449,83 @@ const TravelBoardsPage: React.FC = () => {
         {/* Join modal - actual content for #53 */}
 
         <Modal
-            title="Join a Travel Board"
-            open={isJoinModalOpen}
-            onCancel={() => setIsJoinModalOpen(false)}
-            footer={null}
+          title={<span style={{ color: "#3333cc", fontWeight: 800, fontSize: "1.4rem" }}>Join a board</span>}
+          open={isJoinModalOpen}
+          onCancel={() => { setIsJoinModalOpen(false); setJoinCode(""); setJoiningBoard(null); }}
+          footer={null}
         >
-          <p style={{color: "red"}}>You can join soon ...</p>
+          {/* Notifications section */}
+          <p style={{ color: "#3333cc", fontWeight: 700, fontSize: "1rem", marginBottom: "0.75rem" }}>Notifications</p>
+
+          {joinNotifications.length === 0 ? (
+            <p style={{ color: "#030000", fontSize: "0.9rem", marginBottom: "1.5rem" }}>No pending invitations.</p>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "1.5rem" }}>
+              {joinNotifications.map((notif) => (
+                <div key={notif.id} style={{
+                  display: "flex", alignItems: "center", gap: "0.75rem",
+                  background: "#f4ebeb", borderRadius: "30px", padding: "0.5rem 1rem"
+                }}>
+                  <div style={{
+                    width: "36px", height: "36px", borderRadius: "50%",
+                    background: "#d6cece", flexShrink: 0
+                  }} />
+                  <span style={{ flex: 1, fontSize: "0.9rem", fontStyle: "italic" }}>
+                    <strong>{notif.fromUsername}</strong> invited you to "{notif.boardName}"
+                  </span>
+                  <Button
+                    size="small"
+                    onClick={() => handleAcceptInvite(notif)}
+                    style={{ background: "#0B0696", color: "white", border: "none", borderRadius: "20px" }}
+                  >Accept</Button>
+                  <Button
+                    size="small"
+                    onClick={() => handleDeclineInvite(notif)}
+                    style={{ background: "#0B0696", color: "white", border: "none", borderRadius: "20px" }}
+                  >Decline</Button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Use a code section */}
+          <p style={{ color: "#3333cc",fontWeight: 700, fontSize: "1rem", marginBottom: "0.75rem" }}>Use a code</p>
+
+          {joiningBoard ? (
+            <div style={{
+              background: "#f0eeff", borderRadius: "16px", padding: "1rem",
+              border: "1.5px solid #3333cc", marginBottom: "1rem"
+            }}>
+              <p style={{ fontWeight: 700, color: "#3333cc", margin: "0 0 0.25rem" }}>
+                ✓ Joined: {joiningBoard.name}
+              </p>
+              {joiningBoard.location && (
+                <p style={{ color: "#555", margin: 0, fontSize: "0.9rem" }}>{joiningBoard.location}</p>
+              )}
+            </div>
+          ) : (
+            <>
+              <input
+                value={joinCode}
+                onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                placeholder="Enter code…"
+                maxLength={8}
+                style={{
+                  width: "100%", padding: "10px 16px", borderRadius: "20px",
+                  background: "#e8e8e8", border: "none", fontSize: "1rem",
+                  letterSpacing: "0.15em", boxSizing: "border-box", marginBottom: "0.75rem"
+                }}
+              />
+              <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                <Button
+                  onClick={handleJoinByCode}
+                  style={{ background: "#0B0696", color: "white", border: "none", borderRadius: "20px", padding: "0 1.5rem", height: "40px" }}
+                >
+                  Confirm
+                </Button>
+              </div>
+            </>
+          )}
         </Modal>
 
     </div>
