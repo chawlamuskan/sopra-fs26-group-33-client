@@ -5,6 +5,7 @@ import { Button, Modal, Input, DatePicker } from "antd";
 import styles from "./travelboards.module.css";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 import Header from "@/components/Header";
+import LocationInput from "./LocationInput";
 import dayjs, { Dayjs } from "dayjs";
 import { ApiService } from "@/api/apiService"; // adjust path if needed
 
@@ -28,13 +29,15 @@ const TravelBoardsPage: React.FC = () => {
     const [boardName, setBoardName] = useState("");
     const [location, setLocation] = useState("");
     const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null]>([null, null]);
-    const [isPublic, setIsPublic] = useState<boolean | null>(null);
+    const [privacy, setPrivacy] = useState<"PRIVATE" | "FRIENDS" | "PUBLIC">("PRIVATE");
 
     const [boards, setBoards] = useState<TravelBoard[]>([]); // for displayig TB
 
 
     const [isManageMode, setIsManageMode] = useState(false);    // for managing 
     const [currentUserId, setCurrentUserId] = useState<number | null>(null);  // for managing 
+
+
     useEffect(() => {
         if (!isAllowed) return;     // #35 ; #46 works for pop up too 
         fetchBoards();             // #36 fetch TB for display  
@@ -55,7 +58,7 @@ const TravelBoardsPage: React.FC = () => {
       location: location,
       startDate: dateRange[0] ? dateRange[0].toISOString() : null,
       endDate: dateRange[1] ? dateRange[1].toISOString() : null,
-      privacy: isPublic ? "PUBLIC" : "PRIVATE",
+      privacy: privacy,
     };
 
     try {
@@ -67,7 +70,6 @@ const TravelBoardsPage: React.FC = () => {
       setBoardName("");
       setLocation("");
       setDateRange([null, null]);
-      setIsPublic(false);
     } catch (err) {
       alert("Something went wrong. Please try again.");
       console.error(err);
@@ -218,12 +220,7 @@ const TravelBoardsPage: React.FC = () => {
               onChange={(e) => setBoardName(e.target.value)}
             />
 
-            <Input
-              placeholder="Choose location"
-              className={styles.input}
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-            />
+            <LocationInput value={location} onChange={setLocation} />
 
             <DatePicker.RangePicker
               className={styles.input}
@@ -238,21 +235,22 @@ const TravelBoardsPage: React.FC = () => {
               <div className={styles.privacySection}>
                 <p className={styles.sectionLabel}>Privacy setting</p>
                 <div className={styles.privacyButtons}>
-                  <Button
-                    className={styles.privacyBtn}
-                    type={!isPublic ? "primary" : "default"}
-                    onClick={() => setIsPublic(false)}
-                  >
-                    Private
-                  </Button>
-                  <Button
-                    className={styles.privacyBtn}
-                    type={isPublic ? "primary" : "default"}
-                    onClick={() => setIsPublic(true)}
-                  >
-                    Public
-                  </Button>
+                  {(["PRIVATE", "FRIENDS", "PUBLIC"] as const).map((opt) => (
+                    <Button
+                      key={opt}
+                      className={styles.privacyBtn}
+                      type={privacy === opt ? "primary" : "default"}
+                      onClick={() => setPrivacy(opt)}
+                    >
+                      {opt.charAt(0) + opt.slice(1).toLowerCase()}
+                    </Button>
+                  ))}
                 </div>
+                <p style={{ fontSize: "0.75rem", color: "#888", marginTop: "0.25rem" }}>
+                  {privacy === "PRIVATE" && "Only you can see this board."}
+                  {privacy === "FRIENDS" && "Only your friends can see this board."}
+                  {privacy === "PUBLIC" && "Everyone can see this board."}
+                </p>
               </div>
 
             {/* Invite friends — unchanged */}
