@@ -37,6 +37,11 @@ const TravelBoardsPage: React.FC = () => {
     const [isManageMode, setIsManageMode] = useState(false);    // for managing 
     const [currentUserId, setCurrentUserId] = useState<number | null>(null);  // for managing 
 
+    // for invitation code pop up 
+    const [showCodePopup, setShowCodePopup] = useState(false);
+    const [generatedCode, setGeneratedCode] = useState("");
+    const [codeCopied, setCodeCopied] = useState(false);
+
 
     useEffect(() => {
         if (!isAllowed) return;     // #35 ; #46 works for pop up too 
@@ -102,6 +107,23 @@ const TravelBoardsPage: React.FC = () => {
           setBoards(boards.filter(board => board.id !== boardId));
       }
   };
+
+    const generateInviteCode = () => {
+      // 8-char alphanumeric code — readable and short enough to type
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      const code = Array.from({ length: 8 }, () =>
+        chars[Math.floor(Math.random() * chars.length)]
+      ).join("");
+      setGeneratedCode(code);
+      setShowCodePopup(true);
+      setCodeCopied(false);
+      // TODO: optionally POST this code to your backend so it can be validated on join
+    };
+
+    const handleCopyCode = () => {
+      navigator.clipboard.writeText(generatedCode);
+      setCodeCopied(true);
+    };
 
 
   return (
@@ -257,9 +279,42 @@ const TravelBoardsPage: React.FC = () => {
             <div className={styles.inviteSection}>
               <p className={styles.sectionLabel}>Invite friends</p>
               <div className={styles.inviteButtons}>
-                <Button className={styles.inviteBtn}>Share code</Button>
-                <Button className={styles.privacyBtn}>Pick from friends list</Button>
+                <Button className={styles.inviteBtn} onClick={generateInviteCode}>
+                  Share code
+                </Button>
+                {/* friends search — see point 6 */}
+                <Button className={styles.inviteBtn} disabled style={{ marginLeft: "0.5rem" }}>
+                  Search friends
+                </Button>
               </div>
+
+              {/* Inline code popup */}
+              {showCodePopup && (
+                <div style={{
+                  marginTop: "0.75rem", background: "#f0eeff",
+                  borderRadius: "16px", padding: "1rem",
+                  border: "1.5px solid #3333cc", textAlign: "center"
+                }}>
+                  <p style={{ margin: "0 0 0.5rem", fontWeight: 700, color: "#3333cc" }}>
+                    Invite Code
+                  </p>
+                  <div style={{
+                    fontSize: "1.6rem", letterSpacing: "0.3em",
+                    fontWeight: 800, color: "#0B0696", marginBottom: "0.75rem"
+                  }}>
+                    {generatedCode}
+                  </div>
+                  <Button
+                    onClick={handleCopyCode}
+                    style={{ borderRadius: "20px", background: "#0B0696", color: "white", border: "none" }}
+                  >
+                    {codeCopied ? "✓ Copied!" : "Copy code"}
+                  </Button>
+                  <p style={{ fontSize: "0.75rem", color: "#888", marginTop: "0.5rem" }}>
+                    Share this code with friends so they can join your board.
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Save button */}
