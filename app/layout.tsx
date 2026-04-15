@@ -50,7 +50,7 @@ export default function RootLayout({
             },
             components: {
               Button: {
-                colorPrimary: "#75bd9d",
+                colorPrimary: "#0B0696",
                 algorithm: true,
                 controlHeight: 38,
               },

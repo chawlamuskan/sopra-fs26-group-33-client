@@ -88,9 +88,17 @@ export class ApiService {     // ## To handle all HTTP requests (GET, POST, PUT,
    */
   public async post<T>(endpoint: string, data: unknown): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
+
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    const parsedToken = token ? JSON.parse(token) : null;
+    // added token to header if exists in local storage, so that backend can verify the user
+
     const res = await fetch(url, {
       method: "POST",
-      headers: this.defaultHeaders,
+      headers: {
+        ...this.defaultHeaders,
+        ...(parsedToken ? { Authorization: parsedToken } : {}),
+      },
       body: JSON.stringify(data),
     });
     return this.processResponse<T>(

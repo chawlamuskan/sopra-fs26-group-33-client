@@ -65,7 +65,42 @@ reason).
 
 ---
 
-## Contributions Week 2 - [30.03.2026] to [05.04.2026]
+## Contributions Week 2 + 3 - [30.03.2026] to [12.04.2026] (Easter holidays)
+
+| **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
+| ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
+| **[@chawlamuskan]** | [09.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/ed523a64cd705a64848b904a21c75d7f45016a25] | [added save button and new TB gets saved successfully #50] | [user can create a new TB and save it, saves in backend also] |
+|                    | [09.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/1b3daff996f4e1509137e67be5f291eb51df10a6] | [TB overview page fetches data from backend and displays all created boards] | [user can see the boards he created on the website #36] |
+| **[@nadiapan4]** | [11.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/98c88a9e1e839faccd4336819e3b2a51a46a6220] | [Created and implemented the frontend of the preferences page, with relevant css (issues #12, #13, #14, #15, #16)] | [After registration, users can choose to personalise their profile by choosing a profile picture, bio, etc.] |
+|                    | [12.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/7d0f59c1dc806bc4315d568118d781d9936b6d0e] | [Created and implemented user's menu, and changed the /users/id page to a logged in version of the landing page (issues #25, #27, #57, #58, #59)] | [Allows users to navigate to different pages and log out.] |
+| **[@despoinapantazi]** | [06.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/644cb537a06394c46d0bddf7a9f59974f6b4f5b9] | [Added tests relevant to the logout (session token deletion, user status update). #165 #167 #168] | [Testing that logout fulfills as expected all relevant changes in the backend.] |
+|                    | [08.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/7ba7f5dcb0507a902194332a5884d6c3a6fcd8cc] | [Add REST endpoints and Service functions to allow creation / fetching / update of user preferences #62] | [Created Controller and Service files that support the user preferences (along with the entity / repository / DTOs created in previous commit).] |
+| **[@nsavas8]** | [08.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/05277bb43c9b05ef7ddef7732bebf55deb0f7e01] | [Created country overview page #70] | [Users need this page to have an overview of their saved countries] |
+|                    | [09.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/85e877997c44a18744a51cd3663afd997c03ad19] | [implemented the color coded map, so all visited countries, countries to visit, and the others are displayed in a different color #74] | [Users want to see visually which countries they have visited/want to visit, so they can plan new trips] |
+| **[@yalini-siva]** | [07.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/b65de57f1d14e589cc2ac0bb7c774916a89f86ef] | [Added backend support for sending travel board invitations #175, #176, #178] | [Allows users to invite others to travel boards] |
+|                    | [08.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/f03c7ecac274c31d7cf25a20ce8f3aa6444d709d] | [Added accept/decline invitation endpoints #147, #148, #178] | [Allows users to respond to invitations and join travel boards] |
+
+---
+
+## Contributions Week 4 - [13.04.2026] to [19.04.2026]
+
+| **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
+| ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
+| **[@chawlamuskan]** | [10.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/766c07f2528c63eb6e2b552b197ee70c07f1b5fa] | [created manage button, can manage boards, delete them via minus sign on board, mark as done #39] | [the user can manage his boards and delete them - need to connect to backend] |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@nadiapan4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@despoinapantazi]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@nsavas8]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@yalini-siva]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+
+
+---
+
+## Contributions Week 5 - [20.04.2026] to [26.04.2026]
 
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
@@ -80,9 +115,10 @@ reason).
 | **[@yalini-siva]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 
+
 ---
 
-## Contributions Week 3 - [06.04.2026] to [12.04.2026]
+## Contributions Week 6 - [27.04.2026e] to [03.05.2026]
 
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
@@ -100,18 +136,6 @@ reason).
 
 ---
 
-## Contributions Week 4 - [Begin Date] to [End Date]
-
-_Continue with the same table format as above._
-
----
-
-## Contributions Week 5 - [Begin Date] to [End Date]
-
-_Continue with the same table format as above._
-
----
-
-## Contributions Week 6 - [Begin Date] to [End Date]
+## Contributions Week 7 - [Begin Date] to [End Date]
 
 _Continue with the same table format as above._

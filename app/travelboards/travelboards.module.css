@@ -1,10 +1,17 @@
-/* for actual travel page */
+/* ── page ── */
+.page {
+  background: #ffffff;
+  width: 100%;
+  min-height: calc(100vh - 107px);
+}
+
 .container {
   padding: 2rem;
   max-width: 1100px;
   margin: 0 auto;
 }
 
+/* ── page header ── */
 .header {
   display: flex;
   align-items: center;
@@ -19,6 +26,7 @@
   margin-right: 1rem;
 }
 
+/* ── create/manage/join buttons ── */
 .buttons {
   display: flex;
   gap: 0.5rem;
@@ -26,29 +34,31 @@
 
 .btn {
   padding: 0.3rem 1rem;
-  border: 1.5px solid var(--foreground);
-  border-radius: 20px;
-  background: transparent;
-  color: var(--foreground);
+  border: 1.5px solid #171717 !important;
+  border-radius: 20px !important;
+  background: #F4EBEB !important;
+  color: #171717 !important;
   cursor: pointer;
   font-size: 0.9rem;
   transition: background 0.2s;
 }
 
 .btn:hover {
-  background: rgba(128, 128, 128, 0.15);
+  background: #0B0696 !important;
+  color: #ffffff !important;
+  border-color: #0B0696 !important;
 }
 
+/* ── empty state ── */
 .empty {
   margin-top: 4rem;
   text-align: center;
-  color: var(--foreground);
+  color: #171717;
   font-size: 1.1rem;
   line-height: 2;
 }
 
-/* for creation pop up */
-
+/* ── modal form ── */
 .form {
   display: flex;
   flex-direction: column;
@@ -58,7 +68,15 @@
 
 .input {
   width: 100%;
-  border-radius: 20px;
+  border-radius: 20px !important;
+  background: #e8e8e8 !important;
+}
+
+.input :global(.ant-input),
+.input :global(.ant-picker-input input) {
+  background: #e8e8e8 !important;
+  color: #171717 !important;
+  border: none !important;
 }
 
 .sectionLabel {
@@ -79,10 +97,88 @@
   gap: 0.5rem;
 }
 
-.privacyBtn {
-  flex: 1;
+.saveBtn {
+  background: #0B0696 !important;
+  color: white !important;
+  border-radius: 20px !important;
+  padding: 0 2rem !important;
+  height: 44px !important;
+}
+
+
+/* ── for displaying all TBs ── */
+
+.boardList {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.boardCard {
+  background: #f4ebeb;
   border-radius: 20px;
-  background: #4db8b8;
-  color: white;
-  border: none;
+  border: 1.5px solid #d6cece;
+  padding: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.boardCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.boardName {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #3333cc;
+  margin: 0;
+}
+
+.boardDates {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #3333cc;
+  white-space: nowrap;
+}
+
+.friendsRow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.friendsLabel {
+  font-size: 0.85rem;
+  font-style: italic;
+  font-weight: 600;
+  color: #3333cc;
+}
+
+.placesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.placeBox {
+  background: #ffffff;
+  border-radius: 10px;
+  aspect-ratio: 1;
+  border: 1px solid #e0d6d6;
+}
+
+.seeMoreRow {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.seeMore {
+  font-size: 0.85rem;
+  color: #3333cc;
+  text-decoration: underline;
+  cursor: pointer;
 }
