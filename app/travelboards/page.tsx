@@ -88,6 +88,8 @@ const TravelBoardsPage: React.FC = () => {
       setBoardName("");
       setLocation("");
       setDateRange([null, null]);
+      setInvitedFriends([]); //Nina
+      setPrivacy("PRIVATE"); //Nina
     } catch (err) {
       alert("Something went wrong. Please try again.");
       console.error(err);
@@ -118,6 +120,7 @@ const TravelBoardsPage: React.FC = () => {
       } else {
           // user is not owner → just remove from view
           setBoards(boards.filter(board => board.id !== boardId));
+        // Nina: we need to also delete the user as a member in the backend, not just frontend
       }
   };
 
@@ -144,7 +147,7 @@ const TravelBoardsPage: React.FC = () => {
       try {
         // Adjust endpoint to whatever your backend exposes
         const results = await apiService.get<{id: number; username: string}[]>(
-          `/travelboards/join}`
+          `/travelboards/join`
         );
         setFriendResults(results);
       } catch {
