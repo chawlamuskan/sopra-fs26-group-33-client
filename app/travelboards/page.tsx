@@ -136,9 +136,14 @@ const TravelBoardsPage: React.FC = () => {
       // TODO: optionally POST this code to your backend so it can be validated on join
     };
 
-    const handleCopyCode = () => {
-      navigator.clipboard.writeText(generatedCode);
-      setCodeCopied(true);
+    const handleCopyCode = async () => {
+      try {
+        await navigator.clipboard.writeText(generatedCode);
+        setCodeCopied(true);
+      } catch (error) {
+        setCodeCopied(false);
+        console.error("Failed to copy invite code:", error);
+      }
     };
 
     // for friends search 
