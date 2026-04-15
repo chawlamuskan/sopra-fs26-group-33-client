@@ -1,7 +1,7 @@
 "use client";
 
 import styles from "./travelboards.module.css";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 type Suggestion = { label: string; placeId: string };
 
