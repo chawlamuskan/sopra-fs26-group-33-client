@@ -437,7 +437,7 @@ const Preferences: React.FC = () => {
           </div>
         </Form>
       </div>
-    </div>\
+    </div>
      </ConfigProvider>
   );
 };
