@@ -106,7 +106,7 @@ const Login: React.FC = () => {
           
           <Form.Item>
             <div className={styles.btnWrapper}>
-              <button type="submit" className={styles.btnLogin} onClick={() => router.push("/")}> 
+              <button type="submit" className={styles.btnLogin}> 
                 Login
               </button>
             </div>

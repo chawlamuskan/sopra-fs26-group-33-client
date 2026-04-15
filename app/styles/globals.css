@@ -1,14 +1,9 @@
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #ffffff;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+
 
 html,
 body {
@@ -35,11 +30,7 @@ a {
   text-decoration: none;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
-}
+
 
 .login-container {
   display: flex;
@@ -63,6 +54,31 @@ a {
 }
 
 
+.ant-select-dropdown {
+  background-color: white !important;
+  color: #000000 !important;
+}
+
+.ant-select-item {
+  color: #000000 !important;
+  background-color: white !important;
+}
+
+.ant-select-item-option-active,
+.ant-select-item-option-selected {
+  background-color: #F4EBEB !important;
+  color: #000000 !important;
+}
+
+.ant-select-selector {
+  background: #F4EBEB !important;
+  border: none !important;
+  color: #000000 !important;
+}
+
+.ant-select-selection-item {
+  color: #000000 !important;
+}
 /* datepicker calendar popup override */
 .ant-picker-dropdown .ant-picker-panel-container {
   background: #F4EBEB !important;

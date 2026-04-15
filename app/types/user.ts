@@ -1,10 +1,13 @@
 export interface User {
-  id: string | null;
+  id: string;
   name: string | null;
-  username: string | null;
+  username: string;
   token: string | null;
   status: string | null;
-  bio: string | null; // new add bio
-  creationDate: string | null; // new add creation date
-  // need bio and creation date for the user id page to fetch the data there
+  bio: string | null;
+  creationDate: string;
+  profilePicture: string | null;
+  countriesVisited: string[] | null;
+  countriesWishlist: string[] | null;
+  friends: string[] | null;
 }

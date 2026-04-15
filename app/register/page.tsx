@@ -25,7 +25,7 @@ const Register: React.FC = () => {
         setToken(response.token);
         localStorage.setItem("user", JSON.stringify(response));
       }
-      router.push(`/users/${response.id}`);
+      router.push("/preferences");
     } catch (error) {
       if (error instanceof Error) {
         alert(`Something went wrong during the registration:\n${error.message}`);
