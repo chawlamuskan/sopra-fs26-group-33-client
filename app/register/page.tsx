@@ -25,6 +25,7 @@ const Register: React.FC = () => {
         setToken(response.token);
         localStorage.setItem("user", JSON.stringify(response));
       }
+      router.push("/preferences");
     } catch (error) {
       if (error instanceof Error) {
         alert(`Something went wrong during the registration:\n${error.message}`);
@@ -120,7 +121,7 @@ const Register: React.FC = () => {
               Already registered? Login
             </button>
 
-            <button type="submit" className={styles.btnLogin} style={{ width: "179px" }} onClick={() => router.push("/preferences")}>
+            <button type="submit" className={styles.btnLogin} style={{ width: "179px" }}>
               Save profile
             </button>
           </div>
