@@ -13,6 +13,12 @@ interface FormFieldProps {
   value: string;
 }
 
+interface CountryApiItem {
+  name?: {
+    common?: string;
+  };
+}
+
 const Preferences: React.FC = () => {
   const router = useRouter();
   const apiService = useApi();
@@ -29,10 +35,12 @@ const Preferences: React.FC = () => {
     const fetchCountries = async () => {
       try {
         const res = await fetch("https://restcountries.com/v3.1/all?fields=name");
-        const data = await res.json();
+        const data: CountryApiItem[] = await res.json();
         const options = data
-          .map((c: any) => ({ label: c.name.common, value: c.name.common }))
-          .sort((a: any, b: any) => a.label.localeCompare(b.label));
+          .map((country) => country.name?.common)
+          .filter((name): name is string => Boolean(name))
+          .map((name) => ({ label: name, value: name }))
+          .sort((a, b) => a.label.localeCompare(b.label));
         setCountryOptions(options);
       } catch (error) {
         console.error("Error fetching countries:", error);
@@ -271,7 +279,7 @@ const Preferences: React.FC = () => {
             <div style={{ display: "flex", gap: "24px" , background: "white"}}>
               <Form.Item
                 name="countries_visited"
-                label={<span className={styles.fieldLabel}>Select the countries you've visited</span>}
+                label={<span className={styles.fieldLabel}>Select the countries you&apos;ve visited</span>}
                 style={{ flex: 1 }}
               >
                 <Select

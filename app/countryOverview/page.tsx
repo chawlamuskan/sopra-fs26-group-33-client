@@ -51,15 +51,17 @@ function CountryLayer({ savedCountries }: { savedCountries: savedCountry[] | nul
     map.data.loadGeoJson(
       "https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson",
       undefined,
-      (features: any[]) => {
+
+      (features: google.maps.Data.Feature[]) => {
         features.forEach((f) => {
-    const name = f.getProperty("name");
-    const code = f.getProperty("ISO3166-1-Alpha-2");
-    if ((name as string)?.includes("France") || code === "FR") {
-      console.log("France entry:", name, "->", code);
-    }
-  });
-        map.data.setStyle((feature: any) => {
+          const name = f.getProperty("name");
+          const code = f.getProperty("ISO3166-1-Alpha-2");
+          if ((name as string)?.includes("France") || code === "FR") {
+            console.log("France entry:", name, "->", code);
+          }
+        });
+        map.data.setStyle((feature: google.maps.Data.Feature) => {
+
           const name = feature.getProperty("name") as string;
           const match = savedCountries.find((c: savedCountry) => c.countryName === name);
           return {

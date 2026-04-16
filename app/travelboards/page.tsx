@@ -479,7 +479,7 @@ const TravelBoardsPage: React.FC = () => {
                     background: "#d6cece", flexShrink: 0
                   }} />
                   <span style={{ flex: 1, fontSize: "0.9rem", fontStyle: "italic" }}>
-                    <strong>{notif.fromUsername}</strong> invited you to "{notif.boardName}"
+                    <strong>{notif.fromUsername}</strong> invited you to &quot;{notif.boardName}&quot;
                   </span>
                   <Button
                     size="small"
