@@ -17,9 +17,6 @@ export default function HeaderButtons() {
     const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
     if (storedUser?.id) {
       setUser(storedUser);
-      if (pathname === "/") {
-        router.push(`/users/${storedUser.id}`);
-      }
     }
   }, [pathname]);
 
@@ -125,7 +122,7 @@ export default function HeaderButtons() {
         }}>
           {/* Menu items */}
           {[
-            { label: "Countries Overview", path: `/users/${user?.id}` }, //need to change these paths once the pages are implemented
+            { label: "Countries Overview", path: `/countryOverview` },
             { label: "Saved Places", path: `/users/${user?.id}` },//need to change these paths once the pages are implemented
             { label: "Travel boards", path: `/travelboards` },
             { label: "Community", path: `/users/${user?.id}` },//need to change these paths once the pages are implemented

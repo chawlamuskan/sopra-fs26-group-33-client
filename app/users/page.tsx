@@ -76,7 +76,6 @@ const Dashboard: React.FC = () => {
   const { value: token} = useLocalStorage<string>("token", ""); // to get the token from localStorage and clear it when logging out  
 
   useEffect(() => {
-    if (!isAllowed) return; // wait until we know if the user is allowed to see this page or no
     const fetchUsers = async () => {
       try {
         // apiService.get<User[]> returns the parsed JSON object directly,
