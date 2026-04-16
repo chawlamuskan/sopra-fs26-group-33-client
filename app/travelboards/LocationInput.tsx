@@ -5,6 +5,12 @@ import { useRef, useState } from "react";
 
 type Suggestion = { label: string; placeId: string };
 
+interface NominatimResult {
+  addresstype?: string;
+  display_name: string;
+  place_id: string | number;
+}
+
 const LocationInput = ({
   value,
   onChange,
@@ -15,27 +21,23 @@ const LocationInput = ({
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [show, setShow] = useState(false);
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [loading, setLoading] = useState(false); //Nina
-  const [error, setError] = useState<string | null>(null); //Nina
 
   const fetchSuggestions = async (query: string) => {
     if (query.length < 2) { setSuggestions([]); return; }
-    setLoading(true); //Nina
-    setError(null); //Nina
     try { //Nina
       const res = await fetch(
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=6&featuretype=city&featuretype=country&accept-language=en`
       );
       if (!res.ok) throw new Error("Failed to fetch"); //Nina
-      const data = await res.json();
+      const data: NominatimResult[] = await res.json();
       // Filter to only cities/towns/villages/countries
       const filtered = data
-        .filter((item: any) =>
-          ["city","town","village","hamlet","country","state"].includes(item.addresstype)
+        .filter((item) =>
+          ["city","town","village","hamlet","country","state"].includes(item.addresstype ?? "")
         )
-        .map((item: any) => ({
+        .map((item) => ({
           label: item.display_name.split(",").slice(0, 2).join(",").trim(),
-          placeId: item.place_id,
+          placeId: String(item.place_id),
         }));
       // Deduplicate by label
       const unique = filtered.filter(
@@ -44,11 +46,8 @@ const LocationInput = ({
       );
       setSuggestions(unique);
       setShow(true);
-    } catch (err) { //Nina
-      setError("Could not load suggestions. Try again.");
+    } catch {
       setSuggestions([]);
-    } finally { //Nina
-      setLoading(false);
     }
   };
 
