@@ -15,6 +15,7 @@ import Header from "@/components/Header";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
+/// <reference types="google.maps" />
 
 interface CountryInfo {
   name: string;
@@ -50,7 +51,7 @@ function CountryLayer({ savedCountries }: { savedCountries: savedCountry[] | nul
     map.data.loadGeoJson(
       "https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson",
       undefined,
-      (features) => {
+      (features: any[]) => {
         features.forEach((f) => {
     const name = f.getProperty("name");
     const code = f.getProperty("ISO3166-1-Alpha-2");
@@ -58,7 +59,7 @@ function CountryLayer({ savedCountries }: { savedCountries: savedCountry[] | nul
       console.log("France entry:", name, "->", code);
     }
   });
-        map.data.setStyle((feature) => {
+        map.data.setStyle((feature: any) => {
           const name = feature.getProperty("name") as string;
           const match = savedCountries.find((c: savedCountry) => c.countryName === name);
           return {
@@ -77,7 +78,7 @@ function CountryLayer({ savedCountries }: { savedCountries: savedCountry[] | nul
 }
 
 export default function CountryOverview() {
-    const isAllowed = useProtectedRoute(); 
+    const isAllowed = useProtectedRoute();
     const router = useRouter();
     const position = {lat: 47.3769, lng: 8.5417}
     const [countryInfo, setCountryInfo] = useState<CountryInfo | null>(null);
@@ -121,9 +122,9 @@ export default function CountryOverview() {
     };  
 
 
-    useEffect(() => {
-      if (!isAllowed) return;
-    }, [isAllowed]);
+    // useEffect(() => {
+    //   if (!isAllowed) return;
+    // }, [isAllowed]);
 
     // mock the data until backend is ready
     useEffect(() => {
@@ -150,7 +151,8 @@ export default function CountryOverview() {
     //   };
     //   getSavedCountries();
     // }, [apiService]);
-    
+    if (isAllowed === null) return null;
+    if (!isAllowed) return null;
 
     return (
       <>
