@@ -3,25 +3,39 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import useLocalStorage from "./useLocalStorage";
+//import useLocalStorage from "./useLocalStorage";
+import { useApi } from "@/hooks/useApi";
+import { User } from "@/types/user";
 
 export const useProtectedRoute = () => {
   const router = useRouter();
-  const { value: token } = useLocalStorage<string>("token", "");
-  const [isAllowed, setIsAllowed] = useState(false);
+  //const { value: token, clear, isHydrated } = useLocalStorage<string>("token", "");
+  const [isAllowed, setIsAllowed] = useState<boolean | null>(null); // null mean loading
+  const apiService = useApi();
 
   useEffect(() => {
-    const storedToken =
-      typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    const validate = async () => {
+      const token = localStorage.getItem("token");
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
 
-    // Check if token exists either in hook state or localStorage
-    if ((token && token.trim() !== "") || (storedToken && storedToken.trim() !== "")) {
+      if (!token || !storedUser?.id) {
+        setIsAllowed(false);
+        router.push("/"); // redirect to landing page if not authenticated
+        return;
+      }
+      
+    try {
+      await apiService.get<User>(`/users/${storedUser.id}`);
       setIsAllowed(true);
-    } else {
+    } catch {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
       setIsAllowed(false);
-      router.push("/"); // redirect to landing page if not authenticated
+      router.push("/");
     }
-  }, [token, router]);
+  };
+  validate();
+}, []);
 
   return isAllowed;
 };
