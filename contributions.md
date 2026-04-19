@@ -87,7 +87,7 @@ reason).
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
 | **[@chawlamuskan]** | [10.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/766c07f2528c63eb6e2b552b197ee70c07f1b5fa] | [created manage button, can manage boards, delete them via minus sign on board, mark as done #39] | [the user can manage his boards and delete them - need to connect to backend] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+|                    | [14.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/881051ae89a83ae5d00327324ecc92dc9dd0fece] | [created the shar code button on the creation page and pop up of unique 6 digit code #49] | [the user now can share a unique code to invite friends to his travel board] |
 | **[@nadiapan4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@despoinapantazi]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
@@ -104,7 +104,7 @@ reason).
 
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
-| **[@chawlamuskan]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@chawlamuskan]** | [14.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/eeb2a0174077d8de3e475287b9f284525e02e76a] | [created join modal pop up with restricted access #52 #53] | [user can see who invited him to a travel baord and accept the invitation or enter the code to join a travelboard ] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@nadiapan4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
