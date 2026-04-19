@@ -92,8 +92,8 @@ reason).
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@despoinapantazi]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-| **[@nsavas8]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@nsavas8]** | [19.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/f808c7b4216a3554d37468d456c4e2241013404e] | [Changed the page protection, so its connected to the backend #98] | [We had the issue, that the restricted access was only checking for users in the local storage, but we wanted to see in the backend if the user really exists. Furthermore there were bugs to fix regarding the restricted access] |
+|                    | [19.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/370761df3ca86cbecd997cd8c4b95748b6ea79c1] | [created new page for specific travelboard, so places can get added and created a plus button to add places #42 #102] | [The main functionality of the travel boards is to add places to it to plan a trip] |
 | **[@yalini-siva]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 
