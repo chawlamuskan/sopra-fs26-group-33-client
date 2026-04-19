@@ -1,5 +1,6 @@
 import HeaderButtons from "@/components/HeaderButtons";
 import { useRouter, usePathname } from "next/navigation";
+import useLocalStorage from "@/hooks/useLocalStorage";
 
 export default function Header() {
   const pathname = usePathname();

@@ -1,4 +1,5 @@
 "use client";
+/// <reference types="google.maps" />
 
 import {useRouter, useParams} from "next/navigation";
 import { Button } from "antd";
@@ -15,7 +16,6 @@ import Header from "@/components/Header";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
-/// <reference types="google.maps" />
 
 interface CountryInfo {
   name: string;
@@ -86,8 +86,6 @@ export default function CountryOverview() {
     const [countryInfo, setCountryInfo] = useState<CountryInfo | null>(null);
     const apiService = useApi();
     const [savedCountries, setSavedCountries] = useState<savedCountry[] | null>(null);
-    const params = useParams();
-    const userId = params.id; 
     const handleClick = async (event: MapMouseEvent) => {
         if (!event.detail.latLng) return;
         const lat = event.detail.latLng.lat;
@@ -124,35 +122,31 @@ export default function CountryOverview() {
     };  
 
 
-    // useEffect(() => {
-    //   if (!isAllowed) return;
-    // }, [isAllowed]);
-
-    // mock the data until backend is ready
     useEffect(() => {
-      const mockData: savedCountry[] = [
-        { countryName: "Switzerland", status: "visited" },
-        { countryName: "France", status: "wishlist" },
-        { countryName: "Germany", status: "visited" },
-      ];
-      setSavedCountries(mockData);
-    }, []);
+      if (!isAllowed) return;
+     }, [isAllowed]);
 
-    // useEffect(() => {
-    //   const getSavedCountries = async () => {
-    //     try {
-    //       const data: savedCountry [] = await apiService.get<savedCountry[]>(`/users/${userId}/savedcountries`);
-    //       setSavedCountries(data);
-    //     } catch (error) {
-    //       if (error instanceof Error) {
-    //         alert(`Something went wrong while fetching saved places:\n${error.message}`);
-    //     } else {
-    //       console.error("An unknown error occurred while fetching saved places.");
-    //     }
-    //     }
-    //   };
-    //   getSavedCountries();
-    // }, [apiService]);
+
+
+    useEffect(() => {
+      const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      const userId = storedUser.id;
+      if (!userId) return;
+
+      const getSavedCountries = async () => {
+        try {
+          const data: savedCountry[] = await apiService.get<savedCountry[]>(`/users/${userId}/savedcountries`);
+          setSavedCountries(data);
+        } catch (error) {
+          if (error instanceof Error) {
+            alert(`Something went wrong while fetching saved places:\n${error.message}`);
+          } else {
+            console.error("An unknown error occurred while fetching saved places.");
+          }
+        }
+      };
+      getSavedCountries();
+    }, [apiService]);
     if (isAllowed === null) return null;
     if (!isAllowed) return null;
 
