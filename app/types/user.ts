@@ -1,13 +1,17 @@
 export interface User {
   id: string;
-  name: string | null;
+  name?: string;
   username: string;
-  token: string | null;
-  status: string | null;
-  bio: string | null;
+  token?: string;
+  status?: string;
   creationDate: string;
-  profilePicture: string | null;
-  countriesVisited: string[] | null;
-  countriesWishlist: string[] | null;
-  friends: string[] | null;
+}
+
+export interface Preferences {
+  id: string;
+  bio?: string;
+  profilePicture?: string;
+  visitedCountries?: string[];
+  wishlistCountries?: string[];
+  friends?: number[];
 }

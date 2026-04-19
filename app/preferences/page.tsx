@@ -9,8 +9,9 @@ import styles from "@/styles/register.module.css";
 import { useState, useRef, useEffect } from "react";
 
 interface FormFieldProps {
-  label: string;
-  value: string;
+  bio: string;
+  countries_visited: string[];
+  countries_wishlist: string[];
 }
 
 interface CountryApiItem {
@@ -70,15 +71,46 @@ const Preferences: React.FC = () => {
     };
   };
 
+  const [userPreferences, setUserPreferences] = useState<Record<string, string | null>>({});
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await apiService.get<User[]>("/users");
+        setAllUsers(response);
+
+        const preferencesMap: Record<string, string | null> = {};
+        await Promise.all(
+          response.map(async (user) => {
+            try {
+              const prefs = await apiService.get<{ profilePicture: string }>(
+                `/users/${user.id}/preferences`
+              );
+              preferencesMap[user.id] = prefs.profilePicture ?? null;
+            } catch {
+              preferencesMap[user.id] = null;
+            }
+          })
+        );
+        setUserPreferences(preferencesMap);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+    fetchUsers();
+  }, []);
+
   const handleEndRegistration = async (values: FormFieldProps) => {
     try {
       const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-      const payload = { ...values, profilePicture: imageBase64, friends: selectedFriends};
-      const response = await apiService.put<User>(`/users/${storedUser.id}`, payload);
-      if (response.token) {
-        setToken(response.token);
-        localStorage.setItem("user", JSON.stringify(response));
-      }
+
+      await apiService.post(`/users/${storedUser.id}/preferences`, {
+        bio: values.bio ?? null,
+        profilePicture: imageBase64 ?? null,
+        visitedCountries: values.countries_visited ?? null,
+        wishlistCountries: values.countries_wishlist ?? null,
+        friends: selectedFriends.map((id) => Number(id)) ?? null
+      });
+
       router.push(`/users/${storedUser.id}`);
     } catch (error) {
       if (error instanceof Error) {
@@ -106,9 +138,13 @@ const Preferences: React.FC = () => {
   }, []);
 
 
-  const filteredUsers = allUsers.filter((user) =>
-    user.username?.toLowerCase().includes(friendSearch.toLowerCase())
-  );
+  const filteredUsers = allUsers.filter((user) => {
+    const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+    return (
+      user.username?.toLowerCase().includes(friendSearch.toLowerCase()) &&
+      user.id !== storedUser.id
+    );
+  });
 
   return (
     <ConfigProvider
@@ -339,6 +375,8 @@ const Preferences: React.FC = () => {
                   ) : (
                     filteredUsers.map((user) => {
                       const isSelected = selectedFriends.includes(user.id);
+                      const profilePicture = userPreferences[user.id];
+
                       return (
                         <div
                           key={user.id}
@@ -358,9 +396,9 @@ const Preferences: React.FC = () => {
                           }}
                         >
                           {/* Profile picture */}
-                          {user.profilePicture ? (
+                          {profilePicture ? (
                             <img
-                              src={user.profilePicture}
+                              src={profilePicture}
                               alt={user.username}
                               style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover" }}
                             />
