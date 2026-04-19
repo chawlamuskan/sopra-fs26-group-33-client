@@ -32,6 +32,13 @@ const Preferences: React.FC = () => {
   const { set: setToken } = useLocalStorage<string>("token", "");
 
   useEffect(() => {
+    const justRegistered = sessionStorage.getItem("justRegistered");
+    if (!justRegistered) {
+      router.push("/");
+    }
+  }, []);
+
+  useEffect(() => {
     const fetchCountries = async () => {
       try {
         const res = await fetch("https://restcountries.com/v3.1/all?fields=name");
@@ -79,6 +86,7 @@ const Preferences: React.FC = () => {
         setToken(response.token);
         localStorage.setItem("user", JSON.stringify(response));
       }
+      sessionStorage.removeItem("justRegistered");
       router.push(`/users/${storedUser.id}`);
     } catch (error) {
       if (error instanceof Error) {
@@ -431,6 +439,7 @@ const Preferences: React.FC = () => {
                 style={{ margin: 0, color: "#7D7D7D", fontSize: "18px", fontFamily: "DM Sans", fontWeight: 500, cursor: "pointer" }}
                 onClick={() => {
                   const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+                  sessionStorage.removeItem("justRegistered");
                   router.push(`/users/${storedUser.id}`);
                 }}
               >
