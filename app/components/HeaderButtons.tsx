@@ -2,14 +2,17 @@
 import { useRouter, usePathname } from "next/navigation";
 import { Button } from "antd";
 import { useEffect, useState, useRef } from "react";
-import { User } from "@/types/user";
+import { User, Preferences } from "@/types/user";
 import { useLogout } from "@/hooks/useLogout";
+import { useApi } from "@/hooks/useApi";
 
 export default function HeaderButtons() {
   const router = useRouter();
   const pathname = usePathname();
   const logout = useLogout();
+  const apiService = useApi();
   const [user, setUser] = useState<User | null>(null);
+  const [profilePicture, setProfilePicture] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -17,6 +20,18 @@ export default function HeaderButtons() {
     const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
     if (storedUser?.id) {
       setUser(storedUser);
+
+      const fetchProfilePicture = async () => {
+        try {
+          const prefs = await apiService.get<Preferences>(
+            `/users/${storedUser.id}/preferences`
+          );
+          setProfilePicture(prefs.profilePicture ?? null);
+        } catch {
+          setProfilePicture(null);
+        }
+      };
+      fetchProfilePicture();
     }
   }, [pathname]);
 
@@ -85,9 +100,9 @@ export default function HeaderButtons() {
         }}>
           {user?.username ?? ""}
         </span>
-        {user?.profilePicture ? (
+        {profilePicture ? (
           <img
-            src={user.profilePicture}
+            src={profilePicture}
             alt={user?.username ?? ""}
             style={{ width: "80px", height: "80px", borderRadius: "50%", objectFit: "cover" }}
           />
@@ -102,7 +117,7 @@ export default function HeaderButtons() {
             justifyContent: "center",
             fontSize: "32px",
           }}>
-            🌍
+            👤
           </div>
         )}
       </div>
