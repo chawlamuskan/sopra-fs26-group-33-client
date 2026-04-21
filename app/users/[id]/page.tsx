@@ -31,8 +31,7 @@ const UserDashboard: React.FC = () => {
   const [countryInfo, setCountryInfo] = useState<CountryInfo | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const position = { lat: 47.3769, lng: 8.5417 };
-  if (isAllowed === null) return null;
-  if (!isAllowed) return null;
+  
 
   // useEffect(() => {
   //   if (!isAllowed) return;
@@ -77,6 +76,9 @@ const UserDashboard: React.FC = () => {
       console.error("Error fetching country info:", error);
     }
   };
+
+  if (isAllowed === null) return null;
+  if (!isAllowed) return null;
 
   return (
     <>

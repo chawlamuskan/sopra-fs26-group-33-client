@@ -8,6 +8,7 @@ import Header from "@/components/Header";
 import LocationInput from "./LocationInput";
 import dayjs, { Dayjs } from "dayjs";
 import { ApiService } from "@/api/apiService"; // adjust path if needed
+import { useRouter } from "next/navigation";
 
 type TravelBoard = {
   id: number;
@@ -25,6 +26,7 @@ const TravelBoardsPage: React.FC = () => {
     const [isCreatedModalOpen, setIsCreatedModalOpen] = useState(false); // state to control if we need to display the modal to create new board 
     const [isJoinModalOpen, setIsJoinModalOpen] = useState(false); // state to control if we need to display the modal to join a new board
     const apiService = new ApiService();
+    const router = useRouter();
     
     const [boardName, setBoardName] = useState("");
     const [location, setLocation] = useState("");
@@ -287,7 +289,7 @@ const TravelBoardsPage: React.FC = () => {
               
               {/* See more */}
               <div className={styles.seeMoreRow}>
-                <a className={styles.seeMore}>see more</a>
+                <a className={styles.seeMore} style={{ cursor: "pointer" }} onClick={() => router.push(`/travelboards/${board.id}`)}>see more</a>
               </div>
             </div>
           ))}
