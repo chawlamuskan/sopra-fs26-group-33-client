@@ -8,6 +8,7 @@ import Header from "@/components/Header";
 import LocationInput from "./LocationInput";
 import dayjs, { Dayjs } from "dayjs";
 import { ApiService } from "@/api/apiService"; // adjust path if needed
+import { Preferences } from "@/types/user";
 
 type TravelBoard = {
   id: number;
@@ -17,6 +18,7 @@ type TravelBoard = {
   endDate: string | null;
   privacy: string;
   ownerId: number;
+  memberIds?: number[];
 };
 
 type InvitationNotification = {
@@ -45,6 +47,7 @@ const TravelBoardsPage: React.FC = () => {
     const [inviteCode, setInviteCode] = useState(""); // store the invite code for the board being created
 
     const [boards, setBoards] = useState<TravelBoard[]>([]); // for displayig TB
+    const [memberProfilePictures, setMemberProfilePictures] = useState<Record<number, string | null>>({});
 
     ///// for managing TB - only show delete button when in manage mode, only show rename button if user is owner /////
     const [isManageMode, setIsManageMode] = useState(false);    // for managing 
@@ -89,6 +92,61 @@ const TravelBoardsPage: React.FC = () => {
 
     const isBoardOwner = (board: TravelBoard) =>
       currentUserId !== null && Number(currentUserId) === Number(board.ownerId);
+
+    // user profile pictures for preview in TB cards - only fetch for max 4 users per board and only if not already fetched for another board, to minimize number of requests
+    const getPreviewMemberIds = (board: TravelBoard): number[] => {
+      const ids = [board.ownerId, ...(board.memberIds ?? [])].map((id) => Number(id));
+      const unique = Array.from(new Set(ids));
+      return unique.slice(0, 4);
+    };
+
+    const getTotalParticipantCount = (board: TravelBoard): number => {
+      const ids = [board.ownerId, ...(board.memberIds ?? [])].map((id) => Number(id));
+      return Array.from(new Set(ids)).length;
+    };
+
+    useEffect(() => {
+      if (!isAllowed || boards.length === 0) return;
+
+      const previewIds = Array.from(
+        new Set(
+          boards.flatMap((board) => getPreviewMemberIds(board)),
+        ),
+      );
+
+      const idsToFetch = previewIds.filter((id) => !(id in memberProfilePictures));
+      if (idsToFetch.length === 0) return;
+
+      let cancelled = false;
+
+      const fetchPictures = async () => {
+        const results = await Promise.all(
+          idsToFetch.map(async (userId) => {
+            try {
+              const prefs = await apiService.get<Preferences>(`/users/${userId}/preferences`);
+              return [userId, prefs.profilePicture ?? null] as const;
+            } catch {
+              return [userId, null] as const;
+            }
+          }),
+        );
+
+        if (cancelled) return;
+        setMemberProfilePictures((prev) => {
+          const next = { ...prev };
+          for (const [userId, picture] of results) {
+            next[userId] = picture;
+          }
+          return next;
+        });
+      };
+
+      fetchPictures();
+
+      return () => {
+        cancelled = true;
+      };
+    }, [boards, isAllowed, memberProfilePictures]);
 
     const handleSave = async () => {
     if (!boardName.trim()) {
@@ -418,7 +476,24 @@ const TravelBoardsPage: React.FC = () => {
               {/* Friends joining */}
               <div className={styles.friendsRow}>
                 <span className={styles.friendsLabel}>Friends joining:</span>
-                {/* placeholder empty circles for now */}
+                <div className={styles.memberCircles}>
+                  {getPreviewMemberIds(board).map((userId) => {
+                    const profilePicture = memberProfilePictures[userId];
+                    return profilePicture ? (
+                      <img
+                        key={userId}
+                        src={profilePicture}
+                        alt="member"
+                        className={styles.memberCircleImg}
+                      />
+                    ) : (
+                      <div key={userId} className={styles.memberCircleFallback}>👤</div>
+                    );
+                  })}
+                  {getTotalParticipantCount(board) > 4 && (
+                    <div className={styles.memberMore}>+{getTotalParticipantCount(board) - 4}</div>
+                  )}
+                </div>
               </div>
 
               {/* 6 empty place boxes */}
