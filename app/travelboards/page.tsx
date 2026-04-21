@@ -22,10 +22,12 @@ type TravelBoard = {
 
 const TravelBoardsPage: React.FC = () => {
     const isAllowed = useProtectedRoute(); 
+    const [modal, contextHolder] = Modal.useModal(); // for confirmation modals 
     const [isCreatedModalOpen, setIsCreatedModalOpen] = useState(false); // state to control if we need to display the modal to create new board 
     const [isJoinModalOpen, setIsJoinModalOpen] = useState(false); // state to control if we need to display the modal to join a new board
     const apiService = new ApiService();
     
+    ///// for creating a new board /////
     const [boardName, setBoardName] = useState("");
     const [location, setLocation] = useState("");
     const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null]>([null, null]);
@@ -34,21 +36,24 @@ const TravelBoardsPage: React.FC = () => {
 
     const [boards, setBoards] = useState<TravelBoard[]>([]); // for displayig TB
 
-
+    ///// for managing TB - only show delete button when in manage mode, only show rename button if user is owner /////
     const [isManageMode, setIsManageMode] = useState(false);    // for managing 
     const [currentUserId, setCurrentUserId] = useState<number | null>(null);  // for managing 
+    const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+    const [renameBoardId, setRenameBoardId] = useState<number | null>(null);
+    const [renameBoardName, setRenameBoardName] = useState("");
 
-    // for invitation code pop up 
+    ///// for invitation code pop up /////
     const [showCodePopup, setShowCodePopup] = useState(false);
     const [codeCopied, setCodeCopied] = useState(false);
 
-    // to search friends 
+    ///// to search friends /////
     const [friendSearch, setFriendSearch] = useState("");
     const [friendResults, setFriendResults] = useState<{id: number; username: string; avatar?: string}[]>([]);
     const [invitedFriends, setInvitedFriends] = useState<{id: number; username: string}[]>([]);
     const friendDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    // join button 
+    ///// join button /////
     const [joinCode, setJoinCode] = useState("");
     type Notification = { id: number; fromUsername: string; boardName: string; boardId: number };
     const [joinNotifications, setJoinNotifications] = useState<Notification[]>([]);
@@ -59,10 +64,22 @@ const TravelBoardsPage: React.FC = () => {
         if (!isAllowed) return;     // #35 ; #46 works for pop up too 
         fetchBoards();             // #36 fetch TB for display  
 
-        // get current user id from localStorage
-        const userId = localStorage.getItem("userId");
-        if (userId) setCurrentUserId(Number(userId));
+        // get current user id from stored user object
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+          try {
+            const parsedUser = JSON.parse(storedUser) as { id?: string | number };
+            if (parsedUser.id !== undefined && parsedUser.id !== null) {
+              setCurrentUserId(Number(parsedUser.id));
+            }
+          } catch {
+            setCurrentUserId(null);
+          }
+        }
       }, [isAllowed]);
+
+    const isBoardOwner = (board: TravelBoard) =>
+      currentUserId !== null && Number(currentUserId) === Number(board.ownerId);
 
     const handleSave = async () => {
     if (!boardName.trim()) {
@@ -91,8 +108,8 @@ const TravelBoardsPage: React.FC = () => {
       setDateRange([null, null]);
       setInviteCode("");
       setShowCodePopup(false);
-      setInvitedFriends([]); //Nina
-      setPrivacy("PRIVATE"); //Nina
+      setInvitedFriends([]);
+      setPrivacy("PRIVATE"); 
     } catch (err) {
       alert("Something went wrong. Please try again.");
       console.error(err);
@@ -109,23 +126,93 @@ const TravelBoardsPage: React.FC = () => {
       }
     };
 
-    const handleMinus = async (boardId: number, ownerId: number) => {
+    const manageConfirmBase = {
+      centered: true,
+      icon: null,
+      okButtonProps: {
+        style: {
+          background: "#0B0696",
+          border: "none",
+          borderRadius: "8px",
+          height: "36px",
+          padding: "0 1.2rem",
+        },
+      },
+      cancelButtonProps: {
+        style: {
+          borderRadius: "8px",
+          border: "1px solid #0B0696",
+          color: "#0B0696",
+          height: "36px",
+          padding: "0 1.2rem",
+        },
+      },
+    };
 
-      if (currentUserId === ownerId) {
-          // user is owner → delete the board
-          try {
+    const handleMinus = async (boardId: number, ownerId: number) => {
+      if (currentUserId !== null && Number(currentUserId) === Number(ownerId)) {
+        modal.confirm({
+          ...manageConfirmBase,
+          title: <span style={{ color: "#3333cc", fontWeight: 800 }}>Delete this board?</span>,
+          content: <span style={{ color: "#171717" }}>This will permanently delete the board for everyone.</span>,
+          okText: "Delete",
+          cancelText: "Cancel",
+          onOk: async () => {
+            try {
               await apiService.delete(`/travelboards/${boardId}`);
-              fetchBoards(); // refresh list
-          } catch (err) {
+              fetchBoards();
+            } catch (err) {
               alert("Could not delete board.");
               console.error(err);
-          }
+            }
+          },
+        });
       } else {
-          // user is not owner → just remove from view
-          setBoards(boards.filter(board => board.id !== boardId));
-        // Nina: we need to also delete the user as a member in the backend, not just frontend
+        modal.confirm({
+          ...manageConfirmBase,
+          title: <span style={{ color: "#3333cc", fontWeight: 800 }}>Leave this board?</span>,
+          content: <span style={{ color: "#171717" }}>You will no longer see this board unless invited again.</span>,
+          okText: "Leave",
+          cancelText: "Cancel",
+          onOk: async () => {
+            try {
+              await apiService.delete(`/travelboards/${boardId}/membership`);
+              fetchBoards();
+            } catch (err) {
+              alert("Could not leave board.");
+              console.error(err);
+            }
+          },
+        });
       }
-  };
+    };
+
+    const openRenameModal = (board: TravelBoard) => {
+      setRenameBoardId(board.id);
+      setRenameBoardName(board.name);
+      setIsRenameModalOpen(true);
+    };
+
+    const handleRenameBoard = async () => {
+      if (!renameBoardId) return;
+      if (!renameBoardName.trim()) {
+        alert("Board name cannot be empty.");
+        return;
+      }
+
+      try {
+        await apiService.put(`/travelboards/${renameBoardId}`, {
+          name: renameBoardName.trim(),
+        });
+        setIsRenameModalOpen(false);
+        setRenameBoardId(null);
+        setRenameBoardName("");
+        fetchBoards();
+      } catch (err) {
+        alert("Could not rename board.");
+        console.error(err);
+      }
+    };
 
     const generateInviteCode = () => {
       setShowCodePopup(true);
@@ -203,6 +290,7 @@ const TravelBoardsPage: React.FC = () => {
 
   return (
     <>
+    {contextHolder}
     <Header /> 
     <div className={styles.page}>
     <div className={styles.container}>
@@ -263,6 +351,27 @@ const TravelBoardsPage: React.FC = () => {
                   >
                       −
                   </button>
+              )}
+
+              {isManageMode && isBoardOwner(board) && (
+                <button
+                  onClick={() => openRenameModal(board)}
+                  style={{
+                    position: "absolute",
+                    top: "-10px",
+                    right: "-10px",
+                    borderRadius: "16px",
+                    border: "none",
+                    background: "#0B0696",
+                    color: "white",
+                    cursor: "pointer",
+                    fontSize: "12px",
+                    padding: "4px 8px",
+                    zIndex: 10,
+                  }}
+                >
+                  Rename
+                </button>
               )}
               
               {/* Top row: name + dates */}
@@ -548,6 +657,28 @@ const TravelBoardsPage: React.FC = () => {
               </div>
             </>
           )}
+        </Modal>
+
+        <Modal
+          title={<span style={{ color: "#3333cc" }}>Rename board</span>}
+          open={isRenameModalOpen}
+          onCancel={() => {
+            setIsRenameModalOpen(false);
+            setRenameBoardId(null);
+            setRenameBoardName("");
+          }}
+          onOk={handleRenameBoard}
+          okText="Save"
+          cancelText="Cancel"
+        >
+          <Input
+            className={styles.input}
+            placeholder="New board name"
+            value={renameBoardName}
+            onChange={(e) => setRenameBoardName(e.target.value)}
+            onPressEnter={handleRenameBoard}
+            autoFocus
+          />
         </Modal>
 
     </div>
