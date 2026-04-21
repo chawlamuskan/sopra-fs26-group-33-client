@@ -30,6 +30,7 @@ const TravelBoardsPage: React.FC = () => {
     const [location, setLocation] = useState("");
     const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null]>([null, null]);
     const [privacy, setPrivacy] = useState<"PRIVATE" | "FRIENDS" | "PUBLIC">("PRIVATE");
+    const [inviteCode, setInviteCode] = useState(""); // store the invite code for the board being created
 
     const [boards, setBoards] = useState<TravelBoard[]>([]); // for displayig TB
 
@@ -39,7 +40,6 @@ const TravelBoardsPage: React.FC = () => {
 
     // for invitation code pop up 
     const [showCodePopup, setShowCodePopup] = useState(false);
-    const [generatedCode, setGeneratedCode] = useState("");
     const [codeCopied, setCodeCopied] = useState(false);
 
     // to search friends 
@@ -73,9 +73,10 @@ const TravelBoardsPage: React.FC = () => {
     const payload = {
       name: boardName,
       location: location,
-      startDate: dateRange[0] ? dateRange[0].toISOString() : null,
-      endDate: dateRange[1] ? dateRange[1].toISOString() : null,
+      startDate: dateRange[0] ? dateRange[0].format("YYYY-MM-DD") : null,
+      endDate: dateRange[1] ? dateRange[1].format("YYYY-MM-DD") : null,
       privacy: privacy,
+      inviteCode: inviteCode || null,
       invitedUserIds: invitedFriends.map((f) => f.id),
     };
 
@@ -88,6 +89,8 @@ const TravelBoardsPage: React.FC = () => {
       setBoardName("");
       setLocation("");
       setDateRange([null, null]);
+      setInviteCode("");
+      setShowCodePopup(false);
       setInvitedFriends([]); //Nina
       setPrivacy("PRIVATE"); //Nina
     } catch (err) {
@@ -99,7 +102,7 @@ const TravelBoardsPage: React.FC = () => {
     // for displaying TB 
     const fetchBoards = async () => {
       try {
-        const data = await apiService.get<TravelBoard[]>("/travelboards/my");
+        const data = await apiService.get<TravelBoard[]>("/travelboards");
         setBoards(data);
       } catch (err) {
         console.error("Could not fetch boards:", err);
@@ -125,20 +128,21 @@ const TravelBoardsPage: React.FC = () => {
   };
 
     const generateInviteCode = () => {
-      // 8-char alphanumeric code — readable and short enough to type
-      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-      const code = Array.from({ length: 8 }, () =>
-        chars[Math.floor(Math.random() * chars.length)]
-      ).join("");
-      setGeneratedCode(code);
       setShowCodePopup(true);
       setCodeCopied(false);
-      // TODO: optionally POST this code to your backend so it can be validated on join
     };
 
     const handleCopyCode = async () => {
       try {
-        await navigator.clipboard.writeText(generatedCode);
+        let codeToCopy = inviteCode;
+        if (!codeToCopy.trim()) {
+          const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+          codeToCopy = Array.from({ length: 8 }, () =>
+            chars[Math.floor(Math.random() * chars.length)]
+          ).join("");
+          setInviteCode(codeToCopy);
+        }
+        await navigator.clipboard.writeText(codeToCopy);
         setCodeCopied(true);
       } catch (error) {
         setCodeCopied(false);
@@ -299,7 +303,17 @@ const TravelBoardsPage: React.FC = () => {
         <Modal
           title={<span style={{ color: "#3333cc" }}>Create a new board</span>}
           open={isCreatedModalOpen}
-          onCancel={() => setIsCreatedModalOpen(false)}
+          onCancel={() => {
+            setIsCreatedModalOpen(false);
+            // reset form
+            setBoardName("");
+            setLocation("");
+            setDateRange([null, null]);
+            setInviteCode("");
+            setShowCodePopup(false);
+            setInvitedFriends([]);
+            setPrivacy("PRIVATE");
+          }}
           footer={null}
         >
           <div className={styles.form}>
@@ -367,7 +381,7 @@ const TravelBoardsPage: React.FC = () => {
                     fontSize: "1.6rem", letterSpacing: "0.3em",
                     fontWeight: 800, color: "#0B0696", marginBottom: "0.75rem"
                   }}>
-                    {generatedCode}
+                    {inviteCode}
                   </div>
                   <Button
                     onClick={handleCopyCode}
@@ -376,7 +390,7 @@ const TravelBoardsPage: React.FC = () => {
                     {codeCopied ? "✓ Copied!" : "Copy code"}
                   </Button>
                   <p style={{ fontSize: "0.75rem", color: "#888", marginTop: "0.5rem" }}>
-                    Share this code with friends so they can join your board.
+                    Code is generated and saved only when you press Copy code.
                   </p>
                 </div>
               )}

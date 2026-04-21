@@ -72,12 +72,29 @@
   background: #e8e8e8 !important;
 }
 
+/* Normalize native and Ant inputs inside our input wrapper */
+.input,
+.input input,
 .input :global(.ant-input),
 .input :global(.ant-picker-input input) {
   background: #e8e8e8 !important;
   color: #171717 !important;
-  border: none !important;
+  border: 1.5px solid #d6cece !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
+
+/* Focus state with subtle ring */
+.input:focus,
+.input input:focus,
+.input:focus-visible,
+.input input:focus-visible,
+.input :global(.ant-input):focus {
+  outline: none !important;
+  border-color: #0B0696 !important;
+  box-shadow: 0 0 0 6px rgba(11, 6, 150, 0.08) !important;
+}
+
 
 .sectionLabel {
   font-weight: 700;
