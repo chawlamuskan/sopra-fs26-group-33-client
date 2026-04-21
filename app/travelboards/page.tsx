@@ -19,6 +19,16 @@ type TravelBoard = {
   ownerId: number;
 };
 
+type InvitationNotification = {
+  id: number;
+  boardId: number;
+  senderId: number;
+  receiverId: number;
+  status: string;
+  boardName: string;
+  senderUsername: string;
+};
+
 
 const TravelBoardsPage: React.FC = () => {
     const isAllowed = useProtectedRoute(); 
@@ -55,9 +65,8 @@ const TravelBoardsPage: React.FC = () => {
 
     ///// join button /////
     const [joinCode, setJoinCode] = useState("");
-    type Notification = { id: number; fromUsername: string; boardName: string; boardId: number };
-    const [joinNotifications, setJoinNotifications] = useState<Notification[]>([]);
-    const [joiningBoard, setJoiningBoard] = useState<{ name: string; location: string } | null>(null);
+    const [joinNotifications, setJoinNotifications] = useState<InvitationNotification[]>([]);
+    const [joinFeedback, setJoinFeedback] = useState<string | null>(null);
 
 
     useEffect(() => {
@@ -98,8 +107,25 @@ const TravelBoardsPage: React.FC = () => {
     };
 
     try {
-      await apiService.post("/travelboards", payload);
-      alert("Board created!");
+      const createdBoard = await apiService.post<TravelBoard>("/travelboards", payload);
+
+      let sentInvitationCount = 0;
+      if (createdBoard?.id && invitedFriends.length > 0) {
+        const invitationResults = await Promise.allSettled(
+          invitedFriends.map((friend) =>
+            apiService.post(`/travelboards/${createdBoard.id}/invitations`, {
+              receiverId: friend.id,
+            }),
+          ),
+        );
+        sentInvitationCount = invitationResults.filter((result) => result.status === "fulfilled").length;
+      }
+
+      if (invitedFriends.length > 0) {
+        alert(`Board created! Sent ${sentInvitationCount}/${invitedFriends.length} invitations.`);
+      } else {
+        alert("Board created!");
+      }
       fetchBoards(); // refresh the list of boards after creating a new one
       setIsCreatedModalOpen(false);
       // reset form
@@ -254,35 +280,39 @@ const TravelBoardsPage: React.FC = () => {
     // Fetch notifications when join modal opens
     const handleOpenJoin = async () => {
       setIsJoinModalOpen(true);
+      setJoinFeedback(null);
       try {
-        const data = await apiService.get<Notification[]>("/travelboards/invitations");
+        const data = await apiService.get<InvitationNotification[]>("/invitations");
         setJoinNotifications(data);
       } catch { setJoinNotifications([]); }
     };
 
-    const handleAcceptInvite = async (notif: Notification) => {
+    const handleAcceptInvite = async (notif: InvitationNotification) => {
       try {
-        await apiService.post(`/travelboards/${notif.boardId}/accept`, {});
+        await apiService.put(`/invitations/${notif.id}/accept`, {});
         setJoinNotifications((prev) => prev.filter((n) => n.id !== notif.id));
+        setJoinFeedback(`You joined \"${notif.boardName}\".`);
         fetchBoards();
       } catch { alert("Could not accept invite."); }
     };
 
-    const handleDeclineInvite = async (notif: Notification) => {
+    const handleDeclineInvite = async (notif: InvitationNotification) => {
       try {
-        await apiService.post(`/travelboards/${notif.boardId}/decline`, {});
+        await apiService.put(`/invitations/${notif.id}/decline`, {});
         setJoinNotifications((prev) => prev.filter((n) => n.id !== notif.id));
+        setJoinFeedback(`You declined the invitation to \"${notif.boardName}\".`);
       } catch { alert("Could not decline invite."); }
     };
 
     const handleJoinByCode = async () => {
       if (!joinCode.trim()) return;
       try {
-        const board = await apiService.post<{ name: string; location: string }>(
-          "/travelboards/join-by-code",
-          { code: joinCode.trim() }
+        await apiService.post(
+          `/travelboards/join?inviteCode=${encodeURIComponent(joinCode.trim())}`,
+          {},
         );
-        setJoiningBoard(board);
+        setJoinFeedback("You joined a board via invite code.");
+        setJoinCode("");
         fetchBoards();
       } catch { alert("Invalid or expired code."); }
     };
@@ -582,9 +612,18 @@ const TravelBoardsPage: React.FC = () => {
         <Modal
           title={<span style={{ color: "#3333cc", fontWeight: 800, fontSize: "1.4rem" }}>Join a board</span>}
           open={isJoinModalOpen}
-          onCancel={() => { setIsJoinModalOpen(false); setJoinCode(""); setJoiningBoard(null); }}
+          onCancel={() => { setIsJoinModalOpen(false); setJoinCode(""); setJoinFeedback(null); }}
           footer={null}
         >
+          {joinFeedback && (
+            <div style={{
+              background: "#f0eeff", borderRadius: "16px", padding: "0.75rem 1rem",
+              border: "1.5px solid #3333cc", marginBottom: "1rem", color: "#3333cc", fontWeight: 700
+            }}>
+              {joinFeedback}
+            </div>
+          )}
+
           {/* Notifications section */}
           <p style={{ color: "#3333cc", fontWeight: 700, fontSize: "1rem", marginBottom: "0.75rem" }}>Notifications</p>
 
@@ -602,7 +641,7 @@ const TravelBoardsPage: React.FC = () => {
                     background: "#d6cece", flexShrink: 0
                   }} />
                   <span style={{ flex: 1, fontSize: "0.9rem", fontStyle: "italic" }}>
-                    <strong>{notif.fromUsername}</strong> invited you to &quot;{notif.boardName}&quot;
+                    <strong>{notif.senderUsername}</strong> invited you to &quot;{notif.boardName}&quot;
                   </span>
                   <Button
                     size="small"
@@ -622,41 +661,25 @@ const TravelBoardsPage: React.FC = () => {
           {/* Use a code section */}
           <p style={{ color: "#3333cc",fontWeight: 700, fontSize: "1rem", marginBottom: "0.75rem" }}>Use a code</p>
 
-          {joiningBoard ? (
-            <div style={{
-              background: "#f0eeff", borderRadius: "16px", padding: "1rem",
-              border: "1.5px solid #3333cc", marginBottom: "1rem"
-            }}>
-              <p style={{ fontWeight: 700, color: "#3333cc", margin: "0 0 0.25rem" }}>
-                ✓ Joined: {joiningBoard.name}
-              </p>
-              {joiningBoard.location && (
-                <p style={{ color: "#555", margin: 0, fontSize: "0.9rem" }}>{joiningBoard.location}</p>
-              )}
-            </div>
-          ) : (
-            <>
-              <input
-                value={joinCode}
-                onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                placeholder="Enter code…"
-                maxLength={8}
-                style={{
-                  width: "100%", padding: "10px 16px", borderRadius: "20px",
-                  background: "#e8e8e8", border: "none", fontSize: "1rem",
-                  letterSpacing: "0.15em", boxSizing: "border-box", marginBottom: "0.75rem"
-                }}
-              />
-              <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                <Button
-                  onClick={handleJoinByCode}
-                  style={{ background: "#0B0696", color: "white", border: "none", borderRadius: "20px", padding: "0 1.5rem", height: "40px" }}
-                >
-                  Confirm
-                </Button>
-              </div>
-            </>
-          )}
+          <input
+            value={joinCode}
+            onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+            placeholder="Enter code…"
+            maxLength={8}
+            style={{
+              width: "100%", padding: "10px 16px", borderRadius: "20px",
+              background: "#e8e8e8", border: "none", fontSize: "1rem",
+              letterSpacing: "0.15em", boxSizing: "border-box", marginBottom: "0.75rem"
+            }}
+          />
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <Button
+              onClick={handleJoinByCode}
+              style={{ background: "#0B0696", color: "white", border: "none", borderRadius: "20px", padding: "0 1.5rem", height: "40px" }}
+            >
+              Confirm
+            </Button>
+          </div>
         </Modal>
 
         <Modal
