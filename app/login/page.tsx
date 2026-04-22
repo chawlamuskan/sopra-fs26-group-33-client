@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { User } from "@/types/user";
-import { Form, Input } from "antd";
+import { Form, Input, App } from "antd";
 import styles from "@/styles/login.module.css";
 
 interface FormFieldProps {
@@ -14,6 +14,7 @@ interface FormFieldProps {
 const Login: React.FC = () => {
   const router = useRouter();
   const apiService = useApi();
+  const { message } = App.useApp();
   const [form] = Form.useForm();
 
   const { set: setToken } = useLocalStorage<string>("token", "");
@@ -33,13 +34,15 @@ const Login: React.FC = () => {
         setToken(response.token);
         localStorage.setItem("user", JSON.stringify(response));
       }
+
+      message.success("Login successful!")
       router.push(`/users/${response.id}`);
-    } catch (error) {
-      if (error instanceof Error) {
-        alert(`Something went wrong during the login:\n${error.message}`);
-      } else {
-        console.error("An unknown error occurred during login.");
-      }
+    } catch (error: any) {
+      const backendMessage = 
+        error?.response?.data?.detail ||
+        error?.message ||
+        "An unknown error occurred during registration.";
+      message.error(`${error.message}`);
     }
   };
 
