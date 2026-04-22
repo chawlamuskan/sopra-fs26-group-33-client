@@ -64,7 +64,7 @@ export default function Home() {
   <>
     <Header />
     <main className={styles.main}>
-      <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!} language="en">
+      <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!} language="en" libraries={["places"]}>
         <div style={{ height: "100vh", width: "100vw" }}>
           <Map
             mapId="3acb2fe9409f1015af87f375"
