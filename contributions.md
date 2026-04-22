@@ -87,15 +87,15 @@ reason).
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
 | **[@chawlamuskan]** | [10.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/766c07f2528c63eb6e2b552b197ee70c07f1b5fa] | [created manage button, can manage boards, delete them via minus sign on board, mark as done #39] | [the user can manage his boards and delete them - need to connect to backend] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-| **[@nadiapan4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-| **[@despoinapantazi]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-| **[@nsavas8]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-| **[@yalini-siva]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+|                    | [14.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/881051ae89a83ae5d00327324ecc92dc9dd0fece] | [created the shar code button on the creation page and pop up of unique 6 digit code #49] | [the user now can share a unique code to invite friends to his travel board] |
+| **[@nadiapan4]** | [19.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/079722e8d1ad028b0bfa9db88eefa884fd9fa66f] | [Made the preference page accessible only if you are in the process of registering + minor adjustments] | [Preferences page should be accessible only if you are registering, because if you want to modify things you will have the settings in the future.] |
+|                    | [19.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/1cbf86de11dd7ea608e38727336f7888622b5e36] | [Backend for the Country Overview Page.] | [Allows users to view the actual countries that they chose in the preferences page as countries that they have visited and countries that they want to visit.] |
+| **[@despoinapantazi]** | [21.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/c274890eff7e2e0db2efcb8bc444f60320b943c1] | [Fine-tuning backend files for Preferences and User] | [Checks for email format - Checks for user allowes to create preferences - Finalize testing files after changes in backend] |
+|                    | [21.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/8b8256b6c76ef33f4f1b6319b1bc6d441c59c776] | [Testing for Preferences] | [Controller and ServiceIntegration tests for creation of preferences] |
+| **[@nsavas8]** | [19.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/f808c7b4216a3554d37468d456c4e2241013404e] | [Changed the page protection, so its connected to the backend #98] | [We had the issue, that the restricted access was only checking for users in the local storage, but we wanted to see in the backend if the user really exists. Furthermore there were bugs to fix regarding the restricted access] |
+|                    | [19.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/370761df3ca86cbecd997cd8c4b95748b6ea79c1] | [created new page for specific travelboard, so places can get added and created a plus button to add places #42 #102] | [The main functionality of the travel boards is to add places to it to plan a trip] |
+| **[@yalini-siva]** | [17.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/23fd58f0df52e4177c4eb92cf265c5893c103259] | [Added user search by username functionality #216, #174] | [Allows users to find other registered users] |
+|                    | [19.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/4d2d1607e0df7dad043493b9a9263e81a4f7c91b] | [Added get friend list and remove friend functionality #219/#131, #220, #238] | [Allows users to manage friendships] |
 
 
 ---
@@ -104,7 +104,7 @@ reason).
 
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
-| **[@chawlamuskan]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@chawlamuskan]** | [14.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/eeb2a0174077d8de3e475287b9f284525e02e76a] | [created join modal pop up with restricted access #52 #53] | [user can see who invited him to a travel baord and accept the invitation or enter the code to join a travelboard ] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@nadiapan4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
