@@ -9,6 +9,7 @@ import LocationInput from "./LocationInput";
 import dayjs, { Dayjs } from "dayjs";
 import { ApiService } from "@/api/apiService"; // adjust path if needed
 import { Preferences } from "@/types/user";
+import { SearchOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
 
 
@@ -614,13 +615,11 @@ const TravelBoardsPage: React.FC = () => {
             </div>
 
             <div style={{ position: "relative", marginTop: "0.5rem" }}>
-              <input
-                style={{
-                  width: "100%", padding: "8px 12px", borderRadius: "20px",
-                  background: "#e8e8e8", border: "none", boxSizing: "border-box",
-                  fontSize: "0.9rem"
-                }}
-                placeholder="Search friends by username or email…"
+              <Input
+                placeholder="Search by username"
+                variant="borderless"
+                prefix={<SearchOutlined style={{ color: "#7D7D7D", marginRight: "4px" }} />}
+                style={{ background: "#e8e8e8", borderRadius: "20px", width: "100%" }}
                 value={friendSearch}
                 onChange={(e) => {
                   setFriendSearch(e.target.value);
@@ -629,14 +628,14 @@ const TravelBoardsPage: React.FC = () => {
                 }}
               />
               {friendResults.length > 0 && (
-                <ul style={{
+                <div style={{
                   position: "absolute", top: "100%", left: 0, right: 0,
-                  background: "#fff", border: "1px solid #d6cece",
-                  borderRadius: "12px", listStyle: "none", margin: 0, padding: "0.4rem 0",
-                  zIndex: 100, boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+                  background: "white", borderRadius: "8px",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                  maxHeight: "200px", overflowY: "auto", zIndex: 100,
                 }}>
                   {friendResults.map((f) => (
-                    <li
+                    <div
                       key={f.id}
                       onMouseDown={() => {
                         if (!invitedFriends.find((x) => x.id === f.id)) {
@@ -645,12 +644,25 @@ const TravelBoardsPage: React.FC = () => {
                         setFriendSearch("");
                         setFriendResults([]);
                       }}
-                      style={{ padding: "8px 16px", cursor: "pointer", fontSize: "0.9rem" }}
+                      style={{
+                        display: "flex", alignItems: "center", gap: "12px",
+                        padding: "10px 16px", cursor: "pointer",
+                        borderBottom: "1px solid #f0f0f0",
+                      }}
                     >
-                      {f.username}
-                    </li>
+                      <div style={{
+                        width: 36, height: 36, borderRadius: "50%",
+                        background: "#f0f0f0", display: "flex",
+                        alignItems: "center", justifyContent: "center", fontSize: 16,
+                      }}>
+                        👤
+                      </div>
+                      <span style={{ fontFamily: "DM Sans", fontSize: "16px", color: "#000" }}>
+                        {f.username}
+                      </span>
+                    </div>
                   ))}
-                </ul>
+                </div>
               )}
             </div>
 

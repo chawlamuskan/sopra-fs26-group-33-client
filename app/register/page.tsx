@@ -24,6 +24,7 @@ const Register: React.FC = () => {
       if (response.token) {
         setToken(response.token);
         localStorage.setItem("user", JSON.stringify(response));
+        sessionStorage.setItem("justRegistered", "true");
       }
       router.push("/preferences");
     } catch (error) {
