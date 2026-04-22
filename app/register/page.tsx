@@ -29,12 +29,12 @@ const Register: React.FC = () => {
       }
       message.success("Registration successful!")
       router.push("/preferences");
-    } catch (error: any) {
-      const backendMessage = 
-        error?.response?.data?.detail ||
-        error?.message ||
-        "An unknown error occurred during registration.";
-      message.error(`${error.message}`);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        message.error(error.message);
+      } else {
+        message.error("An unknown error occurred during registration.");
+      }
     }
   };
 
