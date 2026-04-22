@@ -2,6 +2,7 @@
 
 import styles from "./travelboards.module.css";
 import { useRef, useState } from "react";
+import { Input } from "antd";
 
 type Suggestion = { label: string; placeId: string };
 
@@ -59,9 +60,8 @@ const LocationInput = ({
 
   return (
     <div style={{ position: "relative" }}>
-      <input
+      <Input
         className={styles.input}
-        style={{ padding: "8px 12px", width: "100%", boxSizing: "border-box" }}
         placeholder="Choose location"
         value={value}
         onChange={handleChange}
