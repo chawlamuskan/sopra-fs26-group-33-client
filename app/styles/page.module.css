@@ -30,8 +30,16 @@
 .main {
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 8px;
   grid-row-start: 2;
+}
+
+.title {
+  color: #0B0696;
+  font-size: 42px;
+  font-family: DM Sans;
+  font-weight: 700;
+  word-wrap: break-word
 }
 
 .main ol {
