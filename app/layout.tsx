@@ -23,7 +23,7 @@ const dmSans = DM_Sans({
 
 
 export const metadata: Metadata = {
-  title: "Student XX-XXX-XXX",
+  title: "Worldtura",
   description: "sopra-fs26-template-client",
 };
 
@@ -44,7 +44,7 @@ export default function RootLayout({
             token: {
               colorPrimary: "#22426b",
               borderRadius: 8,
-              colorText: "#fff",
+              colorText: "#000000",
               fontSize: 16,
               colorBgContainer: "#16181D",
             },
