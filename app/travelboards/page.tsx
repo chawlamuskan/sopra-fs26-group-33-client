@@ -66,20 +66,25 @@ const TravelBoardsPage: React.FC = () => {
 
     ///// to search friends /////
     const [friendSearch, setFriendSearch] = useState("");
-    const [friendResults, setFriendResults] = useState<{id: number; username: string; avatar?: string}[]>([]);
+    const [friendResults, setFriendResults] = useState<{id: number; username: string; avatar: string | null}[]>([]);
     const [invitedFriends, setInvitedFriends] = useState<{id: number; username: string}[]>([]);
     const friendDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const [allFriends, setAllFriends] = useState<{id: number; username: string; avatar: string | null}[]>([]);
 
     ///// join button /////
     const [joinCode, setJoinCode] = useState("");
     const [joinNotifications, setJoinNotifications] = useState<InvitationNotification[]>([]);
     const [joinFeedback, setJoinFeedback] = useState<string | null>(null);
+    const [notifAvatars, setNotifAvatars] = useState<Record<number, string | null>>({});
+    const [notifCount, setNotifCount] = useState<number>(0);
+
+
 
 
     useEffect(() => {
         if (!isAllowed) return;     // #35 ; #46 works for pop up too 
         fetchBoards();             // #36 fetch TB for display  
-
+        fetchNotifCount();
         // get current user id from stored user object
         const storedUser = localStorage.getItem("user");
         if (storedUser) {
@@ -326,17 +331,66 @@ const TravelBoardsPage: React.FC = () => {
     };
 
     // for friends search 
-    const searchFriends = async (query: string) => {
-      if (query.length < 1) { setFriendResults([]); return; }
+    const handleOpenCreate = async () => {
+      setIsCreatedModalOpen(true);
+      if (allFriends.length > 0) return;
+
       try {
-        // Adjust endpoint to whatever your backend exposes
-        const results = await apiService.get<{id: number; username: string}[]>(
-          `/travelboards/join`
+        const storedUser = localStorage.getItem("user");
+        const parsedUser = storedUser ? JSON.parse(storedUser) as { id?: number } : {};
+        if (!parsedUser.id) return;
+        const myId = Number(parsedUser.id);
+
+        const allUsers = await apiService.get<{ id: number; username: string }[]>("/users");
+
+        let myFriendIds: number[] = [];
+        try {
+          const myPrefs = await apiService.get<{ friends?: number[] }>(`/users/${myId}/preferences`);
+          myFriendIds = (myPrefs.friends ?? []).map(Number);
+        } catch {
+          myFriendIds = [];
+        }
+
+        const mutualIds = new Set<number>(myFriendIds);
+        await Promise.all(
+          allUsers
+            .filter((u) => Number(u.id) !== myId)
+            .map(async (u) => {
+              try {
+                const theirPrefs = await apiService.get<{ friends?: number[] }>(`/users/${u.id}/preferences`);
+                const theirFriends = (theirPrefs.friends ?? []).map(Number);
+                if (theirFriends.includes(myId)) mutualIds.add(Number(u.id));
+              } catch { /* no preferences yet */ }
+            })
         );
-        setFriendResults(results);
+
+        const friendUsers = allUsers.filter((u) => mutualIds.has(Number(u.id)));
+
+        // fetch profile pictures for all friends in parallel
+        const friendsWithAvatars = await Promise.all(
+          friendUsers.map(async (u) => {
+            try {
+              const prefs = await apiService.get<{ profilePicture?: string | null }>(`/users/${u.id}/preferences`);
+              return { id: Number(u.id), username: u.username, avatar: prefs.profilePicture ?? null };
+            } catch {
+              return { id: Number(u.id), username: u.username, avatar: null };
+            }
+          })
+        );
+
+        setAllFriends(friendsWithAvatars);
       } catch {
-        setFriendResults([]);
+        setAllFriends([]);
       }
+    };
+
+    const searchFriends = (query: string) => {
+      if (query.length < 1) { setFriendResults([]); return; }
+      setFriendResults(
+        allFriends.filter((f) =>
+          f.username.toLowerCase().includes(query.toLowerCase())
+        )
+      );
     };
 
     // Fetch notifications when join modal opens
@@ -346,14 +400,30 @@ const TravelBoardsPage: React.FC = () => {
       try {
         const data = await apiService.get<InvitationNotification[]>("/invitations");
         setJoinNotifications(data);
-      } catch { setJoinNotifications([]); }
+
+        // fetch profile pictures for all senders in parallel
+        const avatarEntries = await Promise.all(
+          data.map(async (notif) => {
+            try {
+              const prefs = await apiService.get<{ profilePicture?: string | null }>(`/users/${notif.senderId}/preferences`);
+              return [notif.senderId, prefs.profilePicture ?? null] as const;
+            } catch {
+              return [notif.senderId, null] as const;
+            }
+          })
+        );
+        setNotifAvatars(Object.fromEntries(avatarEntries));
+      } catch {
+        setJoinNotifications([]);
+      }
     };
 
     const handleAcceptInvite = async (notif: InvitationNotification) => {
       try {
         await apiService.put(`/invitations/${notif.id}/accept`, {});
         setJoinNotifications((prev) => prev.filter((n) => n.id !== notif.id));
-        setJoinFeedback(`You joined \"${notif.boardName}\".`);
+        setNotifCount((prev) => Math.max(0, prev - 1)); // ← add
+        setJoinFeedback(`You joined "${notif.boardName}".`);
         fetchBoards();
       } catch { alert("Could not accept invite."); }
     };
@@ -362,7 +432,8 @@ const TravelBoardsPage: React.FC = () => {
       try {
         await apiService.put(`/invitations/${notif.id}/decline`, {});
         setJoinNotifications((prev) => prev.filter((n) => n.id !== notif.id));
-        setJoinFeedback(`You declined the invitation to \"${notif.boardName}\".`);
+        setNotifCount((prev) => Math.max(0, prev - 1)); // ← add
+        setJoinFeedback(`You declined the invitation to "${notif.boardName}".`);
       } catch { alert("Could not decline invite."); }
     };
 
@@ -379,6 +450,15 @@ const TravelBoardsPage: React.FC = () => {
       } catch { alert("Invalid or expired code."); }
     };
 
+    const fetchNotifCount = async () => {
+      try {
+        const data = await apiService.get<InvitationNotification[]>("/invitations");
+        setNotifCount(data.length);
+      } catch {
+        setNotifCount(0);
+      }
+    };
+
 
   return (
     <>
@@ -393,7 +473,7 @@ const TravelBoardsPage: React.FC = () => {
         <div className={styles.buttons}>
 
             {/* #37 open modal */}
-          <Button className={styles.btn} onClick={() => setIsCreatedModalOpen(true)}>
+          <Button className={styles.btn} onClick={handleOpenCreate}>
             Create
           </Button>
           <Button 
@@ -404,7 +484,29 @@ const TravelBoardsPage: React.FC = () => {
               {isManageMode ? "Done" : "Manage"}
           </Button>
           {/* #38 join modal */}
-          <Button className={styles.btn} onClick={handleOpenJoin}>Join</Button>
+          <div style={{ position: "relative", display: "inline-block" }}>
+            <Button className={styles.btn} onClick={handleOpenJoin}>Join</Button>
+            {notifCount > 0 && (
+              <div style={{
+                position: "absolute",
+                top: "-8px",
+                right: "-8px",
+                background: "#0B0696",
+                color: "white",
+                borderRadius: "50%",
+                width: "18px",
+                height: "18px",
+                fontSize: "11px",
+                fontWeight: 700,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                pointerEvents: "none",
+              }}>
+                {notifCount > 9 ? "9+" : notifCount}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -623,8 +725,7 @@ const TravelBoardsPage: React.FC = () => {
                 value={friendSearch}
                 onChange={(e) => {
                   setFriendSearch(e.target.value);
-                  if (friendDebounce.current) clearTimeout(friendDebounce.current);
-                  friendDebounce.current = setTimeout(() => searchFriends(e.target.value), 300);
+                  searchFriends(e.target.value);
                 }}
               />
               {friendResults.length > 0 && (
@@ -650,13 +751,19 @@ const TravelBoardsPage: React.FC = () => {
                         borderBottom: "1px solid #f0f0f0",
                       }}
                     >
-                      <div style={{
-                        width: 36, height: 36, borderRadius: "50%",
-                        background: "#f0f0f0", display: "flex",
-                        alignItems: "center", justifyContent: "center", fontSize: 16,
-                      }}>
-                        👤
-                      </div>
+                      {f.avatar ? (
+                        <img
+                          src={f.avatar}
+                          alt={f.username}
+                          style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }}
+                        />
+                      ) : (
+                        <div style={{
+                          width: 36, height: 36, borderRadius: "50%", background: "#f0f0f0",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          fontSize: 16, flexShrink: 0,
+                        }}>👤</div>
+                      )}
                       <span style={{ fontFamily: "DM Sans", fontSize: "16px", color: "#000" }}>
                         {f.username}
                       </span>
@@ -726,10 +833,19 @@ const TravelBoardsPage: React.FC = () => {
                   display: "flex", alignItems: "center", gap: "0.75rem",
                   background: "#f4ebeb", borderRadius: "30px", padding: "0.5rem 1rem"
                 }}>
-                  <div style={{
-                    width: "36px", height: "36px", borderRadius: "50%",
-                    background: "#d6cece", flexShrink: 0
-                  }} />
+                  {notifAvatars[notif.senderId] ? (
+                    <img
+                      src={notifAvatars[notif.senderId]!}
+                      alt={notif.senderUsername}
+                      style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }}
+                    />
+                  ) : (
+                    <div style={{
+                      width: "36px", height: "36px", borderRadius: "50%",
+                      background: "#d6cece", flexShrink: 0,
+                      display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16,
+                    }}>👤</div>
+                  )}
                   <span style={{ flex: 1, fontSize: "0.9rem", fontStyle: "italic" }}>
                     <strong>{notif.senderUsername}</strong> invited you to &quot;{notif.boardName}&quot;
                   </span>
