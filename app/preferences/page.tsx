@@ -109,15 +109,6 @@ const Preferences: React.FC = () => {
   const handleEndRegistration = async (values: FormFieldProps) => {
     try {
       const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-<<<<<<< nadia
-      const payload = { ...values, profilePicture: imageBase64, friends: selectedFriends};
-      const response = await apiService.put<User>(`/users/${storedUser.id}`, payload);
-      if (response.token) {
-        setToken(response.token);
-        localStorage.setItem("user", JSON.stringify(response));
-      }
-      sessionStorage.removeItem("justRegistered");
-=======
 
       await apiService.post(`/users/${storedUser.id}/preferences`, {
         bio: values.bio ?? null,
@@ -127,7 +118,6 @@ const Preferences: React.FC = () => {
         friends: selectedFriends.map((id) => Number(id)) ?? null
       });
 
->>>>>>> main
       router.push(`/users/${storedUser.id}`);
     } catch (error) {
       if (error instanceof Error) {
