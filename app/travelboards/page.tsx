@@ -76,13 +76,15 @@ const TravelBoardsPage: React.FC = () => {
     const [joinNotifications, setJoinNotifications] = useState<InvitationNotification[]>([]);
     const [joinFeedback, setJoinFeedback] = useState<string | null>(null);
     const [notifAvatars, setNotifAvatars] = useState<Record<number, string | null>>({});
+    const [notifCount, setNotifCount] = useState<number>(0);
+
 
 
 
     useEffect(() => {
         if (!isAllowed) return;     // #35 ; #46 works for pop up too 
         fetchBoards();             // #36 fetch TB for display  
-
+        fetchNotifCount();
         // get current user id from stored user object
         const storedUser = localStorage.getItem("user");
         if (storedUser) {
@@ -420,7 +422,8 @@ const TravelBoardsPage: React.FC = () => {
       try {
         await apiService.put(`/invitations/${notif.id}/accept`, {});
         setJoinNotifications((prev) => prev.filter((n) => n.id !== notif.id));
-        setJoinFeedback(`You joined \"${notif.boardName}\".`);
+        setNotifCount((prev) => Math.max(0, prev - 1)); // ← add
+        setJoinFeedback(`You joined "${notif.boardName}".`);
         fetchBoards();
       } catch { alert("Could not accept invite."); }
     };
@@ -429,7 +432,8 @@ const TravelBoardsPage: React.FC = () => {
       try {
         await apiService.put(`/invitations/${notif.id}/decline`, {});
         setJoinNotifications((prev) => prev.filter((n) => n.id !== notif.id));
-        setJoinFeedback(`You declined the invitation to \"${notif.boardName}\".`);
+        setNotifCount((prev) => Math.max(0, prev - 1)); // ← add
+        setJoinFeedback(`You declined the invitation to "${notif.boardName}".`);
       } catch { alert("Could not decline invite."); }
     };
 
@@ -444,6 +448,15 @@ const TravelBoardsPage: React.FC = () => {
         setJoinCode("");
         fetchBoards();
       } catch { alert("Invalid or expired code."); }
+    };
+
+    const fetchNotifCount = async () => {
+      try {
+        const data = await apiService.get<InvitationNotification[]>("/invitations");
+        setNotifCount(data.length);
+      } catch {
+        setNotifCount(0);
+      }
     };
 
 
@@ -471,7 +484,29 @@ const TravelBoardsPage: React.FC = () => {
               {isManageMode ? "Done" : "Manage"}
           </Button>
           {/* #38 join modal */}
-          <Button className={styles.btn} onClick={handleOpenJoin}>Join</Button>
+          <div style={{ position: "relative", display: "inline-block" }}>
+            <Button className={styles.btn} onClick={handleOpenJoin}>Join</Button>
+            {notifCount > 0 && (
+              <div style={{
+                position: "absolute",
+                top: "-8px",
+                right: "-8px",
+                background: "#0B0696",
+                color: "white",
+                borderRadius: "50%",
+                width: "18px",
+                height: "18px",
+                fontSize: "11px",
+                fontWeight: 700,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                pointerEvents: "none",
+              }}>
+                {notifCount > 9 ? "9+" : notifCount}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
