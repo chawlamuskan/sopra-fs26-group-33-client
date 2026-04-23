@@ -154,6 +154,21 @@ export default function CountryOverview() {
       <>
         <Header />
         <main className={styles.main}>
+          <div style={{ display: "flex", alignItems: "center", gap: "32px", paddingLeft: "28px" }}>
+          <h1 className={styles.title} style={{ margin: 0 }}>Countries Overview</h1>
+          
+          <div style={{ display: "flex", gap: "24px", alignItems: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div style={{ width: 30, height: 30, backgroundColor: "#0B0696", borderRadius: "4px" }} />
+              <span style={{ color: "#0B0696", fontFamily: "DM Sans", fontWeight: 600 }}>Visited</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div style={{ width: 30, height: 30, backgroundColor: "#5AA7C3", borderRadius: "4px" }} />
+              <span style={{ color: "#0B0696", fontFamily: "DM Sans", fontWeight: 600 }}>Want to Visit</span>
+            </div>
+          </div>
+        </div>
+
           <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!} language="en">
             <div style={{ height: "100vh", width: "100vw" }}>
               <Map
@@ -212,7 +227,7 @@ export default function CountryOverview() {
                         textAlign: "center",
                         marginBottom: "8px"
                       }}>
-                        Please <span style={{ textDecoration: "underline", cursor: "pointer" }} onClick={() => router.push("/login")}>Login</span> or <span style={{ textDecoration: "underline", cursor: "pointer" }} onClick={() => router.push("/register")}>Register</span> to view
+                        Content coming soon
                       </div>
                       <p style={{ textAlign: "center", fontWeight: "bold" }}>Community Posts</p>
                       <div style={{
@@ -221,7 +236,7 @@ export default function CountryOverview() {
                         padding: "10px",
                         textAlign: "center"
                       }}>
-                        Please <span style={{ textDecoration: "underline", cursor: "pointer" }} onClick={() => router.push("/login")}>Login</span> or <span style={{ textDecoration: "underline", cursor: "pointer" }} onClick={() => router.push("/register")}>Register</span> to view
+                        Content coming soon
                       </div>
                     </div>
                   </div>

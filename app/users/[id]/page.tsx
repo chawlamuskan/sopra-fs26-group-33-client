@@ -12,6 +12,7 @@ import {
   APIProvider,
   Map,
   MapMouseEvent,
+  useMap,
 } from "@vis.gl/react-google-maps";
 import styles from "@/styles/page.module.css";
 
@@ -23,6 +24,22 @@ interface CountryInfo {
   languages: string[];
 }
 
+// Separate component to access the map instance for zoom tracking
+const ZoomTracker: React.FC<{ onZoomChange: (zoom: number) => void }> = ({ onZoomChange }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!map) return;
+    const listener = map.addListener("zoom_changed", () => {
+      const zoom = map.getZoom();
+      if (zoom !== undefined) onZoomChange(zoom);
+    });
+    return () => google.maps.event.removeListener(listener);
+  }, [map, onZoomChange]);
+
+  return null;
+};
+
 const UserDashboard: React.FC = () => {
   const router = useRouter();
   const apiService = useApi();
@@ -30,16 +47,14 @@ const UserDashboard: React.FC = () => {
   const isAllowed = useProtectedRoute();
   const [countryInfo, setCountryInfo] = useState<CountryInfo | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentZoom, setCurrentZoom] = useState<number>(5);
   const position = { lat: 47.3769, lng: 8.5417 };
-  
 
-  // useEffect(() => {
-  //   if (!isAllowed) return;
-  //   const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-  //   if (storedUser?.id) {
-  //     setCurrentUser(storedUser);
-  //   }
-  // }, [isAllowed]);
+  // Country name labels on Google Maps disappear around zoom level 6-7
+  const COUNTRY_LABEL_MAX_ZOOM = 6;
+
+  if (isAllowed === null) return null;
+  if (!isAllowed) return null;
 
   const fetchCountryInfo = async (countryName: string) => {
     const countryRes = await fetch(
@@ -61,6 +76,9 @@ const UserDashboard: React.FC = () => {
   };
 
   const handleClick = async (event: MapMouseEvent) => {
+    // Don't fetch or show popup if zoomed in too far
+    if (currentZoom > COUNTRY_LABEL_MAX_ZOOM) return;
+
     if (!event.detail.latLng) return;
     const lat = event.detail.latLng.lat;
     const lng = event.detail.latLng.lng;
@@ -77,8 +95,7 @@ const UserDashboard: React.FC = () => {
     }
   };
 
-  if (isAllowed === null) return null;
-  if (!isAllowed) return null;
+  const showPopup = countryInfo && currentZoom <= COUNTRY_LABEL_MAX_ZOOM;
 
   return (
     <>
@@ -87,14 +104,16 @@ const UserDashboard: React.FC = () => {
         <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
           <div style={{ height: "100vh", width: "100vw", position: "relative" }}>
             <Map
-              mapId="3acb2fe9409f1015af87f375"
+              mapId="3acb2fe9409f1015648d998e"
               defaultZoom={5}
               defaultCenter={position}
               gestureHandling="greedy"
               disableDefaultUI
               onClick={handleClick}
             >
-              {countryInfo && (
+              <ZoomTracker onZoomChange={setCurrentZoom} />
+
+              {showPopup && (
                 <div style={{
                   position: "absolute",
                   top: "50%",
@@ -152,20 +171,6 @@ const UserDashboard: React.FC = () => {
                     }}>
                       Content coming soon
                     </div>
-                  </div>
-                  <div style={{ marginTop: "16px", display: "flex", justifyContent: "center" }}>
-                    <Button
-                      onClick={logout}
-                      style={{
-                        borderRadius: "40px",
-                        background: "white",
-                        color: "#0B0696",
-                        fontWeight: 600,
-                        border: "none",
-                      }}
-                    >
-                      Logout
-                    </Button>
                   </div>
                 </div>
               )}

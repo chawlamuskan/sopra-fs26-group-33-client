@@ -3,12 +3,12 @@
   background: #ffffff;
   width: 100%;
   min-height: calc(100vh - 107px);
+  padding: 20px 80px 80px;
 }
 
 .container {
-  padding: 2rem;
-  max-width: 1100px;
-  margin: 0 auto;
+
+  padding: 0; 
 }
 
 /* ── page header ── */
@@ -20,10 +20,11 @@
 }
 
 .title {
-  font-size: 1.8rem;
+  color: #0B0696;
+  font-size: 42px;
+  font-family: DM Sans;
   font-weight: 700;
-  color: #3333cc;
-  margin-right: 1rem;
+  word-wrap: break-word
 }
 
 /* ── create/manage/join buttons ── */
