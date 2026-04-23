@@ -457,7 +457,7 @@ const TravelBoardsPage: React.FC = () => {
                     background: "#0B0696",
                     color: "white",
                     cursor: "pointer",
-                    fontSize: "12px",
+                    fontSize: "15px",
                     padding: "4px 8px",
                     zIndex: 10,
                   }}
