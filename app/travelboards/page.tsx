@@ -8,8 +8,10 @@ import Header from "@/components/Header";
 import LocationInput from "./LocationInput";
 import dayjs, { Dayjs } from "dayjs";
 import { ApiService } from "@/api/apiService"; // adjust path if needed
+import { Preferences } from "@/types/user";
 import { SearchOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
+
 
 type TravelBoard = {
   id: number;
@@ -19,53 +21,136 @@ type TravelBoard = {
   endDate: string | null;
   privacy: string;
   ownerId: number;
+  memberIds?: number[];
+};
+
+type InvitationNotification = {
+  id: number;
+  boardId: number;
+  senderId: number;
+  receiverId: number;
+  status: string;
+  boardName: string;
+  senderUsername: string;
 };
 
 
 const TravelBoardsPage: React.FC = () => {
     const isAllowed = useProtectedRoute(); 
+    const [modal, contextHolder] = Modal.useModal(); // for confirmation modals 
     const [isCreatedModalOpen, setIsCreatedModalOpen] = useState(false); // state to control if we need to display the modal to create new board 
     const [isJoinModalOpen, setIsJoinModalOpen] = useState(false); // state to control if we need to display the modal to join a new board
     const apiService = new ApiService();
     const router = useRouter();
     
+    ///// for creating a new board /////
     const [boardName, setBoardName] = useState("");
     const [location, setLocation] = useState("");
     const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null]>([null, null]);
     const [privacy, setPrivacy] = useState<"PRIVATE" | "FRIENDS" | "PUBLIC">("PRIVATE");
+    const [inviteCode, setInviteCode] = useState(""); // store the invite code for the board being created
 
     const [boards, setBoards] = useState<TravelBoard[]>([]); // for displayig TB
+    const [memberProfilePictures, setMemberProfilePictures] = useState<Record<number, string | null>>({});
 
-
+    ///// for managing TB - only show delete button when in manage mode, only show rename button if user is owner /////
     const [isManageMode, setIsManageMode] = useState(false);    // for managing 
     const [currentUserId, setCurrentUserId] = useState<number | null>(null);  // for managing 
+    const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+    const [renameBoardId, setRenameBoardId] = useState<number | null>(null);
+    const [renameBoardName, setRenameBoardName] = useState("");
 
-    // for invitation code pop up 
+    ///// for invitation code pop up /////
     const [showCodePopup, setShowCodePopup] = useState(false);
-    const [generatedCode, setGeneratedCode] = useState("");
     const [codeCopied, setCodeCopied] = useState(false);
 
-    // to search friends 
+    ///// to search friends /////
     const [friendSearch, setFriendSearch] = useState("");
     const [friendResults, setFriendResults] = useState<{id: number; username: string; avatar?: string}[]>([]);
     const [invitedFriends, setInvitedFriends] = useState<{id: number; username: string}[]>([]);
     const friendDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    // join button 
+    ///// join button /////
     const [joinCode, setJoinCode] = useState("");
-    type Notification = { id: number; fromUsername: string; boardName: string; boardId: number };
-    const [joinNotifications, setJoinNotifications] = useState<Notification[]>([]);
-    const [joiningBoard, setJoiningBoard] = useState<{ name: string; location: string } | null>(null);
+    const [joinNotifications, setJoinNotifications] = useState<InvitationNotification[]>([]);
+    const [joinFeedback, setJoinFeedback] = useState<string | null>(null);
 
 
     useEffect(() => {
         if (!isAllowed) return;     // #35 ; #46 works for pop up too 
         fetchBoards();             // #36 fetch TB for display  
 
-        // get current user id from localStorage
-        const userId = localStorage.getItem("userId");
-        if (userId) setCurrentUserId(Number(userId));
+        // get current user id from stored user object
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+          try {
+            const parsedUser = JSON.parse(storedUser) as { id?: string | number };
+            if (parsedUser.id !== undefined && parsedUser.id !== null) {
+              setCurrentUserId(Number(parsedUser.id));
+            }
+          } catch {
+            setCurrentUserId(null);
+          }
+        }
       }, [isAllowed]);
+
+    const isBoardOwner = (board: TravelBoard) =>
+      currentUserId !== null && Number(currentUserId) === Number(board.ownerId);
+
+    // user profile pictures for preview in TB cards - only fetch for max 4 users per board and only if not already fetched for another board, to minimize number of requests
+    const getPreviewMemberIds = (board: TravelBoard): number[] => {
+      const ids = [board.ownerId, ...(board.memberIds ?? [])].map((id) => Number(id));
+      const unique = Array.from(new Set(ids));
+      return unique.slice(0, 4);
+    };
+
+    const getTotalParticipantCount = (board: TravelBoard): number => {
+      const ids = [board.ownerId, ...(board.memberIds ?? [])].map((id) => Number(id));
+      return Array.from(new Set(ids)).length;
+    };
+
+    useEffect(() => {
+      if (!isAllowed || boards.length === 0) return;
+
+      const previewIds = Array.from(
+        new Set(
+          boards.flatMap((board) => getPreviewMemberIds(board)),
+        ),
+      );
+
+      const idsToFetch = previewIds.filter((id) => !(id in memberProfilePictures));
+      if (idsToFetch.length === 0) return;
+
+      let cancelled = false;
+
+      const fetchPictures = async () => {
+        const results = await Promise.all(
+          idsToFetch.map(async (userId) => {
+            try {
+              const prefs = await apiService.get<Preferences>(`/users/${userId}/preferences`);
+              return [userId, prefs.profilePicture ?? null] as const;
+            } catch {
+              return [userId, null] as const;
+            }
+          }),
+        );
+
+        if (cancelled) return;
+        setMemberProfilePictures((prev) => {
+          const next = { ...prev };
+          for (const [userId, picture] of results) {
+            next[userId] = picture;
+          }
+          return next;
+        });
+      };
+
+      fetchPictures();
+
+      return () => {
+        cancelled = true;
+      };
+    }, [boards, isAllowed, memberProfilePictures]);
 
     const handleSave = async () => {
     if (!boardName.trim()) {
@@ -76,23 +161,43 @@ const TravelBoardsPage: React.FC = () => {
     const payload = {
       name: boardName,
       location: location,
-      startDate: dateRange[0] ? dateRange[0].toISOString() : null,
-      endDate: dateRange[1] ? dateRange[1].toISOString() : null,
+      startDate: dateRange[0] ? dateRange[0].format("YYYY-MM-DD") : null,
+      endDate: dateRange[1] ? dateRange[1].format("YYYY-MM-DD") : null,
       privacy: privacy,
+      inviteCode: inviteCode || null,
       invitedUserIds: invitedFriends.map((f) => f.id),
     };
 
     try {
-      await apiService.post("/travelboards", payload);
-      alert("Board created!");
+      const createdBoard = await apiService.post<TravelBoard>("/travelboards", payload);
+
+      let sentInvitationCount = 0;
+      if (createdBoard?.id && invitedFriends.length > 0) {
+        const invitationResults = await Promise.allSettled(
+          invitedFriends.map((friend) =>
+            apiService.post(`/travelboards/${createdBoard.id}/invitations`, {
+              receiverId: friend.id,
+            }),
+          ),
+        );
+        sentInvitationCount = invitationResults.filter((result) => result.status === "fulfilled").length;
+      }
+
+      if (invitedFriends.length > 0) {
+        alert(`Board created! Sent ${sentInvitationCount}/${invitedFriends.length} invitations.`);
+      } else {
+        alert("Board created!");
+      }
       fetchBoards(); // refresh the list of boards after creating a new one
       setIsCreatedModalOpen(false);
       // reset form
       setBoardName("");
       setLocation("");
       setDateRange([null, null]);
-      setInvitedFriends([]); //Nina
-      setPrivacy("PRIVATE"); //Nina
+      setInviteCode("");
+      setShowCodePopup(false);
+      setInvitedFriends([]);
+      setPrivacy("PRIVATE"); 
     } catch (err) {
       alert("Something went wrong. Please try again.");
       console.error(err);
@@ -102,46 +207,117 @@ const TravelBoardsPage: React.FC = () => {
     // for displaying TB 
     const fetchBoards = async () => {
       try {
-        const data = await apiService.get<TravelBoard[]>("/travelboards/my");
+        const data = await apiService.get<TravelBoard[]>("/travelboards");
         setBoards(data);
       } catch (err) {
         console.error("Could not fetch boards:", err);
       }
     };
 
-    const handleMinus = async (boardId: number, ownerId: number) => {
+    const manageConfirmBase = {
+      centered: true,
+      icon: null,
+      okButtonProps: {
+        style: {
+          background: "#0B0696",
+          border: "none",
+          borderRadius: "8px",
+          height: "36px",
+          padding: "0 1.2rem",
+        },
+      },
+      cancelButtonProps: {
+        style: {
+          borderRadius: "8px",
+          border: "1px solid #0B0696",
+          color: "#0B0696",
+          height: "36px",
+          padding: "0 1.2rem",
+        },
+      },
+    };
 
-      if (currentUserId === ownerId) {
-          // user is owner → delete the board
-          try {
+    const handleMinus = async (boardId: number, ownerId: number) => {
+      if (currentUserId !== null && Number(currentUserId) === Number(ownerId)) {
+        modal.confirm({
+          ...manageConfirmBase,
+          title: <span style={{ color: "#3333cc", fontWeight: 800 }}>Delete this board?</span>,
+          content: <span style={{ color: "#171717" }}>This will permanently delete the board for everyone.</span>,
+          okText: "Delete",
+          cancelText: "Cancel",
+          onOk: async () => {
+            try {
               await apiService.delete(`/travelboards/${boardId}`);
-              fetchBoards(); // refresh list
-          } catch (err) {
+              fetchBoards();
+            } catch (err) {
               alert("Could not delete board.");
               console.error(err);
-          }
+            }
+          },
+        });
       } else {
-          // user is not owner → just remove from view
-          setBoards(boards.filter(board => board.id !== boardId));
-        // Nina: we need to also delete the user as a member in the backend, not just frontend
+        modal.confirm({
+          ...manageConfirmBase,
+          title: <span style={{ color: "#3333cc", fontWeight: 800 }}>Leave this board?</span>,
+          content: <span style={{ color: "#171717" }}>You will no longer see this board unless invited again.</span>,
+          okText: "Leave",
+          cancelText: "Cancel",
+          onOk: async () => {
+            try {
+              await apiService.delete(`/travelboards/${boardId}/membership`);
+              fetchBoards();
+            } catch (err) {
+              alert("Could not leave board.");
+              console.error(err);
+            }
+          },
+        });
       }
-  };
+    };
+
+    const openRenameModal = (board: TravelBoard) => {
+      setRenameBoardId(board.id);
+      setRenameBoardName(board.name);
+      setIsRenameModalOpen(true);
+    };
+
+    const handleRenameBoard = async () => {
+      if (!renameBoardId) return;
+      if (!renameBoardName.trim()) {
+        alert("Board name cannot be empty.");
+        return;
+      }
+
+      try {
+        await apiService.put(`/travelboards/${renameBoardId}`, {
+          name: renameBoardName.trim(),
+        });
+        setIsRenameModalOpen(false);
+        setRenameBoardId(null);
+        setRenameBoardName("");
+        fetchBoards();
+      } catch (err) {
+        alert("Could not rename board.");
+        console.error(err);
+      }
+    };
 
     const generateInviteCode = () => {
-      // 8-char alphanumeric code — readable and short enough to type
-      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-      const code = Array.from({ length: 8 }, () =>
-        chars[Math.floor(Math.random() * chars.length)]
-      ).join("");
-      setGeneratedCode(code);
       setShowCodePopup(true);
       setCodeCopied(false);
-      // TODO: optionally POST this code to your backend so it can be validated on join
     };
 
     const handleCopyCode = async () => {
       try {
-        await navigator.clipboard.writeText(generatedCode);
+        let codeToCopy = inviteCode;
+        if (!codeToCopy.trim()) {
+          const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+          codeToCopy = Array.from({ length: 8 }, () =>
+            chars[Math.floor(Math.random() * chars.length)]
+          ).join("");
+          setInviteCode(codeToCopy);
+        }
+        await navigator.clipboard.writeText(codeToCopy);
         setCodeCopied(true);
       } catch (error) {
         setCodeCopied(false);
@@ -166,35 +342,39 @@ const TravelBoardsPage: React.FC = () => {
     // Fetch notifications when join modal opens
     const handleOpenJoin = async () => {
       setIsJoinModalOpen(true);
+      setJoinFeedback(null);
       try {
-        const data = await apiService.get<Notification[]>("/travelboards/invitations");
+        const data = await apiService.get<InvitationNotification[]>("/invitations");
         setJoinNotifications(data);
       } catch { setJoinNotifications([]); }
     };
 
-    const handleAcceptInvite = async (notif: Notification) => {
+    const handleAcceptInvite = async (notif: InvitationNotification) => {
       try {
-        await apiService.post(`/travelboards/${notif.boardId}/accept`, {});
+        await apiService.put(`/invitations/${notif.id}/accept`, {});
         setJoinNotifications((prev) => prev.filter((n) => n.id !== notif.id));
+        setJoinFeedback(`You joined \"${notif.boardName}\".`);
         fetchBoards();
       } catch { alert("Could not accept invite."); }
     };
 
-    const handleDeclineInvite = async (notif: Notification) => {
+    const handleDeclineInvite = async (notif: InvitationNotification) => {
       try {
-        await apiService.post(`/travelboards/${notif.boardId}/decline`, {});
+        await apiService.put(`/invitations/${notif.id}/decline`, {});
         setJoinNotifications((prev) => prev.filter((n) => n.id !== notif.id));
+        setJoinFeedback(`You declined the invitation to \"${notif.boardName}\".`);
       } catch { alert("Could not decline invite."); }
     };
 
     const handleJoinByCode = async () => {
       if (!joinCode.trim()) return;
       try {
-        const board = await apiService.post<{ name: string; location: string }>(
-          "/travelboards/join-by-code",
-          { code: joinCode.trim() }
+        await apiService.post(
+          `/travelboards/join?inviteCode=${encodeURIComponent(joinCode.trim())}`,
+          {},
         );
-        setJoiningBoard(board);
+        setJoinFeedback("You joined a board via invite code.");
+        setJoinCode("");
         fetchBoards();
       } catch { alert("Invalid or expired code."); }
     };
@@ -202,6 +382,7 @@ const TravelBoardsPage: React.FC = () => {
 
   return (
     <>
+    {contextHolder}
     <Header /> 
     <div className={styles.page}>
     <div className={styles.container}>
@@ -263,6 +444,27 @@ const TravelBoardsPage: React.FC = () => {
                       −
                   </button>
               )}
+
+              {isManageMode && isBoardOwner(board) && (
+                <button
+                  onClick={() => openRenameModal(board)}
+                  style={{
+                    position: "absolute",
+                    top: "-10px",
+                    right: "-10px",
+                    borderRadius: "16px",
+                    border: "none",
+                    background: "#0B0696",
+                    color: "white",
+                    cursor: "pointer",
+                    fontSize: "15px",
+                    padding: "4px 8px",
+                    zIndex: 10,
+                  }}
+                >
+                  Rename
+                </button>
+              )}
               
               {/* Top row: name + dates */}
               <div className={styles.boardCardHeader}>
@@ -278,7 +480,24 @@ const TravelBoardsPage: React.FC = () => {
               {/* Friends joining */}
               <div className={styles.friendsRow}>
                 <span className={styles.friendsLabel}>Friends joining:</span>
-                {/* placeholder empty circles for now */}
+                <div className={styles.memberCircles}>
+                  {getPreviewMemberIds(board).map((userId) => {
+                    const profilePicture = memberProfilePictures[userId];
+                    return profilePicture ? (
+                      <img
+                        key={userId}
+                        src={profilePicture}
+                        alt="member"
+                        className={styles.memberCircleImg}
+                      />
+                    ) : (
+                      <div key={userId} className={styles.memberCircleFallback}>👤</div>
+                    );
+                  })}
+                  {getTotalParticipantCount(board) > 4 && (
+                    <div className={styles.memberMore}>+{getTotalParticipantCount(board) - 4}</div>
+                  )}
+                </div>
               </div>
 
               {/* 6 empty place boxes */}
@@ -302,7 +521,17 @@ const TravelBoardsPage: React.FC = () => {
         <Modal
           title={<span style={{ color: "#3333cc" }}>Create a new board</span>}
           open={isCreatedModalOpen}
-          onCancel={() => setIsCreatedModalOpen(false)}
+          onCancel={() => {
+            setIsCreatedModalOpen(false);
+            // reset form
+            setBoardName("");
+            setLocation("");
+            setDateRange([null, null]);
+            setInviteCode("");
+            setShowCodePopup(false);
+            setInvitedFriends([]);
+            setPrivacy("PRIVATE");
+          }}
           footer={null}
         >
           <div className={styles.form}>
@@ -370,7 +599,7 @@ const TravelBoardsPage: React.FC = () => {
                     fontSize: "1.6rem", letterSpacing: "0.3em",
                     fontWeight: 800, color: "#0B0696", marginBottom: "0.75rem"
                   }}>
-                    {generatedCode}
+                    {inviteCode}
                   </div>
                   <Button
                     onClick={handleCopyCode}
@@ -379,7 +608,7 @@ const TravelBoardsPage: React.FC = () => {
                     {codeCopied ? "✓ Copied!" : "Copy code"}
                   </Button>
                   <p style={{ fontSize: "0.75rem", color: "#888", marginTop: "0.5rem" }}>
-                    Share this code with friends so they can join your board.
+                    Code is generated and saved only when you press Copy code.
                   </p>
                 </div>
               )}
@@ -473,9 +702,18 @@ const TravelBoardsPage: React.FC = () => {
         <Modal
           title={<span style={{ color: "#3333cc", fontWeight: 800, fontSize: "1.4rem" }}>Join a board</span>}
           open={isJoinModalOpen}
-          onCancel={() => { setIsJoinModalOpen(false); setJoinCode(""); setJoiningBoard(null); }}
+          onCancel={() => { setIsJoinModalOpen(false); setJoinCode(""); setJoinFeedback(null); }}
           footer={null}
         >
+          {joinFeedback && (
+            <div style={{
+              background: "#f0eeff", borderRadius: "16px", padding: "0.75rem 1rem",
+              border: "1.5px solid #3333cc", marginBottom: "1rem", color: "#3333cc", fontWeight: 700
+            }}>
+              {joinFeedback}
+            </div>
+          )}
+
           {/* Notifications section */}
           <p style={{ color: "#3333cc", fontWeight: 700, fontSize: "1rem", marginBottom: "0.75rem" }}>Notifications</p>
 
@@ -493,7 +731,7 @@ const TravelBoardsPage: React.FC = () => {
                     background: "#d6cece", flexShrink: 0
                   }} />
                   <span style={{ flex: 1, fontSize: "0.9rem", fontStyle: "italic" }}>
-                    <strong>{notif.fromUsername}</strong> invited you to &quot;{notif.boardName}&quot;
+                    <strong>{notif.senderUsername}</strong> invited you to &quot;{notif.boardName}&quot;
                   </span>
                   <Button
                     size="small"
@@ -513,41 +751,47 @@ const TravelBoardsPage: React.FC = () => {
           {/* Use a code section */}
           <p style={{ color: "#3333cc",fontWeight: 700, fontSize: "1rem", marginBottom: "0.75rem" }}>Use a code</p>
 
-          {joiningBoard ? (
-            <div style={{
-              background: "#f0eeff", borderRadius: "16px", padding: "1rem",
-              border: "1.5px solid #3333cc", marginBottom: "1rem"
-            }}>
-              <p style={{ fontWeight: 700, color: "#3333cc", margin: "0 0 0.25rem" }}>
-                ✓ Joined: {joiningBoard.name}
-              </p>
-              {joiningBoard.location && (
-                <p style={{ color: "#555", margin: 0, fontSize: "0.9rem" }}>{joiningBoard.location}</p>
-              )}
-            </div>
-          ) : (
-            <>
-              <input
-                value={joinCode}
-                onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                placeholder="Enter code…"
-                maxLength={8}
-                style={{
-                  width: "100%", padding: "10px 16px", borderRadius: "20px",
-                  background: "#e8e8e8", border: "none", fontSize: "1rem",
-                  letterSpacing: "0.15em", boxSizing: "border-box", marginBottom: "0.75rem"
-                }}
-              />
-              <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                <Button
-                  onClick={handleJoinByCode}
-                  style={{ background: "#0B0696", color: "white", border: "none", borderRadius: "20px", padding: "0 1.5rem", height: "40px" }}
-                >
-                  Confirm
-                </Button>
-              </div>
-            </>
-          )}
+          <input
+            value={joinCode}
+            onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+            placeholder="Enter code…"
+            maxLength={8}
+            style={{
+              width: "100%", padding: "10px 16px", borderRadius: "20px",
+              background: "#e8e8e8", border: "none", fontSize: "1rem",
+              letterSpacing: "0.15em", boxSizing: "border-box", marginBottom: "0.75rem"
+            }}
+          />
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <Button
+              onClick={handleJoinByCode}
+              style={{ background: "#0B0696", color: "white", border: "none", borderRadius: "20px", padding: "0 1.5rem", height: "40px" }}
+            >
+              Confirm
+            </Button>
+          </div>
+        </Modal>
+
+        <Modal
+          title={<span style={{ color: "#3333cc" }}>Rename board</span>}
+          open={isRenameModalOpen}
+          onCancel={() => {
+            setIsRenameModalOpen(false);
+            setRenameBoardId(null);
+            setRenameBoardName("");
+          }}
+          onOk={handleRenameBoard}
+          okText="Save"
+          cancelText="Cancel"
+        >
+          <Input
+            className={styles.input}
+            placeholder="New board name"
+            value={renameBoardName}
+            onChange={(e) => setRenameBoardName(e.target.value)}
+            onPressEnter={handleRenameBoard}
+            autoFocus
+          />
         </Modal>
 
     </div>

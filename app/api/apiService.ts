@@ -30,7 +30,10 @@ export class ApiService {     // ## To handle all HTTP requests (GET, POST, PUT,
       let errorDetail = res.statusText;   // ## if response not okay , tries reading error msg from backend
       try {
         const errorInfo = await res.json();
-        if (errorInfo?.message) {
+
+        if (errorInfo?.detail) {
+          errorDetail = errorInfo.detail;
+        } else if (errorInfo?.message) {
           errorDetail = errorInfo.message;
         } else {
           errorDetail = JSON.stringify(errorInfo);
@@ -38,7 +41,7 @@ export class ApiService {     // ## To handle all HTTP requests (GET, POST, PUT,
       } catch {
         // If parsing fails, keep using res.statusText
       }
-      const detailedMessage = `${errorMessage} (${res.status}: ${errorDetail})`;
+      const detailedMessage = errorDetail;
       const error: ApplicationError = new Error(
         detailedMessage,
       ) as ApplicationError;
@@ -115,9 +118,16 @@ export class ApiService {     // ## To handle all HTTP requests (GET, POST, PUT,
    */
   public async put<T>(endpoint: string, data: unknown): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
+
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    const parsedToken = token ? JSON.parse(token) : null;
+
     const res = await fetch(url, {
       method: "PUT",
-      headers: this.defaultHeaders,
+      headers: {
+        ...this.defaultHeaders,
+        ...(parsedToken ? { Authorization: parsedToken } : {}),
+      },
       body: JSON.stringify(data),
     });
     return this.processResponse<T>(
@@ -133,9 +143,16 @@ export class ApiService {     // ## To handle all HTTP requests (GET, POST, PUT,
    */
   public async delete<T>(endpoint: string): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
+
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    const parsedToken = token ? JSON.parse(token) : null;
+
     const res = await fetch(url, {
       method: "DELETE",
-      headers: this.defaultHeaders,
+      headers: {
+        ...this.defaultHeaders,
+        ...(parsedToken ? { Authorization: parsedToken } : {}),
+      },
     });
     return this.processResponse<T>(
       res,

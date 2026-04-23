@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { User } from "@/types/user";
-import { ConfigProvider, Form, Input, Select, theme } from "antd";
+import { App, ConfigProvider, Form, Input, Select, theme } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import styles from "@/styles/register.module.css";
 import { useState, useRef, useEffect } from "react";
@@ -23,6 +23,7 @@ interface CountryApiItem {
 const Preferences: React.FC = () => {
   const router = useRouter();
   const apiService = useApi();
+  const { message } = App.useApp();
   const [form] = Form.useForm();
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -117,14 +118,15 @@ const Preferences: React.FC = () => {
         wishlistCountries: values.countries_wishlist ?? null,
         friends: selectedFriends.map((id) => Number(id)) ?? null
       });
-
+      message.success("Preferences saved successfully!")
       router.push(`/users/${storedUser.id}`);
     } catch (error) {
-      if (error instanceof Error) {
-        alert(`Something went wrong during the update:\n${error.message}`);
-      } else {
-        console.error("An unknown error occurred during update.");
-      }
+        console.error(error);
+        message.error(
+          error instanceof Error
+          ? error.message
+          : "Something went wrong while saving preferences."
+        );
     }
   };
 
