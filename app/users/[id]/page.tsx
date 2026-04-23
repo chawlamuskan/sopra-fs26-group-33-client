@@ -172,20 +172,6 @@ const UserDashboard: React.FC = () => {
                       Content coming soon
                     </div>
                   </div>
-                  <div style={{ marginTop: "16px", display: "flex", justifyContent: "center" }}>
-                    <Button
-                      onClick={logout}
-                      style={{
-                        borderRadius: "40px",
-                        background: "white",
-                        color: "#0B0696",
-                        fontWeight: 600,
-                        border: "none",
-                      }}
-                    >
-                      Logout
-                    </Button>
-                  </div>
                 </div>
               )}
             </Map>

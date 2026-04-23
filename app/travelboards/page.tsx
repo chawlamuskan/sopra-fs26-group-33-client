@@ -519,7 +519,7 @@ const TravelBoardsPage: React.FC = () => {
         {/* Create modal - actual content for #47 */}
 
         <Modal
-          title={<span style={{ color: "#3333cc" }}>Create a new board</span>}
+          title={<span style={{  color: "#3333cc", fontWeight: 800, fontSize: "1.4rem" }}>Create a new board</span>}
           open={isCreatedModalOpen}
           onCancel={() => {
             setIsCreatedModalOpen(false);

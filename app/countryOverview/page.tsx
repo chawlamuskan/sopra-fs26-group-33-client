@@ -227,7 +227,7 @@ export default function CountryOverview() {
                         textAlign: "center",
                         marginBottom: "8px"
                       }}>
-                        Please <span style={{ textDecoration: "underline", cursor: "pointer" }} onClick={() => router.push("/login")}>Login</span> or <span style={{ textDecoration: "underline", cursor: "pointer" }} onClick={() => router.push("/register")}>Register</span> to view
+                        Content coming soon
                       </div>
                       <p style={{ textAlign: "center", fontWeight: "bold" }}>Community Posts</p>
                       <div style={{
@@ -236,7 +236,7 @@ export default function CountryOverview() {
                         padding: "10px",
                         textAlign: "center"
                       }}>
-                        Please <span style={{ textDecoration: "underline", cursor: "pointer" }} onClick={() => router.push("/login")}>Login</span> or <span style={{ textDecoration: "underline", cursor: "pointer" }} onClick={() => router.push("/register")}>Register</span> to view
+                        Content coming soon
                       </div>
                     </div>
                   </div>
