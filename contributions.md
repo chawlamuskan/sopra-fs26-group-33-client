@@ -105,7 +105,7 @@ reason).
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
 | **[@chawlamuskan]** | [14.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/eeb2a0174077d8de3e475287b9f284525e02e76a] | [created join modal pop up with restricted access #52 #53] | [user can see who invited him to a travel baord and accept the invitation or enter the code to join a travelboard ] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+|                    | [21.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/7186dcb12c486f24f6533600987b8cabb8c0b2e7] | [manage button: delete board if owner, remove from view if member, rename if owner #39] | [there is restricted access to the board depending if owner or member, only a owner can rename or delete the board, member can only leave it] |
 | **[@nadiapan4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@despoinapantazi]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
@@ -122,7 +122,7 @@ reason).
 
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
-| **[@chawlamuskan]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@chawlamuskan]** | [21.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/f6086bc9838d8206389691f0f43ed9e7e42c3551] | [show notification of invitations + enter invite code to join a TB + accept / decline invitation + confirm code #54] | [the user can see by clicking the join button, if there are any notfications, either accept or decline them, or enter an invitation code to join a board] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@nadiapan4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
