@@ -108,8 +108,8 @@ reason).
 |                    | [21.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/7186dcb12c486f24f6533600987b8cabb8c0b2e7] | [manage button: delete board if owner, remove from view if member, rename if owner #39] | [there is restricted access to the board depending if owner or member, only a owner can rename or delete the board, member can only leave it] |
 | **[@nadiapan4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-| **[@despoinapantazi]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@despoinapantazi]** | [23.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/89cb688b4d4b95d9b438e56456cb966a11ba8993] | [Transfer Saved Countries from User to Preferences entity #205] | [Integrate the backend of the Saved Countries to the Preferences' files] |
+|                    | [24.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/0d9c04f7710d052f5c69e59f9b37f793e8605d4d] | [Conclude Preferences' testing #277] | [Write PreferencesService tests, Write tests for the added Saved Countries] |
 | **[@nsavas8]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@yalini-siva]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
