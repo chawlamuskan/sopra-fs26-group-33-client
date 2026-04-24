@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Button, Modal, Input, DatePicker } from "antd";
+import { Button, Modal, Input, DatePicker, App } from "antd";
 import styles from "./travelboards.module.css";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 import Header from "@/components/Header";
@@ -41,6 +41,7 @@ const TravelBoardsPage: React.FC = () => {
     const [isCreatedModalOpen, setIsCreatedModalOpen] = useState(false); // state to control if we need to display the modal to create new board 
     const [isJoinModalOpen, setIsJoinModalOpen] = useState(false); // state to control if we need to display the modal to join a new board
     const apiService = new ApiService();
+    const { message } = App.useApp();
     const router = useRouter();
     
     ///// for creating a new board /////
@@ -159,7 +160,7 @@ const TravelBoardsPage: React.FC = () => {
 
     const handleSave = async () => {
     if (!boardName.trim()) {
-      alert("Please enter a board name.");
+      message.warning("Please enter a board name.");
       return;
     }
 
@@ -189,9 +190,9 @@ const TravelBoardsPage: React.FC = () => {
       }
 
       if (invitedFriends.length > 0) {
-        alert(`Board created! Sent ${sentInvitationCount}/${invitedFriends.length} invitations.`);
+        message.success(`Board created! Sent ${sentInvitationCount}/${invitedFriends.length} invitations.`);
       } else {
-        alert("Board created!");
+        message.success("Board created!");
       }
       fetchBoards(); // refresh the list of boards after creating a new one
       setIsCreatedModalOpen(false);
@@ -204,7 +205,7 @@ const TravelBoardsPage: React.FC = () => {
       setInvitedFriends([]);
       setPrivacy("PRIVATE"); 
     } catch (err) {
-      alert("Something went wrong. Please try again.");
+      message.error("Something went wrong while creating the board.");
       console.error(err);
     }
   };
@@ -255,7 +256,7 @@ const TravelBoardsPage: React.FC = () => {
               await apiService.delete(`/travelboards/${boardId}`);
               fetchBoards();
             } catch (err) {
-              alert("Could not delete board.");
+              message.error("Could not delete board.");
               console.error(err);
             }
           },
@@ -272,7 +273,7 @@ const TravelBoardsPage: React.FC = () => {
               await apiService.delete(`/travelboards/${boardId}/membership`);
               fetchBoards();
             } catch (err) {
-              alert("Could not leave board.");
+              message.error("Could not leave board.");
               console.error(err);
             }
           },
@@ -289,7 +290,7 @@ const TravelBoardsPage: React.FC = () => {
     const handleRenameBoard = async () => {
       if (!renameBoardId) return;
       if (!renameBoardName.trim()) {
-        alert("Board name cannot be empty.");
+        message.warning("Board name cannot be empty.");
         return;
       }
 
@@ -302,7 +303,7 @@ const TravelBoardsPage: React.FC = () => {
         setRenameBoardName("");
         fetchBoards();
       } catch (err) {
-        alert("Could not rename board.");
+        message.error("Could not rename board.");
         console.error(err);
       }
     };
@@ -425,7 +426,7 @@ const TravelBoardsPage: React.FC = () => {
         setNotifCount((prev) => Math.max(0, prev - 1)); // ← add
         setJoinFeedback(`You joined "${notif.boardName}".`);
         fetchBoards();
-      } catch { alert("Could not accept invite."); }
+      } catch { message.error("Could not accept invite."); }
     };
 
     const handleDeclineInvite = async (notif: InvitationNotification) => {
@@ -434,7 +435,7 @@ const TravelBoardsPage: React.FC = () => {
         setJoinNotifications((prev) => prev.filter((n) => n.id !== notif.id));
         setNotifCount((prev) => Math.max(0, prev - 1)); // ← add
         setJoinFeedback(`You declined the invitation to "${notif.boardName}".`);
-      } catch { alert("Could not decline invite."); }
+      } catch { message.error("Could not decline invite."); }
     };
 
     const handleJoinByCode = async () => {
@@ -447,7 +448,7 @@ const TravelBoardsPage: React.FC = () => {
         setJoinFeedback("You joined a board via invite code.");
         setJoinCode("");
         fetchBoards();
-      } catch { alert("Invalid or expired code."); }
+      } catch { message.error("Invalid or expired code."); }
     };
 
     const fetchNotifCount = async () => {
