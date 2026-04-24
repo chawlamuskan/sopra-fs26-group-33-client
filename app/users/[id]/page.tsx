@@ -128,6 +128,9 @@ const PlaceCard: React.FC<{
   }> = ({ placeInfo, onClose, userId, token, apiService }) => {
     const [savedFeedback, setSavedFeedback] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [showBoardSelector, setShowBoardSelector] = useState(false);
+    const [travelBoards, setTravelBoards] = useState<{id: number, name: string}[]>([]);
+    const [boardFeedback, setBoardFeedback] = useState<string | null>(null);
     const handleAddToSaved = async () => {
       if (!userId) {
         setSavedFeedback("Not logged in.");
@@ -150,6 +153,35 @@ const PlaceCard: React.FC<{
         setTimeout(() => setSavedFeedback(null), 2000);
       }
     };
+
+    const handleOpenBoardSelector = async () => {
+      try {
+        const boards = await apiService.get<{id: number, name: string}[]>("/travelboards");
+        setTravelBoards(boards);
+        setShowBoardSelector(true);
+      } catch {
+        setBoardFeedback("Failed to load boards.");
+        setTimeout(() => setBoardFeedback(null), 2000);
+      }
+    };
+
+    const handleAddToBoard = async (boardId: number) => {
+      setShowBoardSelector(false);
+      try {
+        await apiService.post(`/travelboards/${boardId}/places`, {
+          externalPlaceId: placeInfo.placeId,
+          name: placeInfo.name,
+          address: placeInfo.address,
+          rating: placeInfo.rating,
+        });
+        setBoardFeedback("Added to travel board!");
+      } catch (err: any) {
+        setBoardFeedback(err.status === 409 ? "Already in this board!" : "Failed to add.");
+      } finally {
+        setTimeout(() => setBoardFeedback(null), 2000);
+      }
+    };
+
       const payload = {
   externalPlaceId: placeInfo.placeId,
   name: placeInfo.name,
@@ -161,7 +193,7 @@ const PlaceCard: React.FC<{
   console.log("userId:", userId);
 
   return (
-    <div className={popupStyles.card}>
+    <div className={popupStyles.card} style={{position: "relative"}}>
       {/* Close */}
       <button className={popupStyles.closeBtn} onClick={onClose}>✕</button>
 
@@ -178,10 +210,51 @@ const PlaceCard: React.FC<{
           </button>
           <button
             className={popupStyles.addToBoardBtn}
-            //onClick={handleAddToTravelBoard}
+            onClick={handleOpenBoardSelector}
           >
             + add to travel board
           </button>
+
+          {/* Board selector dropdown */}
+          {showBoardSelector && (
+            <div style={{
+              position: "absolute", background: "white", color: "black", border: "1px solid #ccc",
+              borderRadius: "8px", padding: "8px", zIndex: 10, minWidth: "180px",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.15)"
+            }}>
+              <div style={{ fontWeight: "bold", marginBottom: "6px", fontSize: "13px" }}>
+                Select a board:
+              </div>
+              {travelBoards.length === 0 && (
+                <div style={{ fontSize: "12px", color: "#666" }}>No boards found.</div>
+              )}
+              {travelBoards.map((board) => (
+                <div
+                  key={board.id}
+                  onClick={() => handleAddToBoard(board.id)}
+                  style={{
+                    padding: "6px 8px", cursor: "pointer", borderRadius: "6px",
+                    fontSize: "13px"
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "#f0f0f0")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                >
+                  {board.name}
+                </div>
+              ))}
+              <div
+                onClick={() => setShowBoardSelector(false)}
+                style={{ fontSize: "11px", color: "#999", cursor: "pointer", marginTop: "6px", textAlign: "center" }}
+              >
+                cancel
+              </div>
+            </div>
+          )}
+
+          {/* Board feedback toast */}
+          {boardFeedback && (
+            <p className={popupStyles.toast}>✓ {boardFeedback}</p>
+          )}
         </div>
       </div>
 
