@@ -112,8 +112,8 @@ reason).
 |                    | [24.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/0d9c04f7710d052f5c69e59f9b37f793e8605d4d] | [Conclude Preferences' testing #277] | [Write PreferencesService tests, Write tests for the added Saved Countries] |
 | **[@nsavas8]** | [22.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/5bbb378aa22a4a7aac7d99062d0273df3e7a6901] | [Implementation of backend for saving a place to a travel board] | [One of the main funtionalities of our app is adding places to a travel board] |
 |                    | [24.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/76f03f6d13a37e11b9e4e02e94437232004a4d0f] | [Added DTOs for getting all saved places of a user or a travel board] | [We need to be able to fetch all saved places of a user or of a travel board] |
-| **[@yalini-siva]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@yalini-siva]** | [22.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/4468b8bab5e11faf6eb05ad0d65fc70f3e30db79] | [Added tests for joining boards with invite codes #152, #153, #154] | [Ensures users can only join boards when logged in and using a valid invite code] |
+|                    | [23.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/878ca1ea92aa657c6a1a059d84883a91e4d3e1de] | [Added tests for board creation and invite-code mapping #135, #136, #139] | [Ensures boards are created correctly and invite codes link to the right board] |
 
 
 ---
