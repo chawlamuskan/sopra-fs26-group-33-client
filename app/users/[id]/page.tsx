@@ -17,6 +17,7 @@ import {
 } from "@vis.gl/react-google-maps";
 import styles from "@/styles/page.module.css";
 import popupStyles from "@/styles/placePopup.module.css";
+import { ApiService } from "@/api/apiService";
 
 interface CountryInfo {
   name: string;
@@ -118,22 +119,46 @@ const StarRating: React.FC<{ rating: number }> = ({ rating }) => {
   );
 };
 
-// The redesigned place card matching the screenshot
 const PlaceCard: React.FC<{
-  placeInfo: PlaceInfo;
-  onClose: () => void;
-}> = ({ placeInfo, onClose }) => {
-  const [savedFeedback, setSavedFeedback] = useState<string | null>(null);
-
-  const handleAddToTravelBoard = () => {
-    setSavedFeedback("Added to travel board!");
-    setTimeout(() => setSavedFeedback(null), 2000);
-  };
-
-  const handleAddToSaved = () => {
-    setSavedFeedback("Saved to places!");
-    setTimeout(() => setSavedFeedback(null), 2000);
-  };
+    placeInfo: PlaceInfo;
+    onClose: () => void;
+    userId: string | undefined;
+    token: string | undefined;
+    apiService: ApiService;
+  }> = ({ placeInfo, onClose, userId, token, apiService }) => {
+    const [savedFeedback, setSavedFeedback] = useState<string | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
+    const handleAddToSaved = async () => {
+      if (!userId) {
+        setSavedFeedback("Not logged in.");
+        setTimeout(() => setSavedFeedback(null), 2000);
+        return;
+      }
+      setIsSaving(true);
+      try {
+        await apiService.post(`/users/${userId}/savedplaces`, {
+          externalPlaceId: placeInfo.placeId,
+          name: placeInfo.name,
+          address: placeInfo.address,
+          rating: placeInfo.rating,
+        });
+        setSavedFeedback("Saved to places!");
+      } catch (err: any) {
+        setSavedFeedback(err.status === 409 ? "Already saved!" : "Failed to save.");
+      } finally {
+        setIsSaving(false);
+        setTimeout(() => setSavedFeedback(null), 2000);
+      }
+    };
+      const payload = {
+  externalPlaceId: placeInfo.placeId,
+  name: placeInfo.name,
+  address: placeInfo.address,
+  rating: placeInfo.rating,
+  types: [],
+};
+  console.log("Saving place payload:", payload);
+  console.log("userId:", userId);
 
   return (
     <div className={popupStyles.card}>
@@ -153,7 +178,7 @@ const PlaceCard: React.FC<{
           </button>
           <button
             className={popupStyles.addToBoardBtn}
-            onClick={handleAddToTravelBoard}
+            //onClick={handleAddToTravelBoard}
           >
             + add to travel board
           </button>
@@ -253,6 +278,7 @@ const UserDashboard: React.FC = () => {
   }, []);
 
   const showCountryPopup = countryInfo && currentZoom <= COUNTRY_LABEL_MAX_ZOOM;
+  const storedUser = useLocalStorage<User | null>("user", null);
 
   if (isAllowed === null) return null;
   if (!isAllowed) return null;
@@ -322,6 +348,9 @@ const UserDashboard: React.FC = () => {
                 <PlaceCard
                   placeInfo={placeInfo}
                   onClose={() => setPlaceInfo(null)}
+                  userId={storedUser.value?.id}
+                  token={storedUser.value?.token}
+                  apiService={apiService}
                 />
               </div>
             )}
