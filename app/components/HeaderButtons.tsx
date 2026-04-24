@@ -138,7 +138,7 @@ export default function HeaderButtons() {
           {/* Menu items */}
           {[
             { label: "Countries Overview", path: `/countryOverview` },
-            { label: "Saved Places", path: `/users/${user?.id}` },//need to change these paths once the pages are implemented
+            { label: "Saved Places", path: `/places` },
             { label: "Travel boards", path: `/travelboards` },
             { label: "Community", path: `/community` },//need to change these paths once the pages are implemented
             { label: "Posts", path: `/posts` },//need to change these paths once the pages are implemented
