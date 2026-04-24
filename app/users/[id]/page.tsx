@@ -146,8 +146,9 @@ const PlaceCard: React.FC<{
           rating: placeInfo.rating,
         });
         setSavedFeedback("Saved to places!");
-      } catch (err: any) {
-        setSavedFeedback(err.status === 409 ? "Already saved!" : "Failed to save.");
+      } catch (err: unknown) {
+        const status = (err as { status?: number }).status;
+        setSavedFeedback(status === 409 ? "Already saved!" : "Failed to save.");
       } finally {
         setIsSaving(false);
         setTimeout(() => setSavedFeedback(null), 2000);
@@ -175,8 +176,9 @@ const PlaceCard: React.FC<{
           rating: placeInfo.rating,
         });
         setBoardFeedback("Added to travel board!");
-      } catch (err: any) {
-        setBoardFeedback(err.status === 409 ? "Already in this board!" : "Failed to add.");
+      } catch (err: unknown) {
+        const status = (err as { status?: number }).status;
+        setBoardFeedback(status === 409 ? "Already in this board!" : "Failed to add.");
       } finally {
         setTimeout(() => setBoardFeedback(null), 2000);
       }
