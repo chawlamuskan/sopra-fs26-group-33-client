@@ -10,15 +10,18 @@ import dayjs from "dayjs";
 
 type SavedPlace = {
   id: number;
+  externalPlaceId: string;
   name: string;
-  imageUrl?: string | null;
+  address: string;
+  rating: number | null;
+  photoReference?: string | null;
   addedByUserId: number;
 };
 
 type ActivityLog = {
   id: number;
   userId: number;
-  action: string; // e.g. 'Added "Big Ben" to the saved places'
+  action: string;
 };
 
 type BoardDetail = {
@@ -29,7 +32,6 @@ type BoardDetail = {
   endDate: string | null;
   ownerId: number;
   memberIds?: number[];
-  savedPlaces?: SavedPlace[];
   activityLogs?: ActivityLog[];
 };
 
@@ -40,51 +42,79 @@ const TravelBoardPage: React.FC = () => {
   const apiService = new ApiService();
 
   const [board, setBoard] = useState<BoardDetail | null>(null);
+  const [savedPlaces, setSavedPlaces] = useState<SavedPlace[]>([]);
   const [memberPictures, setMemberPictures] = useState<Record<number, string | null>>({});
 
   useEffect(() => {
     if (!isAllowed || !id) return;
-    const fetchBoard = async () => {
-        try {
-        const allBoards = await apiService.get<BoardDetail[]>("/travelboards");
-        const found = allBoards.find((b) => String(b.id) === String(id));
-        if (found) setBoard(found);
-        } catch (err) {
-        console.error("Could not fetch board:", err);
-        }
-    };
-    fetchBoard();
-    }, [isAllowed, id]);
 
-  // Fetch profile pictures for all members
+    const fetchData = async () => {
+      try {
+        const boardData = await apiService.get<BoardDetail>(`/travelboards/${id}`);
+        const places = await apiService.get<SavedPlace[]>(`/travelboards/${id}/places`);
+
+        console.log("BOARD:", boardData);
+        console.log("PLACES:", places);
+
+        setBoard(boardData);
+        setSavedPlaces(places);
+      } catch (err) {
+        console.error("Could not fetch board:", err);
+      }
+    };
+
+    fetchData();
+  }, [isAllowed, id]);
+
+
   useEffect(() => {
     if (!board) return;
-    const allIds = Array.from(new Set([board.ownerId, ...(board.memberIds ?? [])]));
+
+    const placeUserIds = savedPlaces.map((p) => p.addedByUserId);
+
+    const allIds = Array.from(
+        new Set([
+        board.ownerId,
+        ...(board.memberIds ?? []),
+        ...placeUserIds,
+        ])
+    );
+
     const idsToFetch = allIds.filter((uid) => !(uid in memberPictures));
+
     if (idsToFetch.length === 0) return;
 
     let cancelled = false;
+
     const fetchPics = async () => {
-      const results = await Promise.all(
+        const results = await Promise.all(
         idsToFetch.map(async (uid) => {
-          try {
-            const prefs = await apiService.get<Preferences>(`/users/${uid}/preferences`);
+            try {
+            const prefs = await apiService.get<Preferences>(
+                `/users/${uid}/preferences`
+            );
             return [uid, prefs.profilePicture ?? null] as const;
-          } catch {
+            } catch {
             return [uid, null] as const;
-          }
+            }
         })
-      );
-      if (cancelled) return;
-      setMemberPictures((prev) => {
+        );
+
+        if (cancelled) return;
+
+        setMemberPictures((prev) => {
         const next = { ...prev };
         for (const [uid, pic] of results) next[uid] = pic;
         return next;
-      });
+        });
     };
+
     fetchPics();
-    return () => { cancelled = true; };
-  }, [board]);
+
+    return () => {
+        cancelled = true;
+    };
+    }, [board, savedPlaces.length]);
 
   if (isAllowed === null || !isAllowed) return null;
 
@@ -99,34 +129,40 @@ const TravelBoardPage: React.FC = () => {
       : <div className={styles.avatarFallback}>👤</div>;
   };
 
-  // Placeholder grid: use real saved places if available, fill rest with empty slots
-  const savedPlaces = board?.savedPlaces ?? [];
-  const totalSlots = Math.max(24, savedPlaces.length); // at least 4 rows × 6 cols
-
   return (
     <>
       <Header />
-      <div className={styles.page}>
-        {/* Page header */}
+      <div className={styles.page}
+  style={{
+    padding: "24px 70px",
+    minHeight: "100vh",
+    boxSizing: "border-box",
+    overflow: "visible",  // prevents clipping the header dropdown
+  }}
+>
+        {/* Header */}
         <div className={styles.pageHeader}>
           <h1 className={styles.pageTitle}>Travel Boards</h1>
-          <button className={styles.backBtn} onClick={() => router.back()}>Back</button>
+          <button className={styles.backBtn} onClick={() => router.back()}>
+            Back
+          </button>
         </div>
 
         {board && (
           <div className={styles.boardCard}>
-            {/* ── LEFT PANEL ── */}
+            {/* LEFT PANEL */}
             <div className={styles.leftPanel}>
-              {/* Title row */}
               <div className={styles.boardTitleRow}>
                 <span className={styles.boardCity}>{board.name}</span>
+
                 {board.startDate && (
                   <span className={styles.boardDates}>
                     {dayjs(board.startDate).format("D MMM")}
                     {board.endDate && ` – ${dayjs(board.endDate).format("D MMM")}`}
                   </span>
                 )}
-                {/* Collaborators */}
+
+                {/* Members */}
                 <div className={styles.collabSection}>
                   <span className={styles.collabLabel}>In collaboration with:</span>
                   <div className={styles.collabAvatars}>
@@ -135,49 +171,63 @@ const TravelBoardPage: React.FC = () => {
                     ))}
                   </div>
                 </div>
-                {/* +/− buttons */}
+
                 <div className={styles.iconBtns}>
-                  <button className={styles.iconBtn} onClick={() => console.log("Add place")}>Add a place</button>
-                  <button className={styles.iconBtn} onClick={() => console.log("Remove place")}>Remove a place</button>
+                  <button className={styles.iconBtn}>Add a place</button>
+                  <button className={styles.iconBtn}>Remove a place</button>
                 </div>
               </div>
 
               <p className={styles.sectionLabel}>Saved Places:</p>
 
-              {/* Places grid */}
+              {/* ✅ REAL PLACES GRID */}
               <div className={styles.placesGrid}>
-                {Array.from({ length: totalSlots }).map((_, i) => {
-                  const place = savedPlaces[i];
-                  const ownerPic = place ? memberPictures[place.addedByUserId] : null;
+                {savedPlaces.map((place) => {
+                  const ownerPic = memberPictures[place.addedByUserId];
+
                   return (
-                    <div key={i} className={styles.placeCard}>
-                      {place?.imageUrl && (
-                        <img src={place.imageUrl} alt={place.name} className={styles.placeImg} />
-                      )}
-                      {place && (
-                        ownerPic
-                          ? <img src={ownerPic} alt="owner" className={styles.placeOwnerIcon} />
-                          : <div className={styles.placeOwnerFallback}>👤</div>
+                    <div key={place.id} className={styles.placeCard}>
+                      
+                      {/* Placeholder (replace later with Google image) */}
+                      <div className={styles.placeImgPlaceholder}>
+                        {place.name}
+                      </div>
+
+                      {/* Avatar */}
+                      {ownerPic ? (
+                        <img
+                          src={ownerPic}
+                          alt="owner"
+                          className={styles.placeOwnerIcon}
+                        />
+                      ) : (
+                        <div className={styles.placeOwnerFallback}>👤</div>
                       )}
                     </div>
                   );
                 })}
+
+                {savedPlaces.length === 0 && (
+                  <p>No places added yet.</p>
+                )}
               </div>
             </div>
 
-            {/* ── DIVIDER ── */}
+            {/* DIVIDER */}
             <div className={styles.divider} />
 
-            {/* ── RIGHT PANEL: Activity Log ── */}
+            {/* RIGHT PANEL */}
             <div className={styles.rightPanel}>
               <p className={styles.sectionLabel}>Activities Log:</p>
+
               <div className={styles.activityList}>
                 {(board.activityLogs ?? []).map((log) => {
                   const pic = memberPictures[log.userId];
+
                   return (
                     <div key={log.id} className={styles.activityItem}>
                       {pic
-                        ? <img src={pic} alt="user" className={styles.avatarFallback} style={{ objectFit: "cover" }} />
+                        ? <img src={pic} className={styles.avatarFallback} />
                         : <div className={styles.avatarFallback}>👤</div>
                       }
                       <span className={styles.activityText}>{log.action}</span>
