@@ -110,8 +110,8 @@ reason).
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@despoinapantazi]** | [23.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/89cb688b4d4b95d9b438e56456cb966a11ba8993] | [Transfer Saved Countries from User to Preferences entity #205] | [Integrate the backend of the Saved Countries to the Preferences' files] |
 |                    | [24.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/0d9c04f7710d052f5c69e59f9b37f793e8605d4d] | [Conclude Preferences' testing #277] | [Write PreferencesService tests, Write tests for the added Saved Countries] |
-| **[@nsavas8]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@nsavas8]** | [22.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/5bbb378aa22a4a7aac7d99062d0273df3e7a6901] | [Implementation of backend for saving a place to a travel board] | [One of the main funtionalities of our app is adding places to a travel board] |
+|                    | [24.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/76f03f6d13a37e11b9e4e02e94437232004a4d0f] | [Added DTOs for getting all saved places of a user or a travel board] | [We need to be able to fetch all saved places of a user or of a travel board] |
 | **[@yalini-siva]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 
