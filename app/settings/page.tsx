@@ -1,11 +1,11 @@
 "use client";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 import Header from "@/components/Header";
-import { useParams } from "next/navigation";
 import styles from "@/styles/page.module.css";
 import { App, ConfigProvider, Form, Input, Select, theme } from "antd";
 import { useState, useRef, useEffect } from "react";
 import { ApiService } from "@/api/apiService";
+import { User } from "@/types/user";
 
 interface FormFieldProps {
   bio: string;
@@ -19,19 +19,39 @@ interface CountryApiItem {
 
 const SettingsPageInner: React.FC = () => {
   const isAllowed = useProtectedRoute();
-  const { id } = useParams();
   const apiService = new ApiService();
   const { message } = App.useApp();
   const [form] = Form.useForm();
 
+  const [userId, setUserId] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [countryOptions, setCountryOptions] = useState<{ label: string; value: string }[]>([]);
   const [saving, setSaving] = useState(false);
+  const [initialPreferences, setInitialPreferences] = useState<{
+    bio: string;
+    profilePicture: string | null;
+    visitedCountries: string[];
+    wishlistCountries: string[];
+  } | null>(null);
 
   useEffect(() => {
-    if (!isAllowed || !id) return;
+    const storedUser = localStorage.getItem("user");
+    if (!storedUser) return;
+
+    try {
+      const parsedUser: User = JSON.parse(storedUser);
+      if (parsedUser?.id != null) {
+        setUserId(String(parsedUser.id));
+      }
+    } catch {
+      // ignore malformed user state and keep the page empty
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isAllowed || !userId) return;
     const loadPrefs = async () => {
       try {
         const prefs = await apiService.get<{
@@ -39,24 +59,32 @@ const SettingsPageInner: React.FC = () => {
           profilePicture?: string;
           visitedCountries?: string[];
           wishlistCountries?: string[];
-        }>(`/users/${id}/preferences`);
+        }>(`/users/${userId}/preferences`);
+
+        const nextPreferences = {
+          bio: prefs.bio ?? "",
+          profilePicture: prefs.profilePicture ?? null,
+          visitedCountries: prefs.visitedCountries ?? [],
+          wishlistCountries: prefs.wishlistCountries ?? [],
+        };
 
         form.setFieldsValue({
-          bio: prefs.bio ?? "",
-          countries_visited: prefs.visitedCountries ?? [],
-          countries_wishlist: prefs.wishlistCountries ?? [],
+          bio: nextPreferences.bio,
+          countries_visited: nextPreferences.visitedCountries,
+          countries_wishlist: nextPreferences.wishlistCountries,
         });
+        setInitialPreferences(nextPreferences);
 
-        if (prefs.profilePicture) {
-          setPreviewUrl(prefs.profilePicture);
-          setImageBase64(prefs.profilePicture);
+        if (nextPreferences.profilePicture) {
+          setPreviewUrl(nextPreferences.profilePicture);
+          setImageBase64(nextPreferences.profilePicture);
         }
       } catch {
         // no preferences yet
       }
     };
     loadPrefs();
-  }, [isAllowed, id]);
+  }, [isAllowed, userId, form]);
 
   useEffect(() => {
     const fetchCountries = async () => {
@@ -91,15 +119,41 @@ const SettingsPageInner: React.FC = () => {
   };
 
   const handleSave = async (values: FormFieldProps) => {
+    if (!userId) return;
+
     setSaving(true);
     try {
-      await apiService.put(`/users/${id}/preferences`, {
-        bio: values.bio ?? null,
-        profilePicture: imageBase64 ?? null,
-        visitedCountries: values.countries_visited ?? null,
-        wishlistCountries: values.countries_wishlist ?? null,
-      });
+      const payload: Record<string, unknown> = {};
+
+      if (!initialPreferences || values.bio !== initialPreferences.bio) {
+        payload.bio = values.bio ?? null;
+      }
+
+      if (!initialPreferences || imageBase64 !== initialPreferences.profilePicture) {
+        payload.profilePicture = imageBase64 ?? null;
+      }
+
+      if (!initialPreferences || JSON.stringify(values.countries_visited ?? []) !== JSON.stringify(initialPreferences.visitedCountries)) {
+        payload.visitedCountries = values.countries_visited ?? [];
+      }
+
+      if (!initialPreferences || JSON.stringify(values.countries_wishlist ?? []) !== JSON.stringify(initialPreferences.wishlistCountries)) {
+        payload.wishlistCountries = values.countries_wishlist ?? [];
+      }
+
+      if (Object.keys(payload).length === 0) {
+        message.info("No changes to save.");
+        return;
+      }
+
+      await apiService.put(`/users/${userId}/preferences`, payload);
       message.success("Preferences updated successfully!");
+      setInitialPreferences({
+        bio: values.bio ?? "",
+        profilePicture: imageBase64,
+        visitedCountries: values.countries_visited ?? [],
+        wishlistCountries: values.countries_wishlist ?? [],
+      });
     } catch {
       message.error("Something went wrong. Please try again.");
     } finally {
@@ -107,7 +161,7 @@ const SettingsPageInner: React.FC = () => {
     }
   };
 
-  if (isAllowed === null || !isAllowed) return null;
+  if (isAllowed === null || !isAllowed || !userId) return null;
 
   return (
     <>
