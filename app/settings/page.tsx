@@ -14,15 +14,24 @@ const SettingsPage: React.FC = () => {
 
   return (
     <>
-    <Header />
-    <div className={styles.page}>
-        <div className={styles.container}>
-            <div className={styles.header}>
-                <h1 className={styles.title}> Coming Soon... {id}</h1>
-            </div>
-        </div>
-    </div>
+      <Header />
+      <main className={styles.main} style={{
+            padding: "24px 70px",
+            minHeight: "100vh",
+            boxSizing: "border-box",
+            overflow: "visible" }}>
+        <h1 className={styles.title} style={{ margin: "0 0 24px 0" }}>
+          Settings
+        </h1>
+        <h2 style={{ color: "#000000", fontWeight: "700", fontSize: "28px", margin: "0 0 16px 4px" }}>
+            Change your preferences
+        </h2>
+        <h2 style={{ color: "#000000", fontWeight: "700", fontSize: "28px", margin: "0 0 16px 4px" }}>
+            Change your account details
+        </h2>
+      </main>
     </>
   );
 };
+
 export default SettingsPage;
