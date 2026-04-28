@@ -221,17 +221,54 @@ const SettingsPageInner: React.FC = () => {
       message.warning("Please fill in both password fields.");
       return;
     }
+    // validate new password rules (same as register page)
+    if (newPassword.length < 8) {
+      message.error("Password must be at least 8 characters long.");
+      return;
+    }
+    if (!/[A-Z]/.test(newPassword)) {
+      message.error("Password must contain at least one uppercase letter.");
+      return;
+    }
+    if (!/[0-9]/.test(newPassword)) {
+      message.error("Password must contain at least one number.");
+      return;
+    }
+    if (!/[^a-zA-Z0-9]/.test(newPassword)) {
+      message.error("Password must contain at least one special character.");
+      return;
+    }
+
     setSavingPassword(true);
     try {
-      await apiService.put(`/users/${userId}/password`, {
-        oldPassword,
-        newPassword,
+      // step 1: verify old password by attempting login with current credentials
+      const storedUser = localStorage.getItem("user");
+      const parsedUser = storedUser ? JSON.parse(storedUser) as { username?: string } : {};
+      if (!parsedUser.username) {
+        message.error("Could not verify your identity. Please log in again.");
+        return;
+      }
+
+      try {
+        await apiService.post("/login", {
+          username: parsedUser.username,
+          password: oldPassword,
+        });
+      } catch {
+        message.error("Old password is incorrect.");
+        return;
+      }
+
+      // step 2: old password is correct — update to new password
+      await apiService.put(`/users/${userId}`, {
+        password: newPassword,
       });
-      message.success("Password changed successfully!");
-      setOldPassword("");
-      setNewPassword("");
+
+      message.success("Password changed successfully! Please log in again.");
+      localStorage.clear();
+      router.push("/login");
     } catch {
-      message.error("Could not change password. Check your old password and try again.");
+      message.error("Could not change password. Please try again.");
     } finally {
       setSavingPassword(false);
     }
@@ -292,7 +329,7 @@ const SettingsPageInner: React.FC = () => {
     modal.confirm({
       ...manageConfirmBase,
       title: <span style={{ color: "#0B0696", fontWeight: 800 }}>Delete your account?</span>,
-      content: <span style={{ color: "#171717" }}>We're sad to see you go! Are you sure you want to delete your account?This will permanently delete your account and all associated data. This action cannot be undone.</span>,
+      content: <span style={{ color: "#171717" }}>We're sad to see you go! Are you sure you want to delete your account? This will permanently delete your account and all associated data. This action cannot be undone.</span>,
       okText: "Delete Account",
       cancelText: "Cancel",
       onOk: async () => {
