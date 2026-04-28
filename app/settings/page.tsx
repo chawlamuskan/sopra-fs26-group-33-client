@@ -2,11 +2,12 @@
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 import Header from "@/components/Header";
 import styles from "@/styles/page.module.css";
-import { App, ConfigProvider, Form, Input, Select, theme } from "antd";
+import { App, ConfigProvider, Form, Input, Select, theme, Modal } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import { useState, useRef, useEffect } from "react";
 import { ApiService } from "@/api/apiService";
 import { User } from "@/types/user";
+import { useRouter } from "next/navigation";
 
 interface FormFieldProps {
   bio: string;
@@ -22,6 +23,8 @@ const SettingsPageInner: React.FC = () => {
   const isAllowed = useProtectedRoute();
   const apiService = new ApiService();
   const { message } = App.useApp();
+  const [modal, contextHolder] = Modal.useModal();
+  const router = useRouter();
   const [form] = Form.useForm();
 
   const [userId, setUserId] = useState<string | null>(null);
@@ -259,15 +262,55 @@ const SettingsPageInner: React.FC = () => {
     }
   };
 
+  // delete account
+  const [deletingAccount, setDeletingAccount] = useState(false);
+
   const handleDeleteAccount = async () => {
-    if (!confirm("Are you sure you want to delete your account? This cannot be undone.")) return;
-    try {
-      await apiService.delete(`/users/${userId}`);
-      localStorage.clear();
-      window.location.href = "/";
-    } catch {
-      message.error("Could not delete account.");
-    }
+    const manageConfirmBase = {
+      centered: true,
+      icon: null,
+      okButtonProps: {
+        style: {
+          background: "#0B0696",
+          border: "none",
+          borderRadius: "8px",
+          height: "36px",
+          padding: "0 1.2rem",
+        },
+      },
+      cancelButtonProps: {
+        style: {
+          borderRadius: "8px",
+          border: "1px solid #0B0696",
+          color: "#0B0696",
+          height: "36px",
+          padding: "0 1.2rem",
+        },
+      },
+    };
+
+    modal.confirm({
+      ...manageConfirmBase,
+      title: <span style={{ color: "#0B0696", fontWeight: 800 }}>Delete your account?</span>,
+      content: <span style={{ color: "#171717" }}>We're sad to see you go! Are you sure you want to delete your account?This will permanently delete your account and all associated data. This action cannot be undone.</span>,
+      okText: "Delete Account",
+      cancelText: "Cancel",
+      onOk: async () => {
+        setDeletingAccount(true);
+        try {
+          await apiService.delete(`/users/${userId}`);
+          // Clear localStorage
+          localStorage.clear();
+          // Redirect to home page
+          router.push("/");
+          message.success("Account deleted successfully.");
+        } catch (err) {
+          message.error("Could not delete account. Please try again.");
+        } finally {
+          setDeletingAccount(false);
+        }
+      },
+    });
   };
 
   const filteredUsers = allUsers.filter((user) => {
@@ -281,6 +324,7 @@ const SettingsPageInner: React.FC = () => {
 
   return (
     <>
+      {contextHolder}
       <Header />
       <main style={{
         padding: "24px 70px",
@@ -474,18 +518,19 @@ const SettingsPageInner: React.FC = () => {
             <button
               type="button"
               onClick={handleDeleteAccount}
-              style={{ background: "#0B0696", color: "white", border: "none", borderRadius: "20px", padding: "10px 32px", fontSize: "16px", fontWeight: 600, cursor: "pointer" }}
+              disabled={deletingAccount}
+              style={{ background: "#d9534f", color: "white", border: "none", borderRadius: "20px", padding: "10px 32px", fontSize: "16px", fontWeight: 600, cursor: deletingAccount ? "not-allowed" : "pointer", opacity: deletingAccount ? 0.6 : 1 }}
             >
-              Delete my account
+              {deletingAccount ? "Deleting…" : "Delete my account"}
             </button>
             <button
               type="button"
-              disabled={savingPassword || savingFriends}
+              disabled={savingPassword || savingFriends || deletingAccount}
               onClick={async () => {
                 if (oldPassword.trim() || newPassword.trim()) await handleChangePassword();
                 await handleSaveFriends();
               }}
-              style={{ background: "#0B0696", color: "white", border: "none", borderRadius: "20px", padding: "10px 32px", fontSize: "16px", fontWeight: 600, cursor: "pointer" }}
+              style={{ background: "#0B0696", color: "white", border: "none", borderRadius: "20px", padding: "10px 32px", fontSize: "16px", fontWeight: 600, cursor: (savingPassword || savingFriends || deletingAccount) ? "not-allowed" : "pointer" }}
             >
               {savingPassword || savingFriends ? "Saving…" : "Save changes"}
             </button>
