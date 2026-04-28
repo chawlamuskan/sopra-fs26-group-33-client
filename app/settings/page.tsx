@@ -47,7 +47,6 @@ const SettingsPageInner: React.FC = () => {
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [userPreferences, setUserPreferences] = useState<Record<string, string | null>>({});
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
-  const [currentFriendIds, setCurrentFriendIds] = useState<number[]>([]);
   const [savingFriends, setSavingFriends] = useState(false);
 
   // get userId from localStorage
@@ -62,18 +61,21 @@ const SettingsPageInner: React.FC = () => {
     }
   }, []);
 
-  // load existing preferences
+  // load existing preferences + build two-way friends list
   useEffect(() => {
     if (!isAllowed || !userId) return;
     const loadPrefs = async () => {
       try {
+        const myId = Number(userId);
+
+        // fetch my own preferences
         const prefs = await apiService.get<{
           bio?: string;
           profilePicture?: string;
           visitedCountries?: string[];
           wishlistCountries?: string[];
           friends?: number[];
-        }>(`/users/${userId}/preferences`);
+        }>(`/users/${myId}/preferences`);
 
         const nextPreferences = {
           bio: prefs.bio ?? "",
@@ -93,9 +95,27 @@ const SettingsPageInner: React.FC = () => {
           setImageBase64(nextPreferences.profilePicture);
         }
 
-        // store existing friend ids so we can merge on save
-        setCurrentFriendIds((prefs.friends ?? []).map(Number));
-        setSelectedFriends((prefs.friends ?? []).map(String));
+        // build two-way friend ids — same logic as travelboard handleOpenCreate
+        const myFriendIds = (prefs.friends ?? []).map(Number);
+        const mutualIds = new Set<number>(myFriendIds);
+
+        // fetch all users to check who has added me
+        const allUsersData = await apiService.get<{ id: number; username: string }[]>("/users");
+        await Promise.all(
+          allUsersData
+            .filter((u) => Number(u.id) !== myId)
+            .map(async (u) => {
+              try {
+                const theirPrefs = await apiService.get<{ friends?: number[] }>(`/users/${u.id}/preferences`);
+                const theirFriends = (theirPrefs.friends ?? []).map(Number);
+                if (theirFriends.includes(myId)) mutualIds.add(Number(u.id));
+              } catch {
+                // user has no preferences yet, skip
+              }
+            })
+        );
+
+        setSelectedFriends(Array.from(mutualIds).map(String));
       } catch {
         // no preferences yet
       }
@@ -218,10 +238,19 @@ const SettingsPageInner: React.FC = () => {
     if (!userId) return;
     setSavingFriends(true);
     try {
+      // only save the friends that THIS user explicitly added (one-directional save)
+      // we only write back friends the current user owns, not the ones added by others
+      const myOwnFriends = selectedFriends.filter(async (id) => {
+        try {
+          const theirPrefs = await apiService.get<{ friends?: number[] }>(`/users/${id}/preferences`);
+          return !(theirPrefs.friends ?? []).map(Number).includes(Number(userId));
+        } catch {
+          return true;
+        }
+      });
       await apiService.put(`/users/${userId}/preferences`, {
         friends: selectedFriends.map(Number),
       });
-      setCurrentFriendIds(selectedFriends.map(Number));
       message.success("Friends updated successfully!");
     } catch {
       message.error("Could not update friends.");
@@ -427,6 +456,11 @@ const SettingsPageInner: React.FC = () => {
                 const user = allUsers.find((u) => String(u.id) === id);
                 return (
                   <div key={id} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "4px 10px", background: "#F4EBEB", borderRadius: "20px", fontSize: "14px" }}>
+                    {userPreferences[id] ? (
+                      <img src={userPreferences[id]!} alt={user?.username} style={{ width: 24, height: 24, borderRadius: "50%", objectFit: "cover" }} />
+                    ) : (
+                      <span>👤</span>
+                    )}
                     {user?.username}
                     <span style={{ cursor: "pointer", color: "#d9534f", fontWeight: 700 }} onClick={() => setSelectedFriends((prev) => prev.filter((i) => i !== id))}>✕</span>
                   </div>
@@ -435,7 +469,7 @@ const SettingsPageInner: React.FC = () => {
             </div>
           )}
 
-          {/* Bottom buttons: Delete account + Save changes */}
+          {/* Bottom buttons */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "16px" }}>
             <button
               type="button"
