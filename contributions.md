@@ -123,7 +123,7 @@ reason).
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
 | **[@chawlamuskan]** | [21.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/f6086bc9838d8206389691f0f43ed9e7e42c3551] | [show notification of invitations + enter invite code to join a TB + accept / decline invitation + confirm code #54] | [the user can see by clicking the join button, if there are any notfications, either accept or decline them, or enter an invitation code to join a board] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+|                    | [28.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/c5d1f5c1b9655243c867f309299a529a347f59bc] | [server side, endpoint to delete users account, removes all users data like tb and saved places, removes membership if not owner #369] | [the user can delete his own account and all associated data will get deleted as well ] |
 | **[@nadiapan4]** | [24.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/926206988cde429b0ac4febcaff8cb6107de519f] | [Implemented frontend of an individual travel board page, with saved places that were added to a travel board being fetched from the database.] | [When clicking see more, users can now see the individual travel board, with all the saved places. The profile picture of the user that added the place is also displayed] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@despoinapantazi]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
@@ -140,7 +140,7 @@ reason).
 
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
-| **[@chawlamuskan]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@chawlamuskan]** | [28.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/3a3f4e30781e71db56d79fb083ec1550eb900d1c] | [in settings page, created form to change password + add / remove friends #173] | [settings page is fully implemented front + backend, so the user can update his prefrences, see his current prefrences, change his password by following the password rules, see his current friends, add and remove friends] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@nadiapan4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
