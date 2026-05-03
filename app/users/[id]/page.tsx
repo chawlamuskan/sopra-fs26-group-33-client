@@ -31,6 +31,7 @@ interface PlaceInfo {
   address: string;
   rating: number | null;
   placeId: string;
+  photoReference: string | null;
 }
 
 const ZoomTracker: React.FC<{ onZoomChange: (zoom: number) => void }> = ({
@@ -72,7 +73,7 @@ const PlaceClickInterceptor: React.FC<{
               headers: {
                 "Content-Type": "application/json",
                 "X-Goog-Api-Key": process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
-                "X-Goog-FieldMask": "displayName,formattedAddress,rating,types",
+                "X-Goog-FieldMask": "displayName,formattedAddress,rating,types,photos.name",
               },
             }
           );
@@ -81,6 +82,9 @@ const PlaceClickInterceptor: React.FC<{
             return;
           }
           const data = await response.json();
+          console.log("RAW Google Places response:", JSON.stringify(data, null, 2));
+          console.log("photos field:", data.photos);
+          console.log("photoReference extracted:", data.photos?.[0]?.name ?? null);
           const types: string[] = data.types ?? [];
           const isPOI = types.some((t) => ALLOWED_POI_TYPES.has(t));
           if (!isPOI) return;
@@ -89,6 +93,7 @@ const PlaceClickInterceptor: React.FC<{
             address: data.formattedAddress ?? "No address available",
             rating: data.rating ?? null,
             placeId,
+            photoReference: data.photos?.[0]?.name ?? null,
           });
         } catch (err) {
           console.error("Failed to fetch place details:", err);
@@ -144,6 +149,7 @@ const PlaceCard: React.FC<{
           name: placeInfo.name,
           address: placeInfo.address,
           rating: placeInfo.rating,
+          photoReference: placeInfo.photoReference ?? null,
         });
         setSavedFeedback("Saved to places!");
       } catch (err: unknown) {
@@ -174,6 +180,7 @@ const PlaceCard: React.FC<{
           name: placeInfo.name,
           address: placeInfo.address,
           rating: placeInfo.rating,
+          photoReference: placeInfo.photoReference ?? null,
         });
         setBoardFeedback("Added to travel board!");
       } catch (err: unknown) {
@@ -185,12 +192,13 @@ const PlaceCard: React.FC<{
     };
 
       const payload = {
-  externalPlaceId: placeInfo.placeId,
-  name: placeInfo.name,
-  address: placeInfo.address,
-  rating: placeInfo.rating,
-  types: [],
-};
+        externalPlaceId: placeInfo.placeId,
+        name: placeInfo.name,
+        address: placeInfo.address,
+        rating: placeInfo.rating,
+        types: [],
+        photoReference: placeInfo.photoReference ?? null,
+      };
   console.log("Saving place payload:", payload);
   console.log("userId:", userId);
 
@@ -374,6 +382,7 @@ const UserDashboard: React.FC = () => {
             >
               <ZoomTracker onZoomChange={setCurrentZoom} />
               <PlaceClickInterceptor onPlaceClick={handlePlaceClick} />
+              
 
               {/* Country Info Popup */}
               {showCountryPopup && (
