@@ -261,10 +261,6 @@ const PlaceCard: React.FC<{
             </div>
           )}
 
-          {/* Board feedback toast */}
-          {boardFeedback && (
-            <p className={popupStyles.toast}>✓ {boardFeedback}</p>
-          )}
         </div>
       </div>
 
@@ -303,9 +299,11 @@ const PlaceCard: React.FC<{
         )}
       </div>
 
-      {/* Feedback toast */}
       {savedFeedback && (
         <p className={popupStyles.toast}>✓ {savedFeedback}</p>
+      )}
+      {boardFeedback && (
+        <p className={popupStyles.toast}>✓ {boardFeedback}</p>
       )}
     </div>
   );

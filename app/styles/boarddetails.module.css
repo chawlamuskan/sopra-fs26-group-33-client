@@ -33,7 +33,7 @@
   gap: 24px;
 }
 .leftPanel { flex: 1; }
-.rightPanel { width: 300px; }
+.rightPanel { width: 400px; }
 .divider { width: 1.5px; background: #ccc; border-radius: 2px; align-self: stretch; }
 
 .boardTitleRow { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; flex-wrap: wrap; }

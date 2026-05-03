@@ -79,7 +79,8 @@ const TravelBoardsPage: React.FC = () => {
     const [notifAvatars, setNotifAvatars] = useState<Record<number, string | null>>({});
     const [notifCount, setNotifCount] = useState<number>(0);
 
-
+    ///// to display the images of the travel boards /////
+    const [boardPlaces, setBoardPlaces] = useState<Record<number, { photoReference?: string | null; name: string }[]>>({});
 
 
     useEffect(() => {
@@ -157,6 +158,21 @@ const TravelBoardsPage: React.FC = () => {
         cancelled = true;
       };
     }, [boards, isAllowed, memberProfilePictures]);
+
+    useEffect(() => {
+      if (!isAllowed || boards.length === 0) return;
+      boards.forEach(async (board) => {
+        if (boardPlaces[board.id]) return;
+        try {
+          const places = await apiService.get<{ id: number; name: string; photoReference?: string | null }[]>(
+            `/travelboards/${board.id}/places`
+          );
+          setBoardPlaces((prev) => ({ ...prev, [board.id]: places.slice(0, 6) }));
+        } catch {
+          setBoardPlaces((prev) => ({ ...prev, [board.id]: [] }));
+        }
+      });
+    }, [boards, isAllowed]);
 
     const handleSave = async () => {
     if (!boardName.trim()) {
@@ -603,11 +619,26 @@ const TravelBoardsPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* 6 empty place boxes */}
               <div className={styles.placesGrid}>
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className={styles.placeBox} />
-                ))}
+                {Array.from({ length: 6 }).map((_, i) => {
+                  const place = (boardPlaces[board.id] ?? [])[i];
+                  const photoUrl = place?.photoReference
+                    ? `https://places.googleapis.com/v1/${place.photoReference}/media?maxWidthPx=200&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
+                    : null;
+
+                  return (
+                    <div key={i} className={styles.placeBox} style={{ overflow: "hidden", position: "relative" }}>
+                      {photoUrl ? (
+                        <img
+                          src={photoUrl}
+                          alt={place?.name ?? ""}
+                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                          onError={(e) => { e.currentTarget.style.display = "none"; }}
+                        />
+                      ) : null}
+                    </div>
+                  );
+                })}
               </div>
               
               {/* See more */}
