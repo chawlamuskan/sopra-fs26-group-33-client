@@ -130,8 +130,8 @@ reason).
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@nsavas8]** | [29.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/52f80021c7b23b8caa75fc8bc1b9633b59e27ba8] | [Created methods to delete a place from saved places or from travel boards] | [If plans change, users should be able to remove places they have saved earlier] |
 |                    | [29.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/d919fda55d3acf8623f7b4013f2743251ffb59aa] | [Created tests for the saved places as well as for the travel board places] | [To achieve the 75% test coverage, investing time in writing tests is very important] |
-| **[@yalini-siva]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@yalini-siva]** | [03.05.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/ba136d7e238db2c11b65c9581a62237b63ab63f8] | [Added tests that accepting a friend request creates a friendship and declining a friend request does not #405, #406] | [Ensures the main friend request flow updates friendships correctly depending on whether a request is accepted or declined] |
+|                    | [03.05.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/5a5baec8d074a021bd5d5b48b3dfa51d57ac1b60] | [Added test that removing a friend updates the friend list correctly #226] | [Ensures users can remove friends and they are no longer shown in each other’s friend lists] |
 
 
 ---
