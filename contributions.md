@@ -128,8 +128,8 @@ reason).
 |                    | [03.05.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/259890169a1abfb2f2005e0050cb0afbc0772cf5] | [Displaying pictures of places in the saved places page, in the individual travel board page and in the general travel board page (6 pictures per travel board)] | [Users can see how the place that they saved looks like, giving a visual reference to the place and also making the pages look more lively and populated] |
 | **[@despoinapantazi]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-| **[@nsavas8]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@nsavas8]** | [29.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/52f80021c7b23b8caa75fc8bc1b9633b59e27ba8] | [Created methods to delete a place from saved places or from travel boards] | [If plans change, users should be able to remove places they have saved earlier] |
+|                    | [29.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/d919fda55d3acf8623f7b4013f2743251ffb59aa] | [Created tests for the saved places as well as for the travel board places] | [To achieve the 75% test coverage, investing time in writing tests is very important] |
 | **[@yalini-siva]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 
