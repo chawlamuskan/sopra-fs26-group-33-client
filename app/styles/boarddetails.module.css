@@ -105,16 +105,18 @@
 
 .placesGrid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(6, 1fr); 
   gap: 8px;
 }
+
 .placeCard {
   background: white;
   border-radius: 10px;
-  height: 80px;
+  aspect-ratio: 1 / 1; 
   position: relative;
   overflow: hidden;
 }
+
 .placeImg { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
 .placeOwnerIcon {
   position: absolute;
