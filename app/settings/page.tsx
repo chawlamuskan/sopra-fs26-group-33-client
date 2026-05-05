@@ -417,7 +417,31 @@ const SettingsPageInner: React.FC = () => {
                     <span>⬆</span> Upload
                   </button>
                   {previewUrl && (
-                    <button type="button" onClick={() => { setPreviewUrl(null); setImageBase64(null); if (fileInputRef.current) fileInputRef.current.value = ""; }} style={{ display: "flex", alignItems: "center", gap: "6px", padding: "6px 16px", borderRadius: "20px", border: "1px solid #ffd6d6", background: "#fff5f5", color: "#d9534f", fontSize: "14px", cursor: "pointer", fontWeight: 500 }}>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const prev = previewUrl;
+                        // Optimistically clear preview and file input
+                        setPreviewUrl(null);
+                        setImageBase64(null);
+                        if (fileInputRef.current) fileInputRef.current.value = "";
+
+                        try {
+                          // Persist removal to backend
+                          if (userId) {
+                            await apiService.put(`/users/${userId}/preferences`, { profilePicture: null });
+                            setInitialPreferences((p) => (p ? { ...p, profilePicture: null } : p));
+                          }
+                          message.success("Profile picture removed.");
+                        } catch (err) {
+                          // Revert on failure
+                          setPreviewUrl(prev);
+                          setImageBase64(prev);
+                          message.error("Could not remove profile picture. Please try again.");
+                        }
+                      }}
+                      style={{ display: "flex", alignItems: "center", gap: "6px", padding: "6px 16px", borderRadius: "20px", border: "1px solid #ffd6d6", background: "#fff5f5", color: "#d9534f", fontSize: "14px", cursor: "pointer", fontWeight: 500 }}
+                    >
                       <span>✕</span> Remove
                     </button>
                   )}
