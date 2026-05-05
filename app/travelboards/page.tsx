@@ -493,13 +493,12 @@ const TravelBoardsPage: React.FC = () => {
           <Button className={styles.btn} onClick={handleOpenCreate}>
             Create
           </Button>
-          <Button 
-              className={styles.btn} 
+            <Button
+              className={`${styles.btn} ${isManageMode ? styles.doneBtn : ""}`}
               onClick={() => setIsManageMode(!isManageMode)}
-              style={isManageMode ? {background: "#0B0696", color: "white"} : {}}
-          >
+            >
               {isManageMode ? "Done" : "Manage"}
-          </Button>
+            </Button>
           {/* #38 join modal */}
           <div style={{ position: "relative", display: "inline-block" }}>
             <Button className={styles.btn} onClick={handleOpenJoin}>Join</Button>
