@@ -35,15 +35,71 @@ type BoardDetail = {
   activityLogs?: ActivityLog[];
 };
 
-const TravelBoardPage: React.FC = () => {
-  const isAllowed = useProtectedRoute();
-  const { id } = useParams();
-  const router = useRouter();
-  const apiService = new ApiService();
+  const TravelBoardPage: React.FC = () => {
+    const isAllowed = useProtectedRoute();
+    const { id } = useParams();
+    const router = useRouter();
+    const apiService = new ApiService();
 
-  const [board, setBoard] = useState<BoardDetail | null>(null);
-  const [savedPlaces, setSavedPlaces] = useState<SavedPlace[]>([]);
-  const [memberPictures, setMemberPictures] = useState<Record<number, string | null>>({});
+    const [board, setBoard] = useState<BoardDetail | null>(null);
+    const [savedPlaces, setSavedPlaces] = useState<SavedPlace[]>([]);
+    const [memberPictures, setMemberPictures] = useState<Record<number, string | null>>({});
+
+    const PlaceImage = ({ place }: { place: SavedPlace }) => {
+      const [imgError, setImgError] = useState(false);
+      const photoUrl = place.photoReference && !imgError
+        ? `https://places.googleapis.com/v1/${place.photoReference}/media?maxWidthPx=400&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
+        : null;
+
+      return (
+        <>
+          {photoUrl ? (
+            <img
+              src={photoUrl}
+              alt={place.name}
+              onError={() => setImgError(true)}
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+              }}
+            />
+          ) : (
+            <div style={{
+              position: "absolute",
+              inset: 0,
+              background: "#eaf5fb",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }} />
+          )}
+
+          <div style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 1,
+            background: "linear-gradient(transparent, rgba(0,0,0,0.6))",
+            color: "#fff",
+            fontSize: "10px",
+            fontWeight: "600",
+            padding: "16px 6px 6px",
+            textAlign: "center",
+            lineHeight: "1.2",
+            overflow: "hidden",
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+          }}>
+            {place.name}
+          </div>
+        </>
+      );
+    };
 
   useEffect(() => {
     if (!isAllowed || !id) return;
@@ -180,30 +236,20 @@ const TravelBoardPage: React.FC = () => {
 
               <p className={styles.sectionLabel}>Saved Places:</p>
 
-              {/* ✅ REAL PLACES GRID */}
               <div className={styles.placesGrid}>
                 {savedPlaces.map((place) => {
                   const ownerPic = memberPictures[place.addedByUserId];
 
                   return (
                     <div key={place.id} className={styles.placeCard}>
-                      
-                      {/* Placeholder (replace later with Google image) */}
-                      <div className={styles.placeImgPlaceholder}>
-                        {place.name}
-                      </div>
+                       <PlaceImage place={place} />
 
-                      {/* Avatar */}
-                      {ownerPic ? (
-                        <img
-                          src={ownerPic}
-                          alt="owner"
-                          className={styles.placeOwnerIcon}
-                        />
-                      ) : (
-                        <div className={styles.placeOwnerFallback}>👤</div>
-                      )}
-                    </div>
+                    {ownerPic ? (
+                      <img src={ownerPic} alt="owner" className={styles.placeOwnerIcon} />
+                    ) : (
+                      <div className={styles.placeOwnerFallback}>👤</div>
+                    )}
+                  </div>
                   );
                 })}
 
