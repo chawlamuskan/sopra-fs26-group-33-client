@@ -342,30 +342,8 @@ const TravelBoardsPage: React.FC = () => {
         if (!parsedUser.id) return;
         const myId = Number(parsedUser.id);
 
-        const allUsers = await apiService.get<{ id: number; username: string }[]>("/users");
-
-        let myFriendIds: number[] = [];
-        try {
-          const myPrefs = await apiService.get<{ friends?: number[] }>(`/users/${myId}/preferences`);
-          myFriendIds = (myPrefs.friends ?? []).map(Number);
-        } catch {
-          myFriendIds = [];
-        }
-
-        const mutualIds = new Set<number>(myFriendIds);
-        await Promise.all(
-          allUsers
-            .filter((u) => Number(u.id) !== myId)
-            .map(async (u) => {
-              try {
-                const theirPrefs = await apiService.get<{ friends?: number[] }>(`/users/${u.id}/preferences`);
-                const theirFriends = (theirPrefs.friends ?? []).map(Number);
-                if (theirFriends.includes(myId)) mutualIds.add(Number(u.id));
-              } catch { /* no preferences yet */ }
-            })
-        );
-
-        const friendUsers = allUsers.filter((u) => mutualIds.has(Number(u.id)));
+        // Fetch the list of friends for current user using the /friends endpoint
+        const friendUsers = await apiService.get<{ id: number; username: string }[]>("/friends");
 
         // fetch profile pictures for all friends in parallel
         const friendsWithAvatars = await Promise.all(
