@@ -1,21 +1,35 @@
 "use client";
 import { useRouter, usePathname } from "next/navigation";
-import { Button } from "antd";
+import { Button, Modal, App } from "antd";
 import { BellOutlined } from "@ant-design/icons";
 import { useEffect, useState, useRef } from "react";
 import { User, Preferences } from "@/types/user";
 import { useLogout } from "@/hooks/useLogout";
 import { useApi } from "@/hooks/useApi";
 
+type InvitationNotification = {
+  id: number;
+  boardId: number;
+  senderId: number;
+  receiverId: number;
+  status: string;
+  boardName: string;
+  senderUsername: string;
+};
+
 export default function HeaderButtons() {
   const router = useRouter();
   const pathname = usePathname();
   const logout = useLogout();
   const apiService = useApi();
+  const { message } = App.useApp();
   const [user, setUser] = useState<User | null>(null);
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const [isBellModalOpen, setIsBellModalOpen] = useState(false);
+  const [joinNotifications, setJoinNotifications] = useState<InvitationNotification[]>([]);
+  const [notifAvatars, setNotifAvatars] = useState<Record<number, string | null>>({});
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
@@ -46,6 +60,50 @@ export default function HeaderButtons() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  // Fetch notifications when bell modal opens
+  const handleOpenBellModal = async () => {
+    setIsBellModalOpen(true);
+    try {
+      const data = await apiService.get<InvitationNotification[]>("/invitations");
+      setJoinNotifications(data);
+
+      // fetch profile pictures for all senders in parallel
+      const avatarEntries = await Promise.all(
+        data.map(async (notif) => {
+          try {
+            const prefs = await apiService.get<{ profilePicture?: string | null }>(`/users/${notif.senderId}/preferences`);
+            return [notif.senderId, prefs.profilePicture ?? null] as const;
+          } catch {
+            return [notif.senderId, null] as const;
+          }
+        })
+      );
+      setNotifAvatars(Object.fromEntries(avatarEntries));
+    } catch {
+      setJoinNotifications([]);
+    }
+  };
+
+  const handleAcceptInvite = async (notif: InvitationNotification) => {
+    try {
+      await apiService.put(`/invitations/${notif.id}/accept`, {});
+      setJoinNotifications((prev) => prev.filter((n) => n.id !== notif.id));
+      message.success(`You joined "${notif.boardName}".`);
+    } catch {
+      message.error("Could not accept invite.");
+    }
+  };
+
+  const handleDeclineInvite = async (notif: InvitationNotification) => {
+    try {
+      await apiService.put(`/invitations/${notif.id}/decline`, {});
+      setJoinNotifications((prev) => prev.filter((n) => n.id !== notif.id));
+      message.success(`You declined the invitation to "${notif.boardName}".`);
+    } catch {
+      message.error("Could not decline invite.");
+    }
+  };
 
   if (pathname === "/") {
     return (
@@ -96,6 +154,10 @@ export default function HeaderButtons() {
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           {user?.id && (
             <BellOutlined 
+              onClick={(e) => {
+                e.stopPropagation();
+                handleOpenBellModal();
+              }}
               style={{
                 color: "white",
                 fontSize: "24px",
@@ -197,6 +259,61 @@ export default function HeaderButtons() {
           </div>
         </div>
       )}
+
+      {/* Bell Notifications Modal */}
+      <Modal
+        title={<span style={{ color: "#0B0696", fontWeight: 800, fontSize: "1.4rem" }}>Notifications</span>}
+        open={isBellModalOpen}
+        onCancel={() => setIsBellModalOpen(false)}
+        footer={null}
+      >
+        {/* Friend Requests section */}
+        <p style={{ color: "#0B0696", fontWeight: 700, fontSize: "1rem", marginBottom: "0.75rem" }}>Friend Requests</p>
+        <p style={{ color: "#030000", fontSize: "0.9rem", marginBottom: "1.5rem" }}>Coming soon...</p>
+
+        {/* Travelboard Notifications section */}
+        <p style={{ color: "#0B0696", fontWeight: 700, fontSize: "1rem", marginBottom: "0.75rem" }}>Travelboard Invitations</p>
+
+        {joinNotifications.length === 0 ? (
+          <p style={{ color: "#030000", fontSize: "0.9rem", marginBottom: "1.5rem" }}>No pending invitations.</p>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "1.5rem" }}>
+            {joinNotifications.map((notif) => (
+              <div key={notif.id} style={{
+                display: "flex", alignItems: "center", gap: "0.75rem",
+                background: "#f4ebeb", borderRadius: "30px", padding: "0.5rem 1rem"
+              }}>
+                {notifAvatars[notif.senderId] ? (
+                  <img
+                    src={notifAvatars[notif.senderId]!}
+                    alt={notif.senderUsername}
+                    style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }}
+                  />
+                ) : (
+                  <div style={{
+                    width: "36px", height: "36px", borderRadius: "50%",
+                    background: "#d6cece", flexShrink: 0,
+                    display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16,
+                  }}>👤</div>
+                )}
+                <span style={{ flex: 1, fontSize: "0.9rem", fontStyle: "italic" }}>
+                  <strong>{notif.senderUsername}</strong> invited you to &quot;{notif.boardName}&quot;
+                </span>
+                <Button
+                  size="small"
+                  onClick={() => handleAcceptInvite(notif)}
+                  style={{ background: "#0B0696", color: "white", border: "none", borderRadius: "20px" }}
+                >Accept</Button>
+                <Button
+                  size="small"
+                  onClick={() => handleDeclineInvite(notif)}
+                  style={{ background: "#0B0696", color: "white", border: "none", borderRadius: "20px" }}
+                >Decline</Button>
+              </div>
+            ))}
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }
