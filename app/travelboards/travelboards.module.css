@@ -50,6 +50,13 @@
   border-color: #0B0696 !important;
 }
 
+/* More specific selectors to override Ant Design's styles when necessary */
+.btn.doneBtn {
+  background: #0B0696 !important;
+  color: #ffffff !important;
+  border-color: #0B0696 !important;
+}
+
 /* ── empty state ── */
 .empty {
   margin-top: 4rem;
