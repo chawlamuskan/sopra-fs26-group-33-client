@@ -1,6 +1,7 @@
 "use client";
 import { useRouter, usePathname } from "next/navigation";
 import { Button } from "antd";
+import { BellOutlined } from "@ant-design/icons";
 import { useEffect, useState, useRef } from "react";
 import { User, Preferences } from "@/types/user";
 import { useLogout } from "@/hooks/useLogout";
@@ -92,14 +93,25 @@ export default function HeaderButtons() {
         style={{ display: "flex", alignItems: "center", gap: "16px", cursor: "pointer" }}
         onClick={() => setMenuOpen((prev) => !prev)}
       >
-        <span style={{
-          color: "white",
-          fontSize: "36px",
-          fontFamily: "DM Sans",
-          fontWeight: 700,
-        }}>
-          {user?.username ?? ""}
-        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          {user?.id && (
+            <BellOutlined 
+              style={{
+                color: "white",
+                fontSize: "24px",
+                cursor: "pointer",
+              }}
+            />
+          )}
+          <span style={{
+            color: "white",
+            fontSize: "36px",
+            fontFamily: "DM Sans",
+            fontWeight: 700,
+          }}>
+            {user?.username ?? ""}
+          </span>
+        </div>
         {profilePicture ? (
           <img
             src={profilePicture}
