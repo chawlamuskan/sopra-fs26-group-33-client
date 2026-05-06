@@ -141,7 +141,7 @@ reason).
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
 | **[@chawlamuskan]** | [28.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/3a3f4e30781e71db56d79fb083ec1550eb900d1c] | [in settings page, created form to change password + add / remove friends #173] | [settings page is fully implemented front + backend, so the user can update his prefrences, see his current prefrences, change his password by following the password rules, see his current friends, add and remove friends] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+|                    | [05.05.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/aee0e415957d82320d41fb17970a9c3f7aaa4efe] | [created tests for the settings page #371] | [tests for deleting user removed all users data, validating passsword, changin own prefrences only, updating profile photo] |
 | **[@nadiapan4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@despoinapantazi]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
@@ -158,7 +158,7 @@ reason).
 
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
-| **[@chawlamuskan]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@chawlamuskan]** | [06.05.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/585be331cc04b773698dd94e1cf596dbe0039366] | [created layout of community page + fetching friends #152] | [user can see community page with button for friends and all + layout to fetch correct friends with bio and travelboards] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@nadiapan4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
@@ -171,3 +171,19 @@ reason).
 
 
 ---
+
+## Contributions Week 9 - [18.05.2026] to [22.05.2026]
+
+| **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
+| ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
+| **[@chawlamuskan]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@nadiapan4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@despoinapantazi]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@nsavas8]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@yalini-siva]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+
