@@ -123,6 +123,7 @@ export default function HeaderButtons() {
     try {
       await apiService.put(`/invitations/${notif.id}/accept`, {});
       setJoinNotifications((prev) => prev.filter((n) => n.id !== notif.id));
+      await loadNotifications();
       message.success(`You joined "${notif.boardName}".`);
     } catch {
       message.error("Could not accept invite.");
@@ -133,6 +134,7 @@ export default function HeaderButtons() {
     try {
       await apiService.put(`/invitations/${notif.id}/decline`, {});
       setJoinNotifications((prev) => prev.filter((n) => n.id !== notif.id));
+      await loadNotifications();
       message.success(`You declined the invitation to "${notif.boardName}".`);
     } catch {
       message.error("Could not decline invite.");
@@ -143,6 +145,7 @@ export default function HeaderButtons() {
     try {
       await apiService.put(`/friendRequests/${req.id}/accept`, {});
       setFriendRequests((prev) => prev.filter((r) => r.id !== req.id));
+      await loadNotifications();
       message.success(`You are now friends with ${req.senderUsername}.`);
     } catch {
       message.error("Could not accept friend request.");
@@ -153,6 +156,7 @@ export default function HeaderButtons() {
     try {
       await apiService.put(`/friendRequests/${req.id}/decline`, {});
       setFriendRequests((prev) => prev.filter((r) => r.id !== req.id));
+      await loadNotifications();
       message.success(`You declined the friend request from ${req.senderUsername}.`);
     } catch {
       message.error("Could not decline friend request.");
