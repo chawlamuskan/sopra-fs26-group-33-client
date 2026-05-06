@@ -41,6 +41,47 @@ export default function HeaderButtons() {
   const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
   const [friendRequestAvatars, setFriendRequestAvatars] = useState<Record<number, string | null>>({});
 
+  const loadNotifications = async () => {
+    try {
+      const [invitationData, friendReqData] = await Promise.all([
+        apiService.get<InvitationNotification[]>("/invitations"),
+        apiService.get<FriendRequest[]>("/friendRequests"),
+      ]);
+
+      setJoinNotifications(invitationData);
+      setFriendRequests(friendReqData);
+
+      const avatarEntries = await Promise.all(
+        invitationData.map(async (notif) => {
+          try {
+            const prefs = await apiService.get<{ profilePicture?: string | null }>(`/users/${notif.senderId}/preferences`);
+            return [notif.senderId, prefs.profilePicture ?? null] as const;
+          } catch {
+            return [notif.senderId, null] as const;
+          }
+        })
+      );
+      setNotifAvatars(Object.fromEntries(avatarEntries));
+
+      const friendAvatarEntries = await Promise.all(
+        friendReqData.map(async (req) => {
+          try {
+            const prefs = await apiService.get<{ profilePicture?: string | null }>(`/users/${req.senderId}/preferences`);
+            return [req.senderId, prefs.profilePicture ?? null] as const;
+          } catch {
+            return [req.senderId, null] as const;
+          }
+        })
+      );
+      setFriendRequestAvatars(Object.fromEntries(friendAvatarEntries));
+    } catch {
+      setJoinNotifications([]);
+      setFriendRequests([]);
+      setNotifAvatars({});
+      setFriendRequestAvatars({});
+    }
+  };
+
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
     if (storedUser?.id) {
@@ -57,6 +98,7 @@ export default function HeaderButtons() {
         }
       };
       fetchProfilePicture();
+      loadNotifications();
     }
   }, [pathname]);
 
@@ -74,42 +116,7 @@ export default function HeaderButtons() {
   // Fetch notifications when bell modal opens
   const handleOpenBellModal = async () => {
     setIsBellModalOpen(true);
-    try {
-      // Fetch travelboard invitations
-      const invitationData = await apiService.get<InvitationNotification[]>("/invitations");
-      setJoinNotifications(invitationData);
-
-      const avatarEntries = await Promise.all(
-        invitationData.map(async (notif) => {
-          try {
-            const prefs = await apiService.get<{ profilePicture?: string | null }>(`/users/${notif.senderId}/preferences`);
-            return [notif.senderId, prefs.profilePicture ?? null] as const;
-          } catch {
-            return [notif.senderId, null] as const;
-          }
-        })
-      );
-      setNotifAvatars(Object.fromEntries(avatarEntries));
-
-      // Fetch friend requests
-      const friendReqData = await apiService.get<FriendRequest[]>("/friendRequests");
-      setFriendRequests(friendReqData);
-
-      const friendAvatarEntries = await Promise.all(
-        friendReqData.map(async (req) => {
-          try {
-            const prefs = await apiService.get<{ profilePicture?: string | null }>(`/users/${req.senderId}/preferences`);
-            return [req.senderId, prefs.profilePicture ?? null] as const;
-          } catch {
-            return [req.senderId, null] as const;
-          }
-        })
-      );
-      setFriendRequestAvatars(Object.fromEntries(friendAvatarEntries));
-    } catch {
-      setJoinNotifications([]);
-      setFriendRequests([]);
-    }
+    await loadNotifications();
   };
 
   const handleAcceptInvite = async (notif: InvitationNotification) => {
@@ -200,17 +207,39 @@ export default function HeaderButtons() {
       >
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           {user?.id && (
-            <BellOutlined 
-              onClick={(e) => {
-                e.stopPropagation();
-                handleOpenBellModal();
-              }}
-              style={{
-                color: "white",
-                fontSize: "24px",
-                cursor: "pointer",
-              }}
-            />
+            <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
+              <BellOutlined 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleOpenBellModal();
+                }}
+                style={{
+                  color: "white",
+                  fontSize: "24px",
+                  cursor: "pointer",
+                }}
+              />
+              {joinNotifications.length + friendRequests.length > 0 && (
+                <span style={{
+                  position: "absolute",
+                  top: "-8px",
+                  right: "-10px",
+                  minWidth: "18px",
+                  height: "18px",
+                  padding: "0 4px",
+                  borderRadius: "999px",
+                  background: "#d9534f",
+                  color: "white",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  lineHeight: "18px",
+                  textAlign: "center",
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.25)",
+                }}>
+                  {joinNotifications.length + friendRequests.length}
+                </span>
+              )}
+            </div>
           )}
           <span style={{
             color: "white",
@@ -260,7 +289,7 @@ export default function HeaderButtons() {
           {[
             { label: "Countries Overview", path: `/countryOverview` },
             { label: "Saved Places", path: `/places` },
-            { label: "Travel boards", path: `/travelboards` },
+            { label: "Travel Boards", path: `/travelboards` },
             { label: "Community", path: `/community` },//need to change these paths once the pages are implemented
             { label: "Posts", path: `/posts` },//need to change these paths once the pages are implemented
             { label: "Settings", path: `/settings` },//need to change these paths once the pages are implemented
