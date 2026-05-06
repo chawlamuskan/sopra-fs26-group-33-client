@@ -17,6 +17,14 @@ type InvitationNotification = {
   senderUsername: string;
 };
 
+type FriendRequest = {
+  id: number;
+  senderId: number;
+  receiverId: number;
+  status: string;
+  senderUsername: string;
+};
+
 export default function HeaderButtons() {
   const router = useRouter();
   const pathname = usePathname();
@@ -30,6 +38,8 @@ export default function HeaderButtons() {
   const [isBellModalOpen, setIsBellModalOpen] = useState(false);
   const [joinNotifications, setJoinNotifications] = useState<InvitationNotification[]>([]);
   const [notifAvatars, setNotifAvatars] = useState<Record<number, string | null>>({});
+  const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
+  const [friendRequestAvatars, setFriendRequestAvatars] = useState<Record<number, string | null>>({});
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
@@ -65,12 +75,12 @@ export default function HeaderButtons() {
   const handleOpenBellModal = async () => {
     setIsBellModalOpen(true);
     try {
-      const data = await apiService.get<InvitationNotification[]>("/invitations");
-      setJoinNotifications(data);
+      // Fetch travelboard invitations
+      const invitationData = await apiService.get<InvitationNotification[]>("/invitations");
+      setJoinNotifications(invitationData);
 
-      // fetch profile pictures for all senders in parallel
       const avatarEntries = await Promise.all(
-        data.map(async (notif) => {
+        invitationData.map(async (notif) => {
           try {
             const prefs = await apiService.get<{ profilePicture?: string | null }>(`/users/${notif.senderId}/preferences`);
             return [notif.senderId, prefs.profilePicture ?? null] as const;
@@ -80,8 +90,25 @@ export default function HeaderButtons() {
         })
       );
       setNotifAvatars(Object.fromEntries(avatarEntries));
+
+      // Fetch friend requests
+      const friendReqData = await apiService.get<FriendRequest[]>("/friendRequests");
+      setFriendRequests(friendReqData);
+
+      const friendAvatarEntries = await Promise.all(
+        friendReqData.map(async (req) => {
+          try {
+            const prefs = await apiService.get<{ profilePicture?: string | null }>(`/users/${req.senderId}/preferences`);
+            return [req.senderId, prefs.profilePicture ?? null] as const;
+          } catch {
+            return [req.senderId, null] as const;
+          }
+        })
+      );
+      setFriendRequestAvatars(Object.fromEntries(friendAvatarEntries));
     } catch {
       setJoinNotifications([]);
+      setFriendRequests([]);
     }
   };
 
@@ -102,6 +129,26 @@ export default function HeaderButtons() {
       message.success(`You declined the invitation to "${notif.boardName}".`);
     } catch {
       message.error("Could not decline invite.");
+    }
+  };
+
+  const handleAcceptFriendRequest = async (req: FriendRequest) => {
+    try {
+      await apiService.put(`/friendRequests/${req.id}/accept`, {});
+      setFriendRequests((prev) => prev.filter((r) => r.id !== req.id));
+      message.success(`You are now friends with ${req.senderUsername}.`);
+    } catch {
+      message.error("Could not accept friend request.");
+    }
+  };
+
+  const handleDeclineFriendRequest = async (req: FriendRequest) => {
+    try {
+      await apiService.put(`/friendRequests/${req.id}/decline`, {});
+      setFriendRequests((prev) => prev.filter((r) => r.id !== req.id));
+      message.success(`You declined the friend request from ${req.senderUsername}.`);
+    } catch {
+      message.error("Could not decline friend request.");
     }
   };
 
@@ -269,7 +316,46 @@ export default function HeaderButtons() {
       >
         {/* Friend Requests section */}
         <p style={{ color: "#0B0696", fontWeight: 700, fontSize: "1rem", marginBottom: "0.75rem" }}>Friend Requests</p>
-        <p style={{ color: "#030000", fontSize: "0.9rem", marginBottom: "1.5rem" }}>Coming soon...</p>
+
+        {friendRequests.length === 0 ? (
+          <p style={{ color: "#030000", fontSize: "0.9rem", marginBottom: "1.5rem" }}>No pending friend requests.</p>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "1.5rem" }}>
+            {friendRequests.map((req) => (
+              <div key={req.id} style={{
+                display: "flex", alignItems: "center", gap: "0.75rem",
+                background: "#f4ebeb", borderRadius: "30px", padding: "0.5rem 1rem"
+              }}>
+                {friendRequestAvatars[req.senderId] ? (
+                  <img
+                    src={friendRequestAvatars[req.senderId]!}
+                    alt={req.senderUsername}
+                    style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }}
+                  />
+                ) : (
+                  <div style={{
+                    width: "36px", height: "36px", borderRadius: "50%",
+                    background: "#d6cece", flexShrink: 0,
+                    display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16,
+                  }}>👤</div>
+                )}
+                <span style={{ flex: 1, fontSize: "0.9rem", fontStyle: "italic" }}>
+                  <strong>{req.senderUsername}</strong> sent you a friend request
+                </span>
+                <Button
+                  size="small"
+                  onClick={() => handleAcceptFriendRequest(req)}
+                  style={{ background: "#0B0696", color: "white", border: "none", borderRadius: "20px" }}
+                >Accept</Button>
+                <Button
+                  size="small"
+                  onClick={() => handleDeclineFriendRequest(req)}
+                  style={{ background: "#0B0696", color: "white", border: "none", borderRadius: "20px" }}
+                >Decline</Button>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Travelboard Notifications section */}
         <p style={{ color: "#0B0696", fontWeight: 700, fontSize: "1rem", marginBottom: "0.75rem" }}>Travelboard Invitations</p>
