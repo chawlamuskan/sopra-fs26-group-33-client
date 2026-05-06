@@ -329,7 +329,7 @@ const SettingsPageInner: React.FC = () => {
     modal.confirm({
       ...manageConfirmBase,
       title: <span style={{ color: "#0B0696", fontWeight: 800 }}>Delete your account?</span>,
-      content: <span style={{ color: "#171717" }}>We're sad to see you go! Are you sure you want to delete your account? This will permanently delete your account and all associated data. This action cannot be undone.</span>,
+      content: <span style={{ color: "#171717" }}>We&apos;re sad to see you go! Are you sure you want to delete your account? This will permanently delete your account and all associated data. This action cannot be undone.</span>,
       okText: "Delete Account",
       cancelText: "Cancel",
       onOk: async () => {
