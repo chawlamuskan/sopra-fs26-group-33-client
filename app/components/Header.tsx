@@ -3,12 +3,25 @@
 import HeaderButtons from "@/components/HeaderButtons";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import MapSearchBar from "@/components/MapSearchBar";
 
 type StoredUser = {
   id: number;
 };
 
-export default function Header() {
+interface HeaderProps {
+  onPlaceSelect?: (lat: number, lng: number, place: PlaceInfo) => void;
+}
+
+interface PlaceInfo {
+  name: string;
+  address: string;
+  rating: number | null;
+  placeId: string;
+  photoReference: string | null;
+}
+
+export default function Header( {onPlaceSelect }: HeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [storedUser, setStoredUser] = useState<StoredUser | null>(null);
@@ -45,6 +58,8 @@ export default function Header() {
       >
         Worldtura
       </h1>
+
+      {pathname.startsWith("/users/") && <MapSearchBar onPlaceSelect={onPlaceSelect ?? (() => {})} />}
       <HeaderButtons />
     </header>
   );
@@ -54,6 +69,7 @@ const headerStyle: React.CSSProperties = {
   background: "#0B0696",
   display: "flex",
   alignItems: "center",
+  justifyContent: "space-between",
   padding: "0 24px",
   position: "sticky",
   top: 0,
