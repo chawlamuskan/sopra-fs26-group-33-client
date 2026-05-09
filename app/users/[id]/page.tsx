@@ -31,6 +31,7 @@ interface PlaceInfo {
   address: string;
   rating: number | null;
   placeId: string;
+  photoReference: string | null;
 }
 
 const ZoomTracker: React.FC<{ onZoomChange: (zoom: number) => void }> = ({
@@ -72,7 +73,7 @@ const PlaceClickInterceptor: React.FC<{
               headers: {
                 "Content-Type": "application/json",
                 "X-Goog-Api-Key": process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
-                "X-Goog-FieldMask": "displayName,formattedAddress,rating,types",
+                "X-Goog-FieldMask": "displayName,formattedAddress,rating,types,photos.name",
               },
             }
           );
@@ -81,6 +82,9 @@ const PlaceClickInterceptor: React.FC<{
             return;
           }
           const data = await response.json();
+          console.log("RAW Google Places response:", JSON.stringify(data, null, 2));
+          console.log("photos field:", data.photos);
+          console.log("photoReference extracted:", data.photos?.[0]?.name ?? null);
           const types: string[] = data.types ?? [];
           const isPOI = types.some((t) => ALLOWED_POI_TYPES.has(t));
           if (!isPOI) return;
@@ -89,6 +93,7 @@ const PlaceClickInterceptor: React.FC<{
             address: data.formattedAddress ?? "No address available",
             rating: data.rating ?? null,
             placeId,
+            photoReference: data.photos?.[0]?.name ?? null,
           });
         } catch (err) {
           console.error("Failed to fetch place details:", err);
@@ -97,6 +102,16 @@ const PlaceClickInterceptor: React.FC<{
     );
     return () => { google.maps.event.removeListener(listener); };
   }, [map, onPlaceClick]);
+  return null;
+};
+
+const MapPanner: React.FC<{ target: { lat: number; lng: number } | null }> = ({ target }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (!map || !target) return;
+    map.panTo(target);
+    map.setZoom(15);
+  }, [map, target]);
   return null;
 };
 
@@ -144,6 +159,7 @@ const PlaceCard: React.FC<{
           name: placeInfo.name,
           address: placeInfo.address,
           rating: placeInfo.rating,
+          photoReference: placeInfo.photoReference ?? null,
         });
         setSavedFeedback("Saved to places!");
       } catch (err: unknown) {
@@ -174,6 +190,7 @@ const PlaceCard: React.FC<{
           name: placeInfo.name,
           address: placeInfo.address,
           rating: placeInfo.rating,
+          photoReference: placeInfo.photoReference ?? null,
         });
         setBoardFeedback("Added to travel board!");
       } catch (err: unknown) {
@@ -185,12 +202,13 @@ const PlaceCard: React.FC<{
     };
 
       const payload = {
-  externalPlaceId: placeInfo.placeId,
-  name: placeInfo.name,
-  address: placeInfo.address,
-  rating: placeInfo.rating,
-  types: [],
-};
+        externalPlaceId: placeInfo.placeId,
+        name: placeInfo.name,
+        address: placeInfo.address,
+        rating: placeInfo.rating,
+        types: [],
+        photoReference: placeInfo.photoReference ?? null,
+      };
   console.log("Saving place payload:", payload);
   console.log("userId:", userId);
 
@@ -253,10 +271,6 @@ const PlaceCard: React.FC<{
             </div>
           )}
 
-          {/* Board feedback toast */}
-          {boardFeedback && (
-            <p className={popupStyles.toast}>✓ {boardFeedback}</p>
-          )}
         </div>
       </div>
 
@@ -295,9 +309,11 @@ const PlaceCard: React.FC<{
         )}
       </div>
 
-      {/* Feedback toast */}
       {savedFeedback && (
         <p className={popupStyles.toast}>✓ {savedFeedback}</p>
+      )}
+      {boardFeedback && (
+        <p className={popupStyles.toast}>✓ {boardFeedback}</p>
       )}
     </div>
   );
@@ -312,6 +328,7 @@ const UserDashboard: React.FC = () => {
   const [placeInfo, setPlaceInfo] = useState<PlaceInfo | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [currentZoom, setCurrentZoom] = useState<number>(5);
+  const [searchTarget, setSearchTarget] = useState<{ lat: number; lng: number } | null>(null);
   const position = { lat: 47.3769, lng: 8.5417 };
   const COUNTRY_LABEL_MAX_ZOOM = 6;
 
@@ -359,10 +376,16 @@ const UserDashboard: React.FC = () => {
   if (!isAllowed) return null;
 
   return (
-    <>
-      <Header />
-      <main className={styles.main}>
-        <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
+    
+    <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
+      <>
+      <Header 
+      onPlaceSelect={(lat, lng, place) => {
+        setSearchTarget({ lat, lng });
+        setPlaceInfo(place);
+            }} />
+        <main className={styles.main}>
+        
           <div style={{ height: "100vh", width: "100vw", position: "relative", overflow: "hidden" }}>
             <Map
               mapId="3acb2fe9409f1015648d998e"
@@ -374,6 +397,9 @@ const UserDashboard: React.FC = () => {
             >
               <ZoomTracker onZoomChange={setCurrentZoom} />
               <PlaceClickInterceptor onPlaceClick={handlePlaceClick} />
+              <MapPanner target={searchTarget} />
+              
+              
 
               {/* Country Info Popup */}
               {showCountryPopup && (
@@ -430,9 +456,10 @@ const UserDashboard: React.FC = () => {
               </div>
             )}
           </div>
-        </APIProvider>
+        
       </main>
     </>
+    </APIProvider>
   );
 };
 

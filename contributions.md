@@ -118,7 +118,7 @@ reason).
 
 ---
 
-## Contributions Week 6 - [27.04.2026e] to [03.05.2026]
+## Contributions Week 6 - [27.04.2026] to [03.05.2026]
 
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
@@ -126,12 +126,12 @@ reason).
 |                    | [28.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/c5d1f5c1b9655243c867f309299a529a347f59bc] | [server side, endpoint to delete users account, removes all users data like tb and saved places, removes membership if not owner #369] | [the user can delete his own account and all associated data will get deleted as well ] |
 | **[@nadiapan4]** | [24.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/926206988cde429b0ac4febcaff8cb6107de519f] | [Implemented frontend of an individual travel board page, with saved places that were added to a travel board being fetched from the database.] | [When clicking see more, users can now see the individual travel board, with all the saved places. The profile picture of the user that added the place is also displayed] |
 |                    | [03.05.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/259890169a1abfb2f2005e0050cb0afbc0772cf5] | [Displaying pictures of places in the saved places page, in the individual travel board page and in the general travel board page (6 pictures per travel board)] | [Users can see how the place that they saved looks like, giving a visual reference to the place and also making the pages look more lively and populated] |
-| **[@despoinapantazi]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@despoinapantazi]** | [03.05.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/e5b1099b49987310055eecfc0620a42f94c766a6] | [Allow removal of a saved place in the frontend] | [The user can now remove a place from the saved places, they first have to confirm and then the place is removed] |
+|                    | [03.05.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/25da94fb3f7bbac88b68a9ddbc63ca2c0fda7415] | [Create Community page based on mockups] | [Create frontend for Community page, not yet functional - not properly connected to the backend] |
 | **[@nsavas8]** | [29.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/52f80021c7b23b8caa75fc8bc1b9633b59e27ba8] | [Created methods to delete a place from saved places or from travel boards] | [If plans change, users should be able to remove places they have saved earlier] |
 |                    | [29.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/d919fda55d3acf8623f7b4013f2743251ffb59aa] | [Created tests for the saved places as well as for the travel board places] | [To achieve the 75% test coverage, investing time in writing tests is very important] |
-| **[@yalini-siva]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@yalini-siva]** | [03.05.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/ba136d7e238db2c11b65c9581a62237b63ab63f8] | [Added tests that accepting a friend request creates a friendship and declining a friend request does not #405, #406] | [Ensures the main friend request flow updates friendships correctly depending on whether a request is accepted or declined] |
+|                    | [03.05.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/5a5baec8d074a021bd5d5b48b3dfa51d57ac1b60] | [Added test that removing a friend updates the friend list correctly #226] | [Ensures users can remove friends and they are no longer shown in each other’s friend lists] |
 
 
 ---
@@ -141,7 +141,25 @@ reason).
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
 | **[@chawlamuskan]** | [28.04.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/3a3f4e30781e71db56d79fb083ec1550eb900d1c] | [in settings page, created form to change password + add / remove friends #173] | [settings page is fully implemented front + backend, so the user can update his prefrences, see his current prefrences, change his password by following the password rules, see his current friends, add and remove friends] |
+|                    | [05.05.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/aee0e415957d82320d41fb17970a9c3f7aaa4efe] | [created tests for the settings page #371] | [tests for deleting user removed all users data, validating passsword, changin own prefrences only, updating profile photo] |
+| **[@nadiapan4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@despoinapantazi]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@nsavas8]** | [06.05.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/ba1214652ab7e87e39e771c5191c5f8c85f5b871] | [created multiple tests for saved places and travel board places] | [To test if the endpoints for saved places and travel board places is returning the right status upon calling] |
+|                    | [08.06.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/ab901c0d9e8914f2f2a56449d0051c1b85506c55] | [Implemented search bar for the main map, so users can look up places] | [To improve user experience we want to have a search bar, so users don't have to search for places only on the map, but also by name] |
+| **[@yalini-siva]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+
+
+---
+
+## Contributions Week 8 - [11.05.2026] to [17.05.2026]
+
+| **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
+| ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
+| **[@chawlamuskan]** | [06.05.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/d32dbd526540ab38a7036090f9e4b2aa6b3f4d72] | [created bell notification icon which shows friend request + travelboard notifications #196 #198] | [user can see bell icon in header with notification count which gets updated + modal pop up that shows friend requests + travelboard invite notifications + user can accept / decline it] |
+|                    | [06.05.2026]   | [] | [] | [] |
 | **[@nadiapan4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@despoinapantazi]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
@@ -154,7 +172,7 @@ reason).
 
 ---
 
-## Contributions Week 8 - [01.05.2026] to [17.05.2026]
+## Contributions Week 9 - [18.05.2026] to [22.05.2026]
 
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
@@ -169,5 +187,3 @@ reason).
 | **[@yalini-siva]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 
-
----

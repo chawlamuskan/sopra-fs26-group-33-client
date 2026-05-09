@@ -24,16 +24,6 @@ type TravelBoard = {
   memberIds?: number[];
 };
 
-type InvitationNotification = {
-  id: number;
-  boardId: number;
-  senderId: number;
-  receiverId: number;
-  status: string;
-  boardName: string;
-  senderUsername: string;
-};
-
 
 const TravelBoardsPage: React.FC = () => {
     const isAllowed = useProtectedRoute(); 
@@ -72,20 +62,15 @@ const TravelBoardsPage: React.FC = () => {
     const friendDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
     const [allFriends, setAllFriends] = useState<{id: number; username: string; avatar: string | null}[]>([]);
 
-    ///// join button /////
     const [joinCode, setJoinCode] = useState("");
-    const [joinNotifications, setJoinNotifications] = useState<InvitationNotification[]>([]);
-    const [joinFeedback, setJoinFeedback] = useState<string | null>(null);
-    const [notifAvatars, setNotifAvatars] = useState<Record<number, string | null>>({});
-    const [notifCount, setNotifCount] = useState<number>(0);
 
-
+    ///// to display the images of the travel boards /////
+    const [boardPlaces, setBoardPlaces] = useState<Record<number, { photoReference?: string | null; name: string }[]>>({});
 
 
     useEffect(() => {
         if (!isAllowed) return;     // #35 ; #46 works for pop up too 
-        fetchBoards();             // #36 fetch TB for display  
-        fetchNotifCount();
+        fetchBoards();             // #36 fetch TB for display
         // get current user id from stored user object
         const storedUser = localStorage.getItem("user");
         if (storedUser) {
@@ -157,6 +142,21 @@ const TravelBoardsPage: React.FC = () => {
         cancelled = true;
       };
     }, [boards, isAllowed, memberProfilePictures]);
+
+    useEffect(() => {
+      if (!isAllowed || boards.length === 0) return;
+      boards.forEach(async (board) => {
+        if (boardPlaces[board.id]) return;
+        try {
+          const places = await apiService.get<{ id: number; name: string; photoReference?: string | null }[]>(
+            `/travelboards/${board.id}/places`
+          );
+          setBoardPlaces((prev) => ({ ...prev, [board.id]: places.slice(0, 6) }));
+        } catch {
+          setBoardPlaces((prev) => ({ ...prev, [board.id]: [] }));
+        }
+      });
+    }, [boards, isAllowed]);
 
     const handleSave = async () => {
     if (!boardName.trim()) {
@@ -342,30 +342,8 @@ const TravelBoardsPage: React.FC = () => {
         if (!parsedUser.id) return;
         const myId = Number(parsedUser.id);
 
-        const allUsers = await apiService.get<{ id: number; username: string }[]>("/users");
-
-        let myFriendIds: number[] = [];
-        try {
-          const myPrefs = await apiService.get<{ friends?: number[] }>(`/users/${myId}/preferences`);
-          myFriendIds = (myPrefs.friends ?? []).map(Number);
-        } catch {
-          myFriendIds = [];
-        }
-
-        const mutualIds = new Set<number>(myFriendIds);
-        await Promise.all(
-          allUsers
-            .filter((u) => Number(u.id) !== myId)
-            .map(async (u) => {
-              try {
-                const theirPrefs = await apiService.get<{ friends?: number[] }>(`/users/${u.id}/preferences`);
-                const theirFriends = (theirPrefs.friends ?? []).map(Number);
-                if (theirFriends.includes(myId)) mutualIds.add(Number(u.id));
-              } catch { /* no preferences yet */ }
-            })
-        );
-
-        const friendUsers = allUsers.filter((u) => mutualIds.has(Number(u.id)));
+        // Fetch the list of friends for current user using the /friends endpoint
+        const friendUsers = await apiService.get<{ id: number; username: string }[]>("/friends");
 
         // fetch profile pictures for all friends in parallel
         const friendsWithAvatars = await Promise.all(
@@ -394,48 +372,9 @@ const TravelBoardsPage: React.FC = () => {
       );
     };
 
-    // Fetch notifications when join modal opens
-    const handleOpenJoin = async () => {
+    // Open join modal
+    const handleOpenJoin = () => {
       setIsJoinModalOpen(true);
-      setJoinFeedback(null);
-      try {
-        const data = await apiService.get<InvitationNotification[]>("/invitations");
-        setJoinNotifications(data);
-
-        // fetch profile pictures for all senders in parallel
-        const avatarEntries = await Promise.all(
-          data.map(async (notif) => {
-            try {
-              const prefs = await apiService.get<{ profilePicture?: string | null }>(`/users/${notif.senderId}/preferences`);
-              return [notif.senderId, prefs.profilePicture ?? null] as const;
-            } catch {
-              return [notif.senderId, null] as const;
-            }
-          })
-        );
-        setNotifAvatars(Object.fromEntries(avatarEntries));
-      } catch {
-        setJoinNotifications([]);
-      }
-    };
-
-    const handleAcceptInvite = async (notif: InvitationNotification) => {
-      try {
-        await apiService.put(`/invitations/${notif.id}/accept`, {});
-        setJoinNotifications((prev) => prev.filter((n) => n.id !== notif.id));
-        setNotifCount((prev) => Math.max(0, prev - 1)); // ← add
-        setJoinFeedback(`You joined "${notif.boardName}".`);
-        fetchBoards();
-      } catch { message.error("Could not accept invite."); }
-    };
-
-    const handleDeclineInvite = async (notif: InvitationNotification) => {
-      try {
-        await apiService.put(`/invitations/${notif.id}/decline`, {});
-        setJoinNotifications((prev) => prev.filter((n) => n.id !== notif.id));
-        setNotifCount((prev) => Math.max(0, prev - 1)); // ← add
-        setJoinFeedback(`You declined the invitation to "${notif.boardName}".`);
-      } catch { message.error("Could not decline invite."); }
     };
 
     const handleJoinByCode = async () => {
@@ -445,19 +384,11 @@ const TravelBoardsPage: React.FC = () => {
           `/travelboards/join?inviteCode=${encodeURIComponent(joinCode.trim())}`,
           {},
         );
-        setJoinFeedback("You joined a board via invite code.");
+        message.success("You joined a board via invite code.");
         setJoinCode("");
+        setIsJoinModalOpen(false);
         fetchBoards();
       } catch { message.error("Invalid or expired code."); }
-    };
-
-    const fetchNotifCount = async () => {
-      try {
-        const data = await apiService.get<InvitationNotification[]>("/invitations");
-        setNotifCount(data.length);
-      } catch {
-        setNotifCount(0);
-      }
     };
 
 
@@ -477,37 +408,14 @@ const TravelBoardsPage: React.FC = () => {
           <Button className={styles.btn} onClick={handleOpenCreate}>
             Create
           </Button>
-          <Button 
-              className={styles.btn} 
+            <Button
+              className={`${styles.btn} ${isManageMode ? styles.doneBtn : ""}`}
               onClick={() => setIsManageMode(!isManageMode)}
-              style={isManageMode ? {background: "#0B0696", color: "white"} : {}}
-          >
+            >
               {isManageMode ? "Done" : "Manage"}
-          </Button>
+            </Button>
           {/* #38 join modal */}
-          <div style={{ position: "relative", display: "inline-block" }}>
-            <Button className={styles.btn} onClick={handleOpenJoin}>Join</Button>
-            {notifCount > 0 && (
-              <div style={{
-                position: "absolute",
-                top: "-8px",
-                right: "-8px",
-                background: "#0B0696",
-                color: "white",
-                borderRadius: "50%",
-                width: "18px",
-                height: "18px",
-                fontSize: "11px",
-                fontWeight: 700,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                pointerEvents: "none",
-              }}>
-                {notifCount > 9 ? "9+" : notifCount}
-              </div>
-            )}
-          </div>
+          <Button className={styles.btn} onClick={handleOpenJoin}>Join</Button>
         </div>
       </div>
 
@@ -603,11 +511,26 @@ const TravelBoardsPage: React.FC = () => {
                 </div>
               </div>
 
-              {/* 6 empty place boxes */}
               <div className={styles.placesGrid}>
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className={styles.placeBox} />
-                ))}
+                {Array.from({ length: 6 }).map((_, i) => {
+                  const place = (boardPlaces[board.id] ?? [])[i];
+                  const photoUrl = place?.photoReference
+                    ? `https://places.googleapis.com/v1/${place.photoReference}/media?maxWidthPx=200&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
+                    : null;
+
+                  return (
+                    <div key={i} className={styles.placeBox} style={{ overflow: "hidden", position: "relative" }}>
+                      {photoUrl ? (
+                        <img
+                          src={photoUrl}
+                          alt={place?.name ?? ""}
+                          style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                          onError={(e) => { e.currentTarget.style.display = "none"; }}
+                        />
+                      ) : null}
+                    </div>
+                  );
+                })}
               </div>
               
               {/* See more */}
@@ -810,61 +733,9 @@ const TravelBoardsPage: React.FC = () => {
         <Modal
           title={<span style={{ color: "#3333cc", fontWeight: 800, fontSize: "1.4rem" }}>Join a board</span>}
           open={isJoinModalOpen}
-          onCancel={() => { setIsJoinModalOpen(false); setJoinCode(""); setJoinFeedback(null); }}
+          onCancel={() => { setIsJoinModalOpen(false); setJoinCode(""); }}
           footer={null}
         >
-          {joinFeedback && (
-            <div style={{
-              background: "#f0eeff", borderRadius: "16px", padding: "0.75rem 1rem",
-              border: "1.5px solid #3333cc", marginBottom: "1rem", color: "#3333cc", fontWeight: 700
-            }}>
-              {joinFeedback}
-            </div>
-          )}
-
-          {/* Notifications section */}
-          <p style={{ color: "#3333cc", fontWeight: 700, fontSize: "1rem", marginBottom: "0.75rem" }}>Notifications</p>
-
-          {joinNotifications.length === 0 ? (
-            <p style={{ color: "#030000", fontSize: "0.9rem", marginBottom: "1.5rem" }}>No pending invitations.</p>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "1.5rem" }}>
-              {joinNotifications.map((notif) => (
-                <div key={notif.id} style={{
-                  display: "flex", alignItems: "center", gap: "0.75rem",
-                  background: "#f4ebeb", borderRadius: "30px", padding: "0.5rem 1rem"
-                }}>
-                  {notifAvatars[notif.senderId] ? (
-                    <img
-                      src={notifAvatars[notif.senderId]!}
-                      alt={notif.senderUsername}
-                      style={{ width: 36, height: 36, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }}
-                    />
-                  ) : (
-                    <div style={{
-                      width: "36px", height: "36px", borderRadius: "50%",
-                      background: "#d6cece", flexShrink: 0,
-                      display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16,
-                    }}>👤</div>
-                  )}
-                  <span style={{ flex: 1, fontSize: "0.9rem", fontStyle: "italic" }}>
-                    <strong>{notif.senderUsername}</strong> invited you to &quot;{notif.boardName}&quot;
-                  </span>
-                  <Button
-                    size="small"
-                    onClick={() => handleAcceptInvite(notif)}
-                    style={{ background: "#0B0696", color: "white", border: "none", borderRadius: "20px" }}
-                  >Accept</Button>
-                  <Button
-                    size="small"
-                    onClick={() => handleDeclineInvite(notif)}
-                    style={{ background: "#0B0696", color: "white", border: "none", borderRadius: "20px" }}
-                  >Decline</Button>
-                </div>
-              ))}
-            </div>
-          )}
-
           {/* Use a code section */}
           <p style={{ color: "#3333cc",fontWeight: 700, fontSize: "1rem", marginBottom: "0.75rem" }}>Use a code</p>
 
