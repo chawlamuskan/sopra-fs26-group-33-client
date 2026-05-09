@@ -261,20 +261,31 @@ const SettingsPageInner: React.FC = () => {
     try {
       // Send friend requests for selected users
       if (selectedFriends.length > 0) {
-        await Promise.all(
+        const results = await Promise.allSettled(
           selectedFriends.map((friendId) =>
             apiService.post("/friendRequests", {
               receiverId: Number(friendId),
-            }).catch(() => {
-              // Silently fail if friend request fails for any user
-              console.error(`Failed to send friend request to user ${friendId}`);
             })
           )
         );
+
+        const successCount = results.filter((result) => result.status === "fulfilled").length;
+        const failureCount = results.length - successCount;
+
+        if (successCount === results.length) {
+          message.success(`Friend request${selectedFriends.length !== 1 ? 's' : ''} sent successfully!`);
+          setSelectedFriends([]);
+          setFriendSearch("");
+        } else if (successCount > 0) {
+          message.warning(
+            `${successCount} friend request${successCount !== 1 ? "s" : ""} sent, ${failureCount} failed.`
+          );
+          setSelectedFriends([]);
+          setFriendSearch("");
+        } else {
+          message.error("Could not send friend requests.");
+        }
       }
-      message.success(`Friend request${selectedFriends.length !== 1 ? 's' : ''} sent successfully!`);
-      setSelectedFriends([]);
-      setFriendSearch("");
     } catch {
       message.error("Could not send friend requests.");
     } finally {
