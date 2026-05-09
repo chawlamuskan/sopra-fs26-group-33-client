@@ -119,21 +119,40 @@ const Preferences: React.FC = () => {
         wishlistCountries: values.countries_wishlist ?? null,
       });
 
+      let failedFriendRequests = 0;
+
       // Send friend requests for selected friends
       if (selectedFriends.length > 0) {
-        await Promise.all(
+        const friendRequestResults = await Promise.allSettled(
           selectedFriends.map((friendId) =>
             apiService.post("/friendRequests", {
               receiverId: Number(friendId),
-            }).catch(() => {
-              // Silently fail if friend request fails for any user
-              console.error(`Failed to send friend request to user ${friendId}`);
             })
           )
         );
+
+        failedFriendRequests = friendRequestResults.filter(
+          (result) => result.status === "rejected"
+        ).length;
+
+        friendRequestResults.forEach((result, index) => {
+          if (result.status === "rejected") {
+            const friendId = selectedFriends[index];
+            console.error(`Failed to send friend request to user ${friendId}`, result.reason);
+          }
+        });
       }
 
-      message.success("Preferences saved successfully!")
+      if (failedFriendRequests === 0) {
+        message.success("Preferences saved successfully!");
+      } else {
+        message.warning(
+          failedFriendRequests === selectedFriends.length
+            ? "Preferences saved, but none of the friend requests could be sent."
+            : "Preferences saved, but some friend requests could not be sent."
+        );
+      }
+
       router.push(`/users/${storedUser.id}`);
     } catch (error) {
         console.error(error);
