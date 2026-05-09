@@ -98,8 +98,8 @@ const SettingsPageInner: React.FC = () => {
         }
 
         // fetch current friends from API
-        const friends = await apiService.get<{ id: number; username: string }[]>("/friends");
-        setSelectedFriends(friends.map((f) => String(f.id)));
+        //const friends = await apiService.get<{ id: number; username: string }[]>("/friends");
+        //setSelectedFriends(friends.map((f) => String(f.id)));
       } catch {
         // no preferences yet or error fetching friends
       }
