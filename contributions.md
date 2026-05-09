@@ -146,8 +146,8 @@ reason).
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@despoinapantazi]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-| **[@nsavas8]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@nsavas8]** | [06.05.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/ba1214652ab7e87e39e771c5191c5f8c85f5b871] | [created multiple tests for saved places and travel board places] | [To test if the endpoints for saved places and travel board places is returning the right status upon calling] |
+|                    | [08.06.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/ab901c0d9e8914f2f2a56449d0051c1b85506c55] | [Implemented search bar for the main map, so users can look up places] | [To improve user experience we want to have a search bar, so users don't have to search for places only on the map, but also by name] |
 | **[@yalini-siva]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 
@@ -159,7 +159,7 @@ reason).
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
 | **[@chawlamuskan]** | [06.05.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/585be331cc04b773698dd94e1cf596dbe0039366] | [created layout of community page + fetching friends #152] | [user can see community page with button for friends and all + layout to fetch correct friends with bio and travelboards] |
-|                    | [06.05.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/d32dbd526540ab38a7036090f9e4b2aa6b3f4d72] | [created bell notification icon which shows friend request + travelboard notifications #196 #198] | [user can see bell icon in header with notification count whoch gets updated + modal pop up that shows friend requests + travelboard invite notifications + user can accept / decline it ] |
+|                    | [06.05.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/d32dbd526540ab38a7036090f9e4b2aa6b3f4d72] | [created bell notification icon which shows friend request + travelboard notifications #196 #198] | [user can see bell icon in header with notification count which gets updated + modal pop up that shows friend requests + travelboard invite notifications + user can accept / decline it ] |
 | **[@nadiapan4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@despoinapantazi]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
