@@ -64,7 +64,7 @@ const SettingsPageInner: React.FC = () => {
     }
   }, []);
 
-  // load existing preferences + build two-way friends list
+  // load existing preferences + fetch current friends from API
   useEffect(() => {
     if (!isAllowed || !userId) return;
     const loadPrefs = async () => {
@@ -77,7 +77,6 @@ const SettingsPageInner: React.FC = () => {
           profilePicture?: string;
           visitedCountries?: string[];
           wishlistCountries?: string[];
-          friends?: number[];
         }>(`/users/${myId}/preferences`);
 
         const nextPreferences = {
@@ -98,29 +97,11 @@ const SettingsPageInner: React.FC = () => {
           setImageBase64(nextPreferences.profilePicture);
         }
 
-        // build two-way friend ids — same logic as travelboard handleOpenCreate
-        const myFriendIds = (prefs.friends ?? []).map(Number);
-        const mutualIds = new Set<number>(myFriendIds);
-
-        // fetch all users to check who has added me
-        const allUsersData = await apiService.get<{ id: number; username: string }[]>("/users");
-        await Promise.all(
-          allUsersData
-            .filter((u) => Number(u.id) !== myId)
-            .map(async (u) => {
-              try {
-                const theirPrefs = await apiService.get<{ friends?: number[] }>(`/users/${u.id}/preferences`);
-                const theirFriends = (theirPrefs.friends ?? []).map(Number);
-                if (theirFriends.includes(myId)) mutualIds.add(Number(u.id));
-              } catch {
-                // user has no preferences yet, skip
-              }
-            })
-        );
-
-        setSelectedFriends(Array.from(mutualIds).map(String));
+        // fetch current friends from API
+        //const friends = await apiService.get<{ id: number; username: string }[]>("/friends");
+        //setSelectedFriends(friends.map((f) => String(f.id)));
       } catch {
-        // no preferences yet
+        // no preferences yet or error fetching friends
       }
     };
     loadPrefs();
@@ -274,26 +255,39 @@ const SettingsPageInner: React.FC = () => {
     }
   };
 
-  const handleSaveFriends = async () => {
+  const handleSendFriendRequests = async () => {
     if (!userId) return;
     setSavingFriends(true);
     try {
-      // only save the friends that THIS user explicitly added (one-directional save)
-      // we only write back friends the current user owns, not the ones added by others
-      const myOwnFriends = selectedFriends.filter(async (id) => {
-        try {
-          const theirPrefs = await apiService.get<{ friends?: number[] }>(`/users/${id}/preferences`);
-          return !(theirPrefs.friends ?? []).map(Number).includes(Number(userId));
-        } catch {
-          return true;
+      // Send friend requests for selected users
+      if (selectedFriends.length > 0) {
+        const results = await Promise.allSettled(
+          selectedFriends.map((friendId) =>
+            apiService.post("/friendRequests", {
+              receiverId: Number(friendId),
+            })
+          )
+        );
+
+        const successCount = results.filter((result) => result.status === "fulfilled").length;
+        const failureCount = results.length - successCount;
+
+        if (successCount === results.length) {
+          message.success(`Friend request${selectedFriends.length !== 1 ? 's' : ''} sent successfully!`);
+          setSelectedFriends([]);
+          setFriendSearch("");
+        } else if (successCount > 0) {
+          message.warning(
+            `${successCount} friend request${successCount !== 1 ? "s" : ""} sent, ${failureCount} failed.`
+          );
+          setSelectedFriends([]);
+          setFriendSearch("");
+        } else {
+          message.error("Could not send friend requests.");
         }
-      });
-      await apiService.put(`/users/${userId}/preferences`, {
-        friends: selectedFriends.map(Number),
-      });
-      message.success("Friends updated successfully!");
+      }
     } catch {
-      message.error("Could not update friends.");
+      message.error("Could not send friend requests.");
     } finally {
       setSavingFriends(false);
     }
@@ -497,9 +491,9 @@ const SettingsPageInner: React.FC = () => {
             />
           </div>
 
-          {/* Add friends */}
+          {/* Send friend requests */}
           <h2 style={{ color: "#000000", fontWeight: 700, fontSize: "28px", margin: "0 0 16px 0" }}>
-            Add friends
+            Send friend requests
           </h2>
           <span style={{ fontWeight: 600, color: "#000", fontSize: "18px" }}>Search for friends by username</span>
           <div style={{ position: "relative", marginTop: "8px", marginBottom: "16px" }}>
@@ -589,7 +583,7 @@ const SettingsPageInner: React.FC = () => {
               disabled={savingPassword || savingFriends || deletingAccount}
               onClick={async () => {
                 if (oldPassword.trim() || newPassword.trim()) await handleChangePassword();
-                await handleSaveFriends();
+                await handleSendFriendRequests();
               }}
               style={{ background: "#0B0696", color: "white", border: "none", borderRadius: "20px", padding: "10px 32px", fontSize: "16px", fontWeight: 600, cursor: (savingPassword || savingFriends || deletingAccount) ? "not-allowed" : "pointer" }}
             >

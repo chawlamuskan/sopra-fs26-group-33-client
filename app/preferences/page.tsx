@@ -111,14 +111,48 @@ const Preferences: React.FC = () => {
     try {
       const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
 
+      // Save preferences without friends
       await apiService.post(`/users/${storedUser.id}/preferences`, {
         bio: values.bio ?? null,
         profilePicture: imageBase64 ?? null,
         visitedCountries: values.countries_visited ?? null,
         wishlistCountries: values.countries_wishlist ?? null,
-        friends: selectedFriends.map((id) => Number(id)) ?? null
       });
-      message.success("Preferences saved successfully!")
+
+      let failedFriendRequests = 0;
+
+      // Send friend requests for selected friends
+      if (selectedFriends.length > 0) {
+        const friendRequestResults = await Promise.allSettled(
+          selectedFriends.map((friendId) =>
+            apiService.post("/friendRequests", {
+              receiverId: Number(friendId),
+            })
+          )
+        );
+
+        failedFriendRequests = friendRequestResults.filter(
+          (result) => result.status === "rejected"
+        ).length;
+
+        friendRequestResults.forEach((result, index) => {
+          if (result.status === "rejected") {
+            const friendId = selectedFriends[index];
+            console.error(`Failed to send friend request to user ${friendId}`, result.reason);
+          }
+        });
+      }
+
+      if (failedFriendRequests === 0) {
+        message.success("Preferences saved successfully!");
+      } else {
+        message.warning(
+          failedFriendRequests === selectedFriends.length
+            ? "Preferences saved, but none of the friend requests could be sent."
+            : "Preferences saved, but some friend requests could not be sent."
+        );
+      }
+
       router.push(`/users/${storedUser.id}`);
     } catch (error) {
         console.error(error);
@@ -353,9 +387,9 @@ const Preferences: React.FC = () => {
               </Form.Item>
             </div>
 
-            {/* Row 3: Add friends*/}
+            {/* Row 3: Send friend requests */}
             <Form.Item
-              label={<span className={styles.fieldLabel}>Add friends</span>}
+              label={<span className={styles.fieldLabel}>Send friend requests</span>}
               style={{ width: "100%" }}
             >
               {/* Search input */}
