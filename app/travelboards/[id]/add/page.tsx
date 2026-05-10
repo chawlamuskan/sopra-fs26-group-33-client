@@ -40,10 +40,13 @@ const PlaceholderIcon = () => (
   </svg>
 );
 
-const PlaceCard: React.FC<{ place: SavedPlace; boardLocation: string }> = ({ place, boardLocation }) => {
+
+
+const PlaceCard: React.FC<{ place: SavedPlace; boardLocation: string; added: boolean }> = ({ place, boardLocation, added }) => {
   const [imgError, setImgError] = useState(false);
   const photoUrl = place.photoReference && !imgError ? getPlacePhotoUrl(place.photoReference) : null;
   const matches = isInBoardCity(place.address, boardLocation);
+  const disabled = !matches || added;
   const city = extractCity(boardLocation);
 
   return (
@@ -90,6 +93,31 @@ const PlaceCard: React.FC<{ place: SavedPlace; boardLocation: string }> = ({ pla
         </div>
       )}
 
+      <button
+        style={{
+            position: "absolute",
+            top: "6px",
+            right: "6px",
+            zIndex: 3,
+            width: "24px",
+            height: "24px",
+            borderRadius: "50%",
+            border: "none",
+            fontSize: "16px",
+            fontWeight: "700",
+            lineHeight: "1",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: disabled ? "rgba(120,120,120,0.5)" : "rgba(255,255,255,0.9)",
+            color: disabled ? "rgba(255,255,255,0.6)" : "#0d1b8e",
+            cursor: disabled ? "not-allowed" : "pointer",
+            boxShadow: disabled ? "none" : "0 2px 6px rgba(0,0,0,0.2)",
+        }}
+        >
+        +
+    </button>
+
       {/* Name label */}
       <div style={{
         position: "relative",
@@ -121,17 +149,31 @@ const SavedPlacesAdd: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const apiService = useApi();
   const [board, setBoard] = useState<BoardDetail | null>(null);
+  const [addedIds, setAddedIds] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     if (!storedUser.value?.id || !id) return;
-    Promise.all([
-      apiService.get<SavedPlace[]>(`/users/${storedUser.value.id}/savedplaces`),
-      apiService.get<BoardDetail>(`/travelboards/${id}`),
-    ])
-      .then(([places, boardData]) => { setSavedPlaces(places); setBoard(boardData); })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, [storedUser.value?.id, id]);
+
+    const fetchAll = async () => {
+        try {
+        const [places, boardData, boardPlaces] = await Promise.all([
+            apiService.get<SavedPlace[]>(`/users/${storedUser.value!.id}/savedplaces`),
+            apiService.get<BoardDetail>(`/travelboards/${id}`),
+            apiService.get<SavedPlace[]>(`/travelboards/${id}/places`),  // ← new
+        ]);
+
+        setSavedPlaces(places);
+        setBoard(boardData);
+        setAddedIds(new Set(boardPlaces.map((p) => p.id)));  // ← new
+        } catch (err) {
+        console.error(err);
+        } finally {
+        setLoading(false);
+        }
+    };
+
+    fetchAll();
+    }, [storedUser.value?.id, id]);
 
   return (
     <>
@@ -152,7 +194,7 @@ const SavedPlacesAdd: React.FC = () => {
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(8, 1fr)", gap: "14px" }}>
               {savedPlaces.map((place) => (
-                <PlaceCard key={place.id} place={place} boardLocation={board?.location ?? ""} />
+                <PlaceCard key={place.id} place={place} boardLocation={board?.location ?? ""} added={addedIds.has(place.id)} />
               ))}
             </div>
           )}
