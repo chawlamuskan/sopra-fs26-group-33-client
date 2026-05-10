@@ -148,8 +148,8 @@ reason).
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@nsavas8]** | [06.05.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/ba1214652ab7e87e39e771c5191c5f8c85f5b871] | [created multiple tests for saved places and travel board places] | [To test if the endpoints for saved places and travel board places is returning the right status upon calling] |
 |                    | [08.06.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/ab901c0d9e8914f2f2a56449d0051c1b85506c55] | [Implemented search bar for the main map, so users can look up places] | [To improve user experience we want to have a search bar, so users don't have to search for places only on the map, but also by name] |
-| **[@yalini-siva]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@yalini-siva]** | [07.05.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/ab7ab4bc9876b5796c474df0dd9ad3bf014f4645] | [Added DTOMapper tests for TravelBoard, Invitation, and FriendRequest mappings #432, #433, #434] | [Ensures backend entities are correctly converted to DTOs for the REST API, allowing the frontend to receive the correct data structure.] |
+|                    | [07.05.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/3ade4b027e717a19091b8c7711695614b9d9f216] | [Added integration tests for TravelBoardRepository query methods #431] | [Ensures travel boards can be correctly retrieved and filtered from the database, which is important for reliable travel board functionality] |
 
 
 ---
