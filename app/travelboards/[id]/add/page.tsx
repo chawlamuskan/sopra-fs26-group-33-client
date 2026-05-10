@@ -5,6 +5,7 @@ import styles from "@/styles/page.module.css";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { useApi } from "@/hooks/useApi";
 import { User } from "@/types/user";
+import { useParams, useRouter } from "next/dist/client/components/navigation";
 
 interface SavedPlace {
   id: number;
@@ -13,6 +14,13 @@ interface SavedPlace {
   address: string;
   rating: number | null;
   photoReference: string | null; 
+}
+
+
+interface BoardDetail {
+  id: number;
+  name: string;
+  location: string;
 }
 
 // Build the Google Places photo URL from a photo_reference
@@ -110,10 +118,18 @@ const PlaceCard: React.FC<{ place: SavedPlace }> = ({ place }) => {
 };
 
 const SavedPlacesAdd: React.FC = () => {
+  const { id } = useParams();
+  const router = useRouter();
   const storedUser = useLocalStorage<User | null>("user", null);
   const [savedPlaces, setSavedPlaces] = useState<SavedPlace[]>([]);
   const [loading, setLoading] = useState(true);
   const apiService = useApi();
+  const [board, setBoard] = useState<BoardDetail | null>(null);
+
+  useEffect(() => {
+    if (!id) return;
+    apiService.get<BoardDetail>(`/travelboards/${id}`).then(setBoard).catch(console.error);
+  }, [id]);
 
   useEffect(() => {
     if (!storedUser.value?.id) return;
@@ -132,9 +148,25 @@ const SavedPlacesAdd: React.FC = () => {
         boxSizing: "border-box",
         overflow: "visible",
       }}>
-        <h1 className={styles.title} style={{ margin: "0 0 24px 0" }}>
-          Saved Places
-        </h1>
+        <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "24px" }}>
+          <h1 className={styles.title} style={{ margin: 0 }}>
+            Add Places {board ? `to ${board.name}` : "to Board"}
+          </h1>
+          <button
+            onClick={() => router.back()}
+            style={{
+              background: "none",
+              border: "1.5px solid #0d1b8e",
+              borderRadius: "8px",
+              padding: "6px 14px",
+              color: "#0d1b8e",
+              fontWeight: "600",
+              cursor: "pointer",
+            }}
+          >
+            ← Back
+          </button>
+        </div>
         <div style={{ backgroundColor: "#76bdd6", borderRadius: "16px", padding: "20px" }}>
           <h2 style={{ color: "#0d1b8e", fontWeight: "700", fontSize: "28px", margin: "0 0 16px 4px" }}>
             All
