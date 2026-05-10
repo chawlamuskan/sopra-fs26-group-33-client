@@ -229,7 +229,9 @@ type BoardDetail = {
                 </div>
 
                 <div className={styles.iconBtns}>
-                  <button className={styles.iconBtn}>Add a place</button>
+                  <button className={styles.iconBtn} onClick={() => router.push(`/travelboards/${id}/add`)}>
+                    Add a place
+                  </button>
                   <button className={styles.iconBtn}>Remove a place</button>
                 </div>
               </div>
