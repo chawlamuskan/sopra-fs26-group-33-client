@@ -14,6 +14,7 @@ interface SavedPlace {
   address: string;
   rating: number | null;
   photoReference: string | null;
+  city?: string | null;
 }
 
 interface BoardDetail {
@@ -24,8 +25,27 @@ interface BoardDetail {
 
 const extractCity = (location: string) => location.split(",")[0].trim().toLowerCase();
 
-const isInBoardCity = (address: string, boardLocation: string) =>
-  address.toLowerCase().includes(extractCity(boardLocation));
+const isInBoardCity = (place: SavedPlace, boardLocation: string): boolean => {
+  if (!place.city) return true;
+
+  // boardLocation is stored as the local city name e.g. "roma"
+  // place.city is stored as "locality|country" e.g. "roma|italy"
+  const parts = place.city.split("|");
+  const placeLocality = parts[0]?.toLowerCase().trim() ?? "";
+  const placeCountry = parts[1]?.toLowerCase().trim() ?? "";
+
+  const boardParts = boardLocation.split("|");
+  const boardLocality = boardParts[0]?.toLowerCase().trim() ?? "";
+  const boardCountry = boardParts[1]?.toLowerCase().trim() ?? "";
+
+  // If we have country info on both sides, country must match
+  if (placeCountry && boardCountry && placeCountry !== boardCountry) return false;
+
+  // Then check locality
+  if (placeLocality && boardLocality) return placeLocality === boardLocality;
+
+  return true;
+};
 
 const getPlacePhotoUrl = (photoReference: string) =>
   `https://places.googleapis.com/v1/${photoReference}/media?maxWidthPx=400&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`;
@@ -135,18 +155,19 @@ const ConfirmModal: React.FC<{
 
 const PlaceCard: React.FC<{
   place: SavedPlace;
-  boardLocation: string;
+  boardCity: string; 
+  cityDisplay: string;
   added: boolean;
   onAdd: (place: SavedPlace) => Promise<void>;
-}> = ({ place, boardLocation, added, onAdd }) => {
+}> = ({ place, boardCity, cityDisplay, added, onAdd }) => { // ← was boardLocation
   const [imgError, setImgError] = useState(false);
   const [adding, setAdding] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false); // ← replaces window.confirm
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const photoUrl = place.photoReference && !imgError ? getPlacePhotoUrl(place.photoReference) : null;
-  const matches = isInBoardCity(place.address, boardLocation);
-  const city = extractCity(boardLocation);
-  const cityLabel = city.charAt(0).toUpperCase() + city.slice(1);
+  const matches = isInBoardCity(place, boardCity); 
+  const cityLabel = boardCity.charAt(0).toUpperCase() + boardCity.slice(1); 
+
 
   const doAdd = async () => {
     setShowConfirm(false);
@@ -175,10 +196,10 @@ const PlaceCard: React.FC<{
       
       {showConfirm && (
         <ConfirmModal
-          placeName={place.name}
-          cityLabel={cityLabel}
-          onConfirm={doAdd}
-          onCancel={() => setShowConfirm(false)}
+            placeName={place.name}
+            cityLabel={cityDisplay} 
+            onConfirm={doAdd}
+            onCancel={() => setShowConfirm(false)}
         />
       )}
 
@@ -218,7 +239,7 @@ const PlaceCard: React.FC<{
             justifyContent: "center",
           }}>
             <span style={{ color: "rgba(255,255,255,0.8)", fontSize: "9px", fontWeight: "600", textAlign: "center", padding: "0 6px" }}>
-              Not in {cityLabel}
+              Not in {cityDisplay}
             </span>
           </div>
         )}
@@ -296,6 +317,9 @@ const SavedPlacesAdd: React.FC = () => {
   const apiService = useApi();
   const [board, setBoard] = useState<BoardDetail | null>(null);
   const [addedIds, setAddedIds] = useState<Set<number>>(new Set());
+  const boardCity = board?.location ?? "";
+  const cityLabel = boardCity.split("|")[0];
+  const cityDisplay = cityLabel.charAt(0).toUpperCase() + cityLabel.slice(1);
 
   useEffect(() => {
     if (!storedUser.value?.id || !id) return;
@@ -351,13 +375,14 @@ const SavedPlacesAdd: React.FC = () => {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(8, 1fr)", gap: "14px" }}>
               {savedPlaces.map((place) => (
                 <PlaceCard
-                  key={place.id}
-                  place={place}
-                  boardLocation={board?.location ?? ""}
-                  added={addedIds.has(place.id)}
-                  onAdd={handleAdd}
+                key={place.id}
+                place={place}
+                boardCity={boardCity}
+                cityDisplay={cityDisplay} // ← add
+                added={addedIds.has(place.id)}
+                onAdd={handleAdd}
                 />
-              ))}
+            ))}
             </div>
           )}
         </div>
