@@ -1,0 +1,181 @@
+.page {
+  padding: 24px 70px;
+  font-family: DM Sans;
+}
+
+.title {
+  font-size: 42px;
+  font-weight: 800;
+  color: #0d1b8e;
+  margin-bottom: 12px;
+}
+
+/* ---------- TABS ---------- */
+
+.tabRow {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.tab {
+  padding: 8px 28px;
+  border-radius: 12px;
+  border: 1px solid #111;
+  background: #f3e9ea;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Friends = light blue */
+.tabFriendsActive {
+  background: #76bdd6;
+  color: #0d1b8e;
+}
+
+/* All = light pink */
+.tabAllActive {
+  background: #f5d6e0;
+  color: #0d1b8e;
+}
+
+/* ---------- PANEL ---------- */
+
+.panel {
+  border-radius: 24px;
+  padding: 24px;
+  border: 1px solid #111;
+  min-height: 600px;
+}
+
+/* match screenshot */
+.panelFriends {
+  background: #76bdd6;
+}
+
+.panelAll {
+  background: #f5d6e0;
+}
+
+/* ---------- FRIENDS LAYOUT ---------- */
+
+.friendsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  height: 100%;
+}
+
+.friendColumn {
+  padding: 16px;
+  position: relative;
+}
+
+.separator {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: #0d1b8e;
+}
+
+/* ---------- FRIEND HEADER ---------- */
+
+.friendHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+}
+
+.avatarFallback {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.friendBtn {
+  background: #f5eaea;
+  border: 1px solid #000;
+  padding: 6px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+/* ---------- TEXT ---------- */
+
+.bio {
+  font-size: 13px;
+  margin: 8px 0;
+  color: #0d1b8e;
+  font-style: italic;
+}
+
+.sectionTitle {
+  margin-top: 10px;
+  font-weight: 700;
+  color: #0d1b8e;
+  font-size: 13px;
+}
+
+/* ---------- BOARDS ---------- */
+
+.boardPreviewGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.miniBoard {
+  background: white;
+  border-radius: 10px;
+  height: 60px;
+}
+
+/* ---------- BUTTON ---------- */
+
+.inviteBtn {
+  margin-top: 16px;
+  width: 100%;
+  background: #0d1b8e;
+  color: white;
+  border-radius: 20px;
+  padding: 10px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ---------- ALL TAB ---------- */
+
+.allGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.publicCard {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.joinBtn {
+  margin-top: 10px;
+  width: 100%;
+  background: #0d1b8e;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 8px;
+}
