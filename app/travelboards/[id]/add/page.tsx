@@ -23,6 +23,11 @@ interface BoardDetail {
   location: string;
 }
 
+const extractCity = (location: string) => location.split(",")[0].trim().toLowerCase();
+
+const isInBoardCity = (address: string, boardLocation: string) =>
+  address.toLowerCase().includes(extractCity(boardLocation));
+
 // Build the Google Places photo URL from a photo_reference
 const getPlacePhotoUrl = (photoReference: string) =>
   `https://places.googleapis.com/v1/${photoReference}/media?maxWidthPx=400&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`;
@@ -35,65 +40,57 @@ const PlaceholderIcon = () => (
   </svg>
 );
 
-const PlaceCard: React.FC<{ place: SavedPlace }> = ({ place }) => {
+const PlaceCard: React.FC<{ place: SavedPlace; boardLocation: string }> = ({ place, boardLocation }) => {
   const [imgError, setImgError] = useState(false);
-  const photoUrl = place.photoReference && !imgError
-    ? getPlacePhotoUrl(place.photoReference)
-    : null;
+  const photoUrl = place.photoReference && !imgError ? getPlacePhotoUrl(place.photoReference) : null;
+  const matches = isInBoardCity(place.address, boardLocation);
+  const city = extractCity(boardLocation);
 
   return (
-    <div
-      title={place.name}
-      style={{
-        backgroundColor: "#ffffff",
-        borderRadius: "12px",
-        aspectRatio: "1 / 1",
-        cursor: "pointer",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "flex-end",
-        overflow: "hidden",
-        position: "relative",
-        transition: "transform 0.15s ease, box-shadow 0.15s ease",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = "scale(1.04)";
-        e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,0,0,0.15)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = "scale(1)";
-        e.currentTarget.style.boxShadow = "none";
-      }}
-    >
+    <div style={{
+      backgroundColor: "#ffffff",
+      borderRadius: "12px",
+      aspectRatio: "1 / 1",
+      overflow: "hidden",
+      position: "relative",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "flex-end",
+    }}>
       {/* Photo or placeholder */}
       {photoUrl ? (
         <img
           src={photoUrl}
           alt={place.name}
           onError={() => setImgError(true)}
-          style={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-          }}
+          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
         />
       ) : (
-        <div style={{
-          position: "absolute",
-          inset: 0,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: "#eaf5fb",
-        }}>
+        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#eaf5fb" }}>
           <PlaceholderIcon />
         </div>
       )}
 
-      {/* Name label at bottom */}
+      {/* Grey overlay for non-matching cities */}
+      {!matches && (
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          backgroundColor: "rgba(0,0,0,0.55)",
+          filter: "grayscale(100%)",
+          zIndex: 2,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}>
+          <span style={{ color: "rgba(255,255,255,0.8)", fontSize: "9px", fontWeight: "600", textAlign: "center", padding: "0 6px" }}>
+            Not in {city.charAt(0).toUpperCase() + city.slice(1)}
+          </span>
+        </div>
+      )}
+
+      {/* Name label */}
       <div style={{
         position: "relative",
         zIndex: 1,
@@ -105,7 +102,6 @@ const PlaceCard: React.FC<{ place: SavedPlace }> = ({ place }) => {
         padding: "16px 6px 6px",
         textAlign: "center",
         lineHeight: "1.2",
-        // Clamp to 2 lines
         display: "-webkit-box",
         WebkitLineClamp: 2,
         WebkitBoxOrient: "vertical",
@@ -127,58 +123,36 @@ const SavedPlacesAdd: React.FC = () => {
   const [board, setBoard] = useState<BoardDetail | null>(null);
 
   useEffect(() => {
-    if (!id) return;
-    apiService.get<BoardDetail>(`/travelboards/${id}`).then(setBoard).catch(console.error);
-  }, [id]);
-
-  useEffect(() => {
-    if (!storedUser.value?.id) return;
-    apiService.get<SavedPlace[]>(`/users/${storedUser.value.id}/savedplaces`)
-      .then((data) => setSavedPlaces(data))
+    if (!storedUser.value?.id || !id) return;
+    Promise.all([
+      apiService.get<SavedPlace[]>(`/users/${storedUser.value.id}/savedplaces`),
+      apiService.get<BoardDetail>(`/travelboards/${id}`),
+    ])
+      .then(([places, boardData]) => { setSavedPlaces(places); setBoard(boardData); })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [storedUser.value?.id]);
+  }, [storedUser.value?.id, id]);
 
   return (
     <>
       <Header />
-      <main className={styles.main} style={{
-        padding: "24px 70px",
-        minHeight: "100vh",
-        boxSizing: "border-box",
-        overflow: "visible",
-      }}>
+      <main className={styles.main} style={{ padding: "24px 70px", minHeight: "100vh", boxSizing: "border-box", overflow: "visible" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "24px" }}>
           <h1 className={styles.title} style={{ margin: 0 }}>
-            Add Places {board ? `to ${board.name}` : "to Board"}
+            Add Places {board ? `to "${board.name}"` : "to Board"}
           </h1>
-          <button
-            onClick={() => router.back()}
-            style={{
-              background: "none",
-              border: "1.5px solid #0d1b8e",
-              borderRadius: "8px",
-              padding: "6px 14px",
-              color: "#0d1b8e",
-              fontWeight: "600",
-              cursor: "pointer",
-            }}
-          >
-            ← Back
+          <button onClick={() => router.back()} style={{ background: "none", border: "1.5px solid #0d1b8e", borderRadius: "20px", padding: "6px 14px", color: "#0d1b8e", fontWeight: "600", cursor: "pointer" }}>
+           Go Back
           </button>
         </div>
         <div style={{ backgroundColor: "#76bdd6", borderRadius: "16px", padding: "20px" }}>
-          <h2 style={{ color: "#0d1b8e", fontWeight: "700", fontSize: "28px", margin: "0 0 16px 4px" }}>
-            All
-          </h2>
-          {loading ? (
-            <p>Loading...</p>
-          ) : savedPlaces.length === 0 ? (
+          <h2 style={{ color: "#0d1b8e", fontWeight: "700", fontSize: "28px", margin: "0 0 16px 4px" }}>All</h2>
+          {loading ? <p>Loading…</p> : savedPlaces.length === 0 ? (
             <p style={{ color: "#0d1b8e" }}>No saved places yet.</p>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(8, 1fr)", gap: "14px" }}>
               {savedPlaces.map((place) => (
-                <PlaceCard key={place.id} place={place} />
+                <PlaceCard key={place.id} place={place} boardLocation={board?.location ?? ""} />
               ))}
             </div>
           )}
