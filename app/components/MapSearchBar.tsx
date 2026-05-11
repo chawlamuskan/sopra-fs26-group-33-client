@@ -47,9 +47,19 @@ export default function MapSearchBar({ onPlaceSelect }: MapSearchBarProps) {
         }
       );
       const data = await response.json();
+
+      type Suggestion = {
+        placePrediction: {
+          placeId: string;
+          text: {
+            text: string;
+          };
+        };
+      };
+
       if (data.suggestions) {
         setPredictions(
-          data.suggestions.map((s: any) => ({
+          data.suggestions.map((s: Suggestion) => ({
             place_id: s.placePrediction.placeId,
             description: s.placePrediction.text.text,
           }))
