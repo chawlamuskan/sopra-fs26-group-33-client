@@ -119,6 +119,7 @@ const Preferences: React.FC = () => {
         friends: selectedFriends.map((id) => Number(id)) ?? null
       });
       message.success("Preferences saved successfully!")
+      sessionStorage.removeItem("justRegistered");
       router.push(`/users/${storedUser.id}`);
     } catch (error) {
         console.error(error);
