@@ -25,6 +25,7 @@ const dmSans = DM_Sans({
 export const metadata: Metadata = {
   title: "Worldtura",
   description: "sopra-fs26-template-client",
+  viewport: "width=device-width, initial-scale=1",
 };
 
 
@@ -68,7 +69,7 @@ export default function RootLayout({
         >
           <AntdRegistry>
             <AntdApp>
-              <Layout>
+              <Layout style={{ minHeight: "100vh", background: "#fff" }}>
 
                 {children}
               </Layout>
