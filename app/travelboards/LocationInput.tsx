@@ -6,6 +6,12 @@ import { Input } from "antd";
 
 type Suggestion = { label: string; placeId: string };
 
+interface AddressComponent {
+  types: string[];
+  long_name: string;
+  short_name: string;
+}
+
 interface NominatimResult {
   addresstype?: string;
   display_name: string;
@@ -33,11 +39,11 @@ const LocationInput = ({
       const components = data.results?.[0]?.address_components ?? [];
 
       const locality = components
-        .find((c: any) => c.types.includes("locality"))
+        .find((c: AddressComponent) => c.types.includes("locality"))
         ?.long_name?.toLowerCase() ?? null;
 
       const country = components
-        .find((c: any) => c.types.includes("country"))
+        .find((c: AddressComponent) => c.types.includes("country"))
         ?.long_name?.toLowerCase() ?? null;
 
       if (locality && country) return `${locality}|${country}`;
@@ -59,7 +65,7 @@ const LocationInput = ({
         .filter((item) =>
           ["city", "town", "village", "hamlet", "country", "state"].includes(item.addresstype ?? "")
         )
-        .map((item: any) => {
+        .map((item: NominatimResult) => {
           const city =
             item.address?.city ??
             item.address?.town ??
