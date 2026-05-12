@@ -26,13 +26,43 @@ interface CountryInfo {
   flag: string;
   languages: string[];
 }
+
 interface PlaceInfo {
   name: string;
   address: string;
   rating: number | null;
   placeId: string;
   photoReference: string | null;
+  lat: number | null;
+  lng: number | null;
 }
+
+
+const resolveCity = async (placeId: string): Promise<string | null> => {
+  try {
+    const res = await fetch(
+      `https://maps.googleapis.com/maps/api/geocode/json?place_id=${placeId}&language=en&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
+    );
+    const data = await res.json();
+    const components = data.results?.[0]?.address_components ?? [];
+    
+    // Use country — always consistent in English
+    const country = components
+      .find((c: any) => c.types.includes("country"))
+      ?.long_name?.toLowerCase() ?? null;
+
+    const locality = components
+      .find((c: any) => c.types.includes("locality"))
+      ?.long_name?.toLowerCase() ?? null;
+
+    // Store as "locality|country" so we can match on both
+    if (locality && country) return `${locality}|${country}`;
+    if (country) return `|${country}`;
+    return null;
+  } catch {
+    return null;
+  }
+};
 
 const ZoomTracker: React.FC<{ onZoomChange: (zoom: number) => void }> = ({
   onZoomChange,
@@ -73,7 +103,7 @@ const PlaceClickInterceptor: React.FC<{
               headers: {
                 "Content-Type": "application/json",
                 "X-Goog-Api-Key": process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
-                "X-Goog-FieldMask": "displayName,formattedAddress,rating,types,photos.name",
+                "X-Goog-FieldMask": "displayName,formattedAddress,rating,types,photos.name,location",
               },
             }
           );
@@ -82,9 +112,6 @@ const PlaceClickInterceptor: React.FC<{
             return;
           }
           const data = await response.json();
-          console.log("RAW Google Places response:", JSON.stringify(data, null, 2));
-          console.log("photos field:", data.photos);
-          console.log("photoReference extracted:", data.photos?.[0]?.name ?? null);
           const types: string[] = data.types ?? [];
           const isPOI = types.some((t) => ALLOWED_POI_TYPES.has(t));
           if (!isPOI) return;
@@ -94,6 +121,8 @@ const PlaceClickInterceptor: React.FC<{
             rating: data.rating ?? null,
             placeId,
             photoReference: data.photos?.[0]?.name ?? null,
+            lat: data.location?.latitude ?? null,
+            lng: data.location?.longitude ?? null,
           });
         } catch (err) {
           console.error("Failed to fetch place details:", err);
@@ -105,17 +134,6 @@ const PlaceClickInterceptor: React.FC<{
   return null;
 };
 
-const MapPanner: React.FC<{ target: { lat: number; lng: number } | null }> = ({ target }) => {
-  const map = useMap();
-  useEffect(() => {
-    if (!map || !target) return;
-    map.panTo(target);
-    map.setZoom(15);
-  }, [map, target]);
-  return null;
-};
-
-// Star rating — renders partial fill for the fractional star
 const StarRating: React.FC<{ rating: number }> = ({ rating }) => {
   const fullStars = Math.floor(rating);
   const hasHalf = rating % 1 >= 0.5;
@@ -135,95 +153,87 @@ const StarRating: React.FC<{ rating: number }> = ({ rating }) => {
 };
 
 const PlaceCard: React.FC<{
-    placeInfo: PlaceInfo;
-    onClose: () => void;
-    userId: string | undefined;
-    token: string | undefined;
-    apiService: ApiService;
-  }> = ({ placeInfo, onClose, userId, token, apiService }) => {
-    const [savedFeedback, setSavedFeedback] = useState<string | null>(null);
-    const [isSaving, setIsSaving] = useState(false);
-    const [showBoardSelector, setShowBoardSelector] = useState(false);
-    const [travelBoards, setTravelBoards] = useState<{id: number, name: string}[]>([]);
-    const [boardFeedback, setBoardFeedback] = useState<string | null>(null);
-    const handleAddToSaved = async () => {
-      if (!userId) {
-        setSavedFeedback("Not logged in.");
-        setTimeout(() => setSavedFeedback(null), 2000);
-        return;
-      }
-      setIsSaving(true);
-      try {
-        await apiService.post(`/users/${userId}/savedplaces`, {
-          externalPlaceId: placeInfo.placeId,
-          name: placeInfo.name,
-          address: placeInfo.address,
-          rating: placeInfo.rating,
-          photoReference: placeInfo.photoReference ?? null,
-        });
-        setSavedFeedback("Saved to places!");
-      } catch (err: unknown) {
-        const status = (err as { status?: number }).status;
-        setSavedFeedback(status === 409 ? "Already saved!" : "Failed to save.");
-      } finally {
-        setIsSaving(false);
-        setTimeout(() => setSavedFeedback(null), 2000);
-      }
-    };
+  placeInfo: PlaceInfo;
+  onClose: () => void;
+  userId: string | undefined;
+  token: string | undefined;
+  apiService: ApiService;
+}> = ({ placeInfo, onClose, userId, token, apiService }) => {
+  const [savedFeedback, setSavedFeedback] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [showBoardSelector, setShowBoardSelector] = useState(false);
+  const [travelBoards, setTravelBoards] = useState<{ id: number; name: string }[]>([]);
+  const [boardFeedback, setBoardFeedback] = useState<string | null>(null);
 
-    const handleOpenBoardSelector = async () => {
-      try {
-        const boards = await apiService.get<{id: number, name: string}[]>("/travelboards");
-        setTravelBoards(boards);
-        setShowBoardSelector(true);
-      } catch {
-        setBoardFeedback("Failed to load boards.");
-        setTimeout(() => setBoardFeedback(null), 2000);
-      }
-    };
-
-    const handleAddToBoard = async (boardId: number) => {
-      setShowBoardSelector(false);
-      try {
-        await apiService.post(`/travelboards/${boardId}/places`, {
-          externalPlaceId: placeInfo.placeId,
-          name: placeInfo.name,
-          address: placeInfo.address,
-          rating: placeInfo.rating,
-          photoReference: placeInfo.photoReference ?? null,
-        });
-        setBoardFeedback("Added to travel board!");
-      } catch (err: unknown) {
-        const status = (err as { status?: number }).status;
-        setBoardFeedback(status === 409 ? "Already in this board!" : "Failed to add.");
-      } finally {
-        setTimeout(() => setBoardFeedback(null), 2000);
-      }
-    };
-
-      const payload = {
+  const handleAddToSaved = async () => {
+    if (!userId) {
+      setSavedFeedback("Not logged in.");
+      setTimeout(() => setSavedFeedback(null), 2000);
+      return;
+    }
+    setIsSaving(true);
+    try {
+      const city = await resolveCity(placeInfo.placeId);
+      await apiService.post(`/users/${userId}/savedplaces`, {
         externalPlaceId: placeInfo.placeId,
         name: placeInfo.name,
         address: placeInfo.address,
         rating: placeInfo.rating,
-        types: [],
         photoReference: placeInfo.photoReference ?? null,
-      };
-  console.log("Saving place payload:", payload);
-  console.log("userId:", userId);
+        city, // ← send city
+      });
+      setSavedFeedback("Saved to places!");
+    } catch (err: unknown) {
+      const status = (err as { status?: number }).status;
+      setSavedFeedback(status === 409 ? "Already saved!" : "Failed to save.");
+    } finally {
+      setIsSaving(false);
+      setTimeout(() => setSavedFeedback(null), 2000);
+    }
+  };
+
+  const handleOpenBoardSelector = async () => {
+    try {
+      const boards = await apiService.get<{ id: number; name: string }[]>("/travelboards");
+      setTravelBoards(boards);
+      setShowBoardSelector(true);
+    } catch {
+      setBoardFeedback("Failed to load boards.");
+      setTimeout(() => setBoardFeedback(null), 2000);
+    }
+  };
+
+  const handleAddToBoard = async (boardId: number) => {
+    setShowBoardSelector(false);
+    try {
+      const city = await resolveCity(placeInfo.placeId);
+      await apiService.post(`/travelboards/${boardId}/places`, {
+        externalPlaceId: placeInfo.placeId,
+        name: placeInfo.name,
+        address: placeInfo.address,
+        rating: placeInfo.rating,
+        photoReference: placeInfo.photoReference ?? null,
+        city, // ← send city
+      });
+      setBoardFeedback("Added to travel board!");
+    } catch (err: unknown) {
+      const status = (err as { status?: number }).status;
+      setBoardFeedback(status === 409 ? "Already in this board!" : "Failed to add.");
+    } finally {
+      setTimeout(() => setBoardFeedback(null), 2000);
+    }
+  };
 
   return (
-    <div className={popupStyles.card} style={{position: "relative"}}>
-      {/* Close */}
+    <div className={popupStyles.card} style={{ position: "relative" }}>
       <button className={popupStyles.closeBtn} onClick={onClose}>✕</button>
-
-      {/* Header row: title + action buttons */}
       <div className={popupStyles.headerRow}>
         <h3 className={popupStyles.placeName}>{placeInfo.name}</h3>
         <div className={popupStyles.headerActions}>
           <button
             className={popupStyles.iconBtn}
             onClick={handleAddToSaved}
+            disabled={isSaving}
             title="Save place"
           >
             🔖
@@ -234,13 +244,11 @@ const PlaceCard: React.FC<{
           >
             + add to travel board
           </button>
-
-          {/* Board selector dropdown */}
           {showBoardSelector && (
             <div style={{
-              position: "absolute", background: "white", color: "black", border: "1px solid #ccc",
-              borderRadius: "8px", padding: "8px", zIndex: 10, minWidth: "180px",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.15)"
+              position: "absolute", background: "white", color: "black",
+              border: "1px solid #ccc", borderRadius: "8px", padding: "8px",
+              zIndex: 10, minWidth: "180px", boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
             }}>
               <div style={{ fontWeight: "bold", marginBottom: "6px", fontSize: "13px" }}>
                 Select a board:
@@ -252,10 +260,7 @@ const PlaceCard: React.FC<{
                 <div
                   key={board.id}
                   onClick={() => handleAddToBoard(board.id)}
-                  style={{
-                    padding: "6px 8px", cursor: "pointer", borderRadius: "6px",
-                    fontSize: "13px"
-                  }}
+                  style={{ padding: "6px 8px", cursor: "pointer", borderRadius: "6px", fontSize: "13px" }}
                   onMouseEnter={(e) => (e.currentTarget.style.background = "#f0f0f0")}
                   onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
                 >
@@ -270,14 +275,9 @@ const PlaceCard: React.FC<{
               </div>
             </div>
           )}
-
         </div>
       </div>
-
-      {/* Address */}
       <p className={popupStyles.address}>📍 {placeInfo.address}</p>
-
-      {/* Image grid — 2 rows × 4 cols of white placeholders */}
       <div className={popupStyles.gridSection}>
         <div className={popupStyles.gridLabel}>Featured in these posts</div>
         <div className={popupStyles.imageGrid}>
@@ -286,7 +286,6 @@ const PlaceCard: React.FC<{
           ))}
         </div>
       </div>
-
       <div className={popupStyles.gridSection}>
         <div className={popupStyles.gridLabel}>Featured in these boards</div>
         <div className={popupStyles.imageGrid}>
@@ -295,11 +294,7 @@ const PlaceCard: React.FC<{
           ))}
         </div>
       </div>
-
-      {/* Divider */}
       <div className={popupStyles.divider} />
-
-      {/* Rating from Google Maps */}
       <div className={popupStyles.ratingSection}>
         <span className={popupStyles.ratingLabel}>Rating from Google Maps</span>
         {placeInfo.rating !== null ? (
@@ -308,13 +303,8 @@ const PlaceCard: React.FC<{
           <span className={popupStyles.noRating}>No rating available</span>
         )}
       </div>
-
-      {savedFeedback && (
-        <p className={popupStyles.toast}>✓ {savedFeedback}</p>
-      )}
-      {boardFeedback && (
-        <p className={popupStyles.toast}>✓ {boardFeedback}</p>
-      )}
+      {savedFeedback && <p className={popupStyles.toast}>✓ {savedFeedback}</p>}
+      {boardFeedback && <p className={popupStyles.toast}>✓ {boardFeedback}</p>}
     </div>
   );
 };
@@ -326,7 +316,6 @@ const UserDashboard: React.FC = () => {
   const isAllowed = useProtectedRoute();
   const [countryInfo, setCountryInfo] = useState<CountryInfo | null>(null);
   const [placeInfo, setPlaceInfo] = useState<PlaceInfo | null>(null);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [currentZoom, setCurrentZoom] = useState<number>(5);
   const [searchTarget, setSearchTarget] = useState<{ lat: number; lng: number } | null>(null);
   const position = { lat: 47.3769, lng: 8.5417 };
@@ -397,11 +386,7 @@ const UserDashboard: React.FC = () => {
             >
               <ZoomTracker onZoomChange={setCurrentZoom} />
               <PlaceClickInterceptor onPlaceClick={handlePlaceClick} />
-              <MapPanner target={searchTarget} />
-              
-              
 
-              {/* Country Info Popup */}
               {showCountryPopup && (
                 <div style={{
                   position: "absolute", top: "50%", left: "50%",
@@ -443,7 +428,6 @@ const UserDashboard: React.FC = () => {
               )}
             </Map>
 
-            {/* Place Card — rendered outside <Map> */}
             {placeInfo && (
               <div className={popupStyles.cardWrapper}>
                 <PlaceCard

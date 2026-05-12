@@ -145,12 +145,14 @@ const Preferences: React.FC = () => {
 
       if (failedFriendRequests === 0) {
         message.success("Preferences saved successfully!");
+        sessionStorage.removeItem("justRegistered");
       } else {
         message.warning(
           failedFriendRequests === selectedFriends.length
             ? "Preferences saved, but none of the friend requests could be sent."
             : "Preferences saved, but some friend requests could not be sent."
         );
+        sessionStorage.removeItem("justRegistered");
       }
 
       router.push(`/users/${storedUser.id}`);
