@@ -19,6 +19,8 @@ interface PlaceInfo {
   rating: number | null;
   placeId: string;
   photoReference: string | null;
+  lat: number | null;
+  lng: number | null;
 }
 
 export default function MapSearchBar({ onPlaceSelect }: MapSearchBarProps) {
