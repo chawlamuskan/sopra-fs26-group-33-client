@@ -1,82 +1,106 @@
 .page {
   padding: 20px clamp(16px, 3vw, 64px);
   font-family: DM Sans;
+  background: #f7fafc;
 }
+
+/* ---------- TITLE ---------- */
 
 .title {
   font-size: 42px;
   font-weight: 800;
   color: #0d1b8e;
-  margin-bottom: 12px;
+  margin-bottom: 0;
+}
+
+/* ---------- HEADER (TITLE + TABS) ---------- */
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 14px;
 }
 
 /* ---------- TABS ---------- */
 
 .tabRow {
   display: flex;
-  gap: 16px;
-  margin-bottom: 10px;
+  gap: 12px;
+  width: fit-content;
 }
 
 .tab {
-  padding: 8px 28px;
+  padding: 8px 22px;
   border-radius: 12px;
-  border: 1px solid #111;
-  background: #f3e9ea;
+  border: 1px solid rgba(13, 27, 142, 0.25);
+  background: white;
   font-weight: 700;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-/* Friends = light blue */
+.tab:hover {
+  transform: translateY(-1px);
+}
+
+/* Friends (cold blue) */
 .tabFriendsActive {
-  background: #76bdd6;
+  background: #9fc6e1;
   color: #0d1b8e;
 }
 
-/* All = light pink */
+/* Public (soft lavender/grey-blue) */
 .tabAllActive {
-  background: #c8c4d4;
+  background:  #dccfe3;
   color: #0d1b8e;
 }
 
 /* ---------- PANEL ---------- */
 
 .panel {
-  border-radius: 24px;
+  border-radius: 26px;
   padding: 24px;
-  border: 1px solid #111;
-  min-height: 600px;
+  border: 1px solid rgba(13, 27, 142, 0.15);
+  min-height: unset;
 }
 
-/* match screenshot */
 .panelFriends {
-  background: #76bdd6;
+  background:  #9fc6e1;
 }
 
 .panelAll {
-  background: #f4ebeb;
+  background: #dccfe3;
 }
 
-/* ---------- FRIENDS LAYOUT ---------- */
+/* ---------- GRID ---------- */
 
 .friendsGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  height: 100%;
+  display: flex;
+  gap: 22px;
+  align-items: flex-start;
 }
+
+.friendColumnWrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+
+/* ---------- USER COLUMN (LIGHT GROUPING, NOT HEAVY CARD) ---------- */
 
 .friendColumn {
-  padding: 16px;
-  position: relative;
-}
-
-.separator {
-  position: absolute;
-  right: 0;
-  top: 0;
-  width: 2px;
-  height: 100%;
-  background: #0d1b8e;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(6px);
+  break-inside: avoid;
+  margin-bottom: 22px;
+  display: inline-block;
+  width: 100%;
 }
 
 /* ---------- FRIEND HEADER ---------- */
@@ -85,259 +109,204 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-bottom: 4px;
 }
 
-.avatar {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-}
-
+.avatar,
 .avatarFallback {
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  background: #ddd;
+}
+
+/* ---------- NAME + USERNAME ---------- */
+
+.friendIdentity {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: center;
+  align-items: flex-start;
+  line-height: 1.1;
 }
 
-.friendBtn {
-  background: #f5eaea;
-  border: 1px solid #000;
-  padding: 6px 14px;
-  border-radius: 10px;
+.friendName {
+  font-size: 18px;
   font-weight: 700;
+  color: #0d1b8e;
 }
 
-/* ---------- TEXT ---------- */
+.friendUsername {
+  font-size: 13px;
+  color: #6c6d74;
+  opacity: 0.70;
+  margin-top: 2px;
+}
+
+/* ---------- BIO ---------- */
 
 .bio {
   font-size: 13px;
-  margin: 8px 0;
+  margin: 6px 0 6px 0;
   color: #0d1b8e;
   font-style: italic;
+  opacity: 0.85;
 }
+
+/* ---------- SECTION TITLE ---------- */
 
 .sectionTitle {
   margin-top: 10px;
   font-weight: 700;
   color: #0d1b8e;
   font-size: 13px;
+  opacity: 0.9;
 }
 
-/* ---------- BOARDS ---------- */
-
-.boardPreviewGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.miniBoard {
-  background: white;
-  border-radius: 10px;
-  height: 60px;
-}
-
-/* ---------- BUTTON ---------- */
-
-.inviteBtn {
-  margin-top: 16px;
-  width: 100%;
-  background: #0d1b8e;
-  color: white;
-  border-radius: 20px;
-  padding: 10px;
-  border: none;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-/* ---------- ALL TAB ---------- */
-
-.allGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 16px;
-}
-
-.publicCard {
-  background: white;
-  border-radius: 12px;
-  padding: 16px;
-}
-
-.joinBtn {
-  margin-top: 10px;
-  width: 100%;
-  background: #0d1b8e;
-  color: white;
-  border: none;
-  border-radius: 12px;
-  padding: 8px;
-}
-
-.placesGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 4px;
-  max-width: 100%;
-}
-
-.placeBox {
-  width: 100%;
-  aspect-ratio: 1;
-  max-height: 80px;
-  overflow: hidden;
-  border-radius: 10px;
-  border: 1px solid #e0d6d6;
-}
+/* ---------- BOARDS (COLLAGE FEEL) ---------- */
 
 .friendBoards {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   margin-top: 8px;
 }
 
 .friendBoardCard {
-  background: white;
+  background: rgba(255, 255, 255, 0.28);
   border-radius: 14px;
   padding: 10px;
-  border: 1px solid #e0d6d6;
+  border: 1px solid rgba(255, 255, 255, 0.35);
 }
+
+.friendBtn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.friendTextBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  line-height: 1.1;
+}
+
+/* ---------- BOARD HEADER ---------- */
 
 .friendBoardHeader {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 6px;
+  align-items: center;
+  margin-bottom: 8px;
 }
 
 .friendBoardName {
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 15px;
   color: #0d1b8e;
-  font-size: 0.95rem;
 }
 
-.placeImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+/* ---------- MEMBERS ---------- */
+
+.memberRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+}
+
+.memberLabel {
+  font-size: 12px;
+  color: #0d1b8e;
+  font-weight: 600;
+}
+
+.memberCircles {
+  display: flex;
+  gap: 6px;
 }
 
 .memberCircleImg,
 .memberCircleFallback {
   width: 22px;
   height: 22px;
-  min-width: 22px;
-  min-height: 22px;
   border-radius: 50%;
-  object-fit: cover;
 }
 
-.friendBoardHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
+/* ---------- PLACES GRID ---------- */
+
+.placesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
 }
+
+.placeBox {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.4);
+}
+
+/* ---------- BUTTON ---------- */
 
 .inviteBtn {
-  margin: 0; 
-}
-
-.friendBoardName {
-  font-weight: 600;
-  font-size: 16px;
-}
-
-.askJoinBtn {
   background: #0d1b8e;
   color: white;
   border: none;
-  padding: 6px 10px;
-  border-radius: 6px;
+  border-radius: 16px;
+  padding: 8px 10px;
+  font-weight: 600;
   font-size: 12px;
   cursor: pointer;
-  white-space: nowrap;
 }
 
-.askJoinBtn:hover {
-  opacity: 0.85;
+/* ---------- SEE MORE BUTTON ---------- */
+
+.seeMoreRow {
+  display: flex;
+  justify-content: right;
+  margin-top: 10px;
 }
 
-.inviteBtnSmall {
-  padding: 4px 10px;   /* makes it fit text */
-  font-size: 12px;
-  width: auto;
-  min-width: unset;
-  height: auto;
-  white-space: nowrap;
+.seeMore {
+  font-size: 0.85rem;
+  color: #3333cc;
+  text-decoration: underline;
+  cursor: pointer;
 }
 
-.memberSection {
+/* ---------- EMPTY STATE ---------- */
+
+.emptyState {
+  grid-column: 1 / -1;
+  text-align: center;
+
+  color: rgba(13, 27, 142, 0.85); /* your primary navy with opacity */
+
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin: 8px 0;
-}
-
-.memberRow {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 8px 0;
-}
-
-.memberLabel {
-  color: #0d1b8e;  
-  font-weight: 600;
-  font-size: 13px;
-  white-space: nowrap;
-}
-
-.memberCircles {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.placePlaceholder {
-  width: 100%;
-  height: 100%;
-  background: #eee;
-  display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
-  text-align: center;
-  padding: 6px;
+
+  padding: 40px 20px;
 }
 
-.seeMoreBtn {
-  margin-top: 14px;
-
-  padding: 6px 14px;
-  width: fit-content;
-
-  border-radius: 999px;
-  border: 1px solid #0d1b8e;
-
-  background: white;
-  color: #0d1b8e;
-
-  font-size: 13px;
-  font-weight: 600;
-
-  cursor: pointer;
-  transition: all 0.2s ease;
+.emptyTitle {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: rgba(13, 27, 142, 0.95);
 }
 
-.seeMoreBtn:hover {
-  background: #0d1b8e;
-  color: white;
+.emptyText {
+  font-size: 15px;
+  line-height: 1.5;
+  max-width: 420px;
+  color: rgba(13, 27, 142, 0.65);
 }
