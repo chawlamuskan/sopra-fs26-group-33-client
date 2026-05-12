@@ -3,6 +3,7 @@
 import { Input } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import { useState } from "react";
+import { PlaceInfo } from "@/types/placeinfo";
 
 interface PlacePrediction {
   place_id: string;
@@ -13,15 +14,6 @@ interface MapSearchBarProps {
   onPlaceSelect: (lat: number, lng: number, place: PlaceInfo) => void;
 }
 
-interface PlaceInfo {
-  name: string;
-  address: string;
-  rating: number | null;
-  placeId: string;
-  photoReference: string | null;
-  lat: number | null;
-  lng: number | null;
-}
 
 export default function MapSearchBar({ onPlaceSelect }: MapSearchBarProps) {
   const [query, setQuery] = useState("");
@@ -95,6 +87,8 @@ export default function MapSearchBar({ onPlaceSelect }: MapSearchBarProps) {
         rating: data.rating ?? null,
         placeId: placeId,
         photoReference: data.photos?.[0]?.name ?? null,
+        lat: data.location?.latitude ?? null,
+        lng: data.location?.longitude ?? null,
       });
     }
   } catch (err) {
