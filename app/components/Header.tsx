@@ -4,6 +4,7 @@ import HeaderButtons from "@/components/HeaderButtons";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import MapSearchBar from "@/components/MapSearchBar";
+import { PlaceInfo } from "@/types/placeinfo";
 
 type StoredUser = {
   id: number;
@@ -11,14 +12,6 @@ type StoredUser = {
 
 interface HeaderProps {
   onPlaceSelect?: (lat: number, lng: number, place: PlaceInfo) => void;
-}
-
-interface PlaceInfo {
-  name: string;
-  address: string;
-  rating: number | null;
-  placeId: string;
-  photoReference: string | null;
 }
 
 export default function Header( {onPlaceSelect }: HeaderProps) {

@@ -6,10 +6,17 @@ import { Input } from "antd";
 
 type Suggestion = { label: string; placeId: string };
 
+interface AddressComponent {
+  types: string[];
+  long_name: string;
+  short_name: string;
+}
+
 interface NominatimResult {
   addresstype?: string;
   display_name: string;
   place_id: string | number;
+  address?: Record<string, string>;
 }
 
 const LocationInput = ({
@@ -23,24 +30,52 @@ const LocationInput = ({
   const [show, setShow] = useState(false);
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const resolveLocalCityName = async (cityLabel: string): Promise<string> => {
+    try {
+      const res = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(cityLabel)}&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
+      );
+      const data = await res.json();
+      const components = data.results?.[0]?.address_components ?? [];
+
+      const locality = components
+        .find((c: AddressComponent) => c.types.includes("locality"))
+        ?.long_name?.toLowerCase() ?? null;
+
+      const country = components
+        .find((c: AddressComponent) => c.types.includes("country"))
+        ?.long_name?.toLowerCase() ?? null;
+
+      if (locality && country) return `${locality}|${country}`;
+      return cityLabel.split(",")[0].trim().toLowerCase();
+    } catch {
+      return cityLabel.split(",")[0].trim().toLowerCase();
+    }
+  };
+
   const fetchSuggestions = async (query: string) => {
     if (query.length < 2) { setSuggestions([]); return; }
-    try { //Nina
+    try {
       const res = await fetch(
         `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=6&featuretype=city&featuretype=country&accept-language=en`
       );
-      if (!res.ok) throw new Error("Failed to fetch"); //Nina
+      if (!res.ok) throw new Error("Failed to fetch");
       const data: NominatimResult[] = await res.json();
-      // Filter to only cities/towns/villages/countries
       const filtered = data
         .filter((item) =>
-          ["city","town","village","hamlet","country","state"].includes(item.addresstype ?? "")
+          ["city", "town", "village", "hamlet", "country", "state"].includes(item.addresstype ?? "")
         )
-        .map((item) => ({
-          label: item.display_name.split(",").slice(0, 2).join(",").trim(),
-          placeId: String(item.place_id),
-        }));
-      // Deduplicate by label
+        .map((item: NominatimResult) => {
+          const city =
+            item.address?.city ??
+            item.address?.town ??
+            item.address?.village ??
+            item.address?.hamlet ??
+            item.address?.state;
+          const country = item.address?.country;
+          const label = city && country ? `${city}, ${country}` : item.display_name.split(",")[0].trim();
+          return { label, placeId: String(item.place_id) };
+        });
       const unique = filtered.filter(
         (v: Suggestion, i: number, arr: Suggestion[]) =>
           arr.findIndex((x) => x.label === v.label) === i
@@ -79,8 +114,12 @@ const LocationInput = ({
           {suggestions.map((s) => (
             <li
               key={s.placeId}
-              onMouseDown={() => { onChange(s.label); setShow(false); }}
-              style={{ padding: "8px 16px", cursor: "pointer", fontSize: "0.9rem", color: "#171717", background: "#f4ebeb"  }}
+              onMouseDown={async () => {
+                const localCity = await resolveLocalCityName(s.label);
+                onChange(localCity);
+                setShow(false);
+              }}
+              style={{ padding: "8px 16px", cursor: "pointer", fontSize: "0.9rem", color: "#171717", background: "#f4ebeb" }}
               onMouseEnter={(e) => (e.currentTarget.style.background = "#e0d4d4")}
               onMouseLeave={(e) => (e.currentTarget.style.background = "#f4ebeb")}
             >
@@ -92,4 +131,5 @@ const LocationInput = ({
     </div>
   );
 };
+
 export default LocationInput;
