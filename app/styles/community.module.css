@@ -1,0 +1,343 @@
+.page {
+  padding: 20px clamp(16px, 3vw, 64px);
+  font-family: DM Sans;
+}
+
+.title {
+  font-size: 42px;
+  font-weight: 800;
+  color: #0d1b8e;
+  margin-bottom: 12px;
+}
+
+/* ---------- TABS ---------- */
+
+.tabRow {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.tab {
+  padding: 8px 28px;
+  border-radius: 12px;
+  border: 1px solid #111;
+  background: #f3e9ea;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Friends = light blue */
+.tabFriendsActive {
+  background: #76bdd6;
+  color: #0d1b8e;
+}
+
+/* All = light pink */
+.tabAllActive {
+  background: #c8c4d4;
+  color: #0d1b8e;
+}
+
+/* ---------- PANEL ---------- */
+
+.panel {
+  border-radius: 24px;
+  padding: 24px;
+  border: 1px solid #111;
+  min-height: 600px;
+}
+
+/* match screenshot */
+.panelFriends {
+  background: #76bdd6;
+}
+
+.panelAll {
+  background: #f4ebeb;
+}
+
+/* ---------- FRIENDS LAYOUT ---------- */
+
+.friendsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  height: 100%;
+}
+
+.friendColumn {
+  padding: 16px;
+  position: relative;
+}
+
+.separator {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: #0d1b8e;
+}
+
+/* ---------- FRIEND HEADER ---------- */
+
+.friendHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+}
+
+.avatarFallback {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.friendBtn {
+  background: #f5eaea;
+  border: 1px solid #000;
+  padding: 6px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+/* ---------- TEXT ---------- */
+
+.bio {
+  font-size: 13px;
+  margin: 8px 0;
+  color: #0d1b8e;
+  font-style: italic;
+}
+
+.sectionTitle {
+  margin-top: 10px;
+  font-weight: 700;
+  color: #0d1b8e;
+  font-size: 13px;
+}
+
+/* ---------- BOARDS ---------- */
+
+.boardPreviewGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.miniBoard {
+  background: white;
+  border-radius: 10px;
+  height: 60px;
+}
+
+/* ---------- BUTTON ---------- */
+
+.inviteBtn {
+  margin-top: 16px;
+  width: 100%;
+  background: #0d1b8e;
+  color: white;
+  border-radius: 20px;
+  padding: 10px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ---------- ALL TAB ---------- */
+
+.allGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.publicCard {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.joinBtn {
+  margin-top: 10px;
+  width: 100%;
+  background: #0d1b8e;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 8px;
+}
+
+.placesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  max-width: 100%;
+}
+
+.placeBox {
+  width: 100%;
+  aspect-ratio: 1;
+  max-height: 80px;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid #e0d6d6;
+}
+
+.friendBoards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.friendBoardCard {
+  background: white;
+  border-radius: 14px;
+  padding: 10px;
+  border: 1px solid #e0d6d6;
+}
+
+.friendBoardHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.friendBoardName {
+  font-weight: 700;
+  color: #0d1b8e;
+  font-size: 0.95rem;
+}
+
+.placeImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.memberCircleImg,
+.memberCircleFallback {
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  min-height: 22px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.friendBoardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.inviteBtn {
+  margin: 0; 
+}
+
+.friendBoardName {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.askJoinBtn {
+  background: #0d1b8e;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.askJoinBtn:hover {
+  opacity: 0.85;
+}
+
+.inviteBtnSmall {
+  padding: 4px 10px;   /* makes it fit text */
+  font-size: 12px;
+  width: auto;
+  min-width: unset;
+  height: auto;
+  white-space: nowrap;
+}
+
+.memberSection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 8px 0;
+}
+
+.memberRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0;
+}
+
+.memberLabel {
+  color: #0d1b8e;  
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.memberCircles {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.placePlaceholder {
+  width: 100%;
+  height: 100%;
+  background: #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  text-align: center;
+  padding: 6px;
+}
+
+.seeMoreBtn {
+  margin-top: 14px;
+
+  padding: 6px 14px;
+  width: fit-content;
+
+  border-radius: 999px;
+  border: 1px solid #0d1b8e;
+
+  background: white;
+  color: #0d1b8e;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.seeMoreBtn:hover {
+  background: #0d1b8e;
+  color: white;
+}
