@@ -37,6 +37,12 @@ interface PlaceInfo {
   lng: number | null;
 }
 
+interface AddressComponent {
+  types: string[];
+  long_name: string;
+  short_name: string;
+}
+
 
 const resolveCity = async (placeId: string): Promise<string | null> => {
   try {
@@ -46,13 +52,13 @@ const resolveCity = async (placeId: string): Promise<string | null> => {
     const data = await res.json();
     const components = data.results?.[0]?.address_components ?? [];
     
-    // Use country — always consistent in English
+    
     const country = components
-      .find((c: any) => c.types.includes("country"))
+      .find((c: AddressComponent) => c.types.includes("country"))
       ?.long_name?.toLowerCase() ?? null;
 
     const locality = components
-      .find((c: any) => c.types.includes("locality"))
+      .find((c: AddressComponent) => c.types.includes("locality"))
       ?.long_name?.toLowerCase() ?? null;
 
     // Store as "locality|country" so we can match on both
