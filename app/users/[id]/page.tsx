@@ -317,6 +317,7 @@ const UserDashboard: React.FC = () => {
   const [countryInfo, setCountryInfo] = useState<CountryInfo | null>(null);
   const [placeInfo, setPlaceInfo] = useState<PlaceInfo | null>(null);
   const [currentZoom, setCurrentZoom] = useState<number>(5);
+  const [searchTarget, setSearchTarget] = useState<{ lat: number; lng: number } | null>(null);
   const position = { lat: 47.3769, lng: 8.5417 };
   const COUNTRY_LABEL_MAX_ZOOM = 6;
 
@@ -364,10 +365,16 @@ const UserDashboard: React.FC = () => {
   if (!isAllowed) return null;
 
   return (
-    <>
-      <Header />
-      <main className={styles.main}>
-        <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
+    
+    <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}>
+      <>
+      <Header 
+      onPlaceSelect={(lat, lng, place) => {
+        setSearchTarget({ lat, lng });
+        setPlaceInfo(place);
+            }} />
+        <main className={styles.main}>
+        
           <div style={{ height: "100vh", width: "100vw", position: "relative", overflow: "hidden" }}>
             <Map
               mapId="3acb2fe9409f1015648d998e"
@@ -433,9 +440,10 @@ const UserDashboard: React.FC = () => {
               </div>
             )}
           </div>
-        </APIProvider>
+        
       </main>
     </>
+    </APIProvider>
   );
 };
 
