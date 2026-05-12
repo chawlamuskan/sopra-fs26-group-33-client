@@ -18,6 +18,7 @@ import {
 import styles from "@/styles/page.module.css";
 import popupStyles from "@/styles/placePopup.module.css";
 import { ApiService } from "@/api/apiService";
+import { PlaceInfo } from "@/types/placeinfo";
 
 interface CountryInfo {
   name: string;
@@ -27,15 +28,7 @@ interface CountryInfo {
   languages: string[];
 }
 
-interface PlaceInfo {
-  name: string;
-  address: string;
-  rating: number | null;
-  placeId: string;
-  photoReference: string | null;
-  lat: number | null;
-  lng: number | null;
-}
+
 
 interface AddressComponent {
   types: string[];
