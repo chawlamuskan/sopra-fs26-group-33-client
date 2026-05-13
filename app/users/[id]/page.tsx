@@ -388,9 +388,9 @@ const UserDashboard: React.FC = () => {
 
               {showCountryPopup && (
                 <div style={{
-                  position: "absolute", top: "50%", left: "50%",
-                  transform: "translate(-50%, -50%)",
-                  backgroundColor: "#0B0696D1", color: "white",
+                  position: "absolute", top: "40%", right: "10%",
+                  transform: "translateY(-50%)",
+                  backgroundColor: "#0B0696F0", color: "white",
                   borderRadius: "16px", padding: "24px", width: "320px",
                   zIndex: 1000, boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
                 }}>
