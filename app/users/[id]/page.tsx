@@ -362,6 +362,17 @@ const UserDashboard: React.FC = () => {
   const showCountryPopup = countryInfo && currentZoom <= COUNTRY_LABEL_MAX_ZOOM;
   const storedUser = useLocalStorage<User | null>("user", null);
 
+  const MapPanner: React.FC<{ target: { lat: number; lng: number } | null; onDone: () => void;}> = ({ target, onDone }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (!map || !target) return;
+    map.panTo({ lat: target.lat, lng: target.lng });
+    map.setZoom(15);
+    onDone();
+  }, [map, target]);
+  return null;
+};
+
   if (isAllowed === null) return null;
   if (!isAllowed) return null;
 
@@ -387,6 +398,9 @@ const UserDashboard: React.FC = () => {
             >
               <ZoomTracker onZoomChange={setCurrentZoom} />
               <PlaceClickInterceptor onPlaceClick={handlePlaceClick} />
+              <MapPanner 
+              target={searchTarget}
+              onDone={() => setSearchTarget(null)} />
 
               {showCountryPopup && (
                 <div style={{
