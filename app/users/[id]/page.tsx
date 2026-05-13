@@ -48,11 +48,11 @@ const resolveCity = async (placeId: string): Promise<string | null> => {
     
     const country = components
       .find((c: AddressComponent) => c.types.includes("country"))
-      ?.long_name?.toLowerCase() ?? null;
+      ?.short_name?.toLowerCase() ?? null;
 
     const locality = components
       .find((c: AddressComponent) => c.types.includes("locality"))
-      ?.long_name?.toLowerCase() ?? null;
+      ?.short_name?.toLowerCase() ?? null;
 
     // Store as "locality|country" so we can match on both
     if (locality && country) return `${locality}|${country}`;
@@ -320,9 +320,9 @@ const UserDashboard: React.FC = () => {
   const position = { lat: 47.3769, lng: 8.5417 };
   const COUNTRY_LABEL_MAX_ZOOM = 6;
 
-  const fetchCountryInfo = async (countryName: string) => {
+  const fetchCountryInfo = async (countryCode: string) => {
     const countryRes = await fetch(
-      `https://restcountries.com/v3.1/name/${countryName}?fullText=true`
+      `https://restcountries.com/v3.1/alpha/${countryCode}?fullText=true`
     );
     const countryData = await countryRes.json();
     if (!countryData || countryData.status === 404) return;
@@ -346,8 +346,8 @@ const UserDashboard: React.FC = () => {
       );
       const geocodeData = await geocodeReverse.json();
       if (!geocodeData.results || geocodeData.results.length === 0) return;
-      const countryName = geocodeData.results[0].address_components[0].long_name;
-      await fetchCountryInfo(countryName);
+      const countryCode = geocodeData.results[0].address_components[0].short_name;
+      await fetchCountryInfo(countryCode);
     } catch (error) {
       console.error("Error fetching country info:", error);
     }
