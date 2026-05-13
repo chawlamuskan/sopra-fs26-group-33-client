@@ -122,6 +122,7 @@ const PlaceClickInterceptor: React.FC<{
             photoReference: data.photos?.[0]?.name ?? null,
             lat: data.location?.latitude ?? null,
             lng: data.location?.longitude ?? null,
+            types: types.filter((t) => ALLOWED_POI_TYPES.has(t)),
           });
         } catch (err) {
           console.error("Failed to fetch place details:", err);
@@ -179,7 +180,8 @@ const PlaceCard: React.FC<{
         address: placeInfo.address,
         rating: placeInfo.rating,
         photoReference: placeInfo.photoReference ?? null,
-        city, // ← send city
+        city,
+        types: placeInfo.types,
       });
       setSavedFeedback("Saved to places!");
     } catch (err: unknown) {
