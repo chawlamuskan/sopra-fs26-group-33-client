@@ -25,7 +25,11 @@ type FriendRequest = {
   senderUsername: string;
 };
 
-export default function HeaderButtons() {
+interface HeaderButtonsProps {
+  onToggleSavedPlaces?: (enabled: boolean) => void;
+}
+
+export default function HeaderButtons( {onToggleSavedPlaces}: HeaderButtonsProps) {
   const router = useRouter();
   const pathname = usePathname();
   const logout = useLogout();
@@ -40,6 +44,7 @@ export default function HeaderButtons() {
   const [notifAvatars, setNotifAvatars] = useState<Record<number, string | null>>({});
   const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
   const [friendRequestAvatars, setFriendRequestAvatars] = useState<Record<number, string | null>>({});
+  const [showSavedPlaces, setShowSavedPlaces] = useState(false);
 
   const loadNotifications = async () => {
     try {
@@ -81,6 +86,7 @@ export default function HeaderButtons() {
       setFriendRequestAvatars({});
     }
   };
+  
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
@@ -163,6 +169,13 @@ export default function HeaderButtons() {
     }
   };
 
+  const handleToggle = () => {
+    const next = !showSavedPlaces;
+    setShowSavedPlaces(next);
+    onToggleSavedPlaces?.(next);
+
+  }
+
   if (pathname === "/") {
     return (
       <div style={{ display: "flex", gap: "16px", marginLeft: "auto" }}>
@@ -207,9 +220,52 @@ export default function HeaderButtons() {
       {/* Profile picture + username — clickable */}
       <div
         style={{ display: "flex", alignItems: "center", gap: "16px", cursor: "pointer" }}
-        onClick={() => setMenuOpen((prev) => !prev)}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        {user?.id && pathname.startsWith("/users/") && (
+          <div
+            onClick={handleToggle}
+            title={showSavedPlaces ? "Hide saved places" : "Show saved places on map"}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              cursor: "pointer",
+              marginRight: "16px",
+            }}
+          >
+            
+            {/* Track */}
+            <div style={{
+              width: "64px",
+              height: "32px",
+              borderRadius: "999px",
+              background: showSavedPlaces ? "white" : "rgba(255,255,255,0.25)",
+              border: "2px solid white",
+              position: "relative",
+              transition: "background 0.25s ease",
+            }}>
+              {/* Knob */}
+              <div style={{
+                position: "absolute",
+                top: "3px",
+                left: showSavedPlaces ? "33px" : "3px",
+                width: "22px",
+                height: "22px",
+                borderRadius: "50%",
+                background: showSavedPlaces ? "#0B0696" : "white",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "13px",
+                transition: "left 0.25s ease, background 0.25s ease",
+                boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
+              }}>
+                📍
+              </div>
+            </div>
+          </div>
+        )}
           {user?.id && (
             <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
               <BellOutlined 
@@ -245,7 +301,9 @@ export default function HeaderButtons() {
               )}
             </div>
           )}
-          <span style={{
+          <span 
+            onClick={() => setMenuOpen((prev) => !prev)}
+            style={{
             color: "white",
             fontSize: "36px",
             fontFamily: "DM Sans",
@@ -256,12 +314,15 @@ export default function HeaderButtons() {
         </div>
         {profilePicture ? (
           <img
+            onClick={() => setMenuOpen((prev) => !prev)}
             src={profilePicture}
             alt={user?.username ?? ""}
             style={{ width: "80px", height: "80px", borderRadius: "50%", objectFit: "cover" }}
           />
         ) : (
-          <div style={{
+          <div 
+            onClick={() => setMenuOpen((prev) => !prev)}
+            style={{
             width: "80px",
             height: "80px",
             borderRadius: "50%",
