@@ -20,6 +20,7 @@ import styles from "@/styles/page.module.css";
 import popupStyles from "@/styles/placePopup.module.css";
 import { ApiService } from "@/api/apiService";
 import { PlaceInfo } from "@/types/placeinfo";
+import InfoButton from "@/components/InfoButton";
 
 interface CountryInfo {
   name: string;
@@ -438,6 +439,7 @@ const UserDashboard: React.FC = () => {
         }} 
         onToggleSavedPlaces={setShowSavedPlaces}
             />
+      <InfoButton />
         <main className={styles.main}>
         
           <div style={{ height: "100vh", width: "100vw", position: "relative", overflow: "hidden" }}>

@@ -16,6 +16,7 @@ import Header from "@/components/Header";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
+import InfoButton from "@/components/InfoButton";
 
 interface CountryInfo {
   name: string;
@@ -153,6 +154,7 @@ export default function CountryOverview() {
     return (
       <>
         <Header />
+        <InfoButton />
         <main className={styles.main}>
           <div style={{ display: "flex", alignItems: "center", gap: "32px", paddingLeft: "28px" }}>
           <h1 className={styles.title} style={{ margin: 0 }}>Countries Overview</h1>

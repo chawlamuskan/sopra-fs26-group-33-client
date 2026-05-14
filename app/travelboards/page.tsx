@@ -11,6 +11,7 @@ import { ApiService } from "@/api/apiService"; // adjust path if needed
 import { Preferences } from "@/types/user";
 import { SearchOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
+import InfoButton from "@/components/InfoButton";
 
 
 type TravelBoard = {
@@ -396,6 +397,7 @@ const TravelBoardsPage: React.FC = () => {
     <>
     {contextHolder}
     <Header /> 
+    <InfoButton />
     <div className={styles.page}>
     <div className={styles.container}>
 
