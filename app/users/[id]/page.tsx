@@ -14,6 +14,7 @@ import {
   MapMouseEvent,
   useMap,
   useMapsLibrary,
+  AdvancedMarker,
 } from "@vis.gl/react-google-maps";
 import styles from "@/styles/page.module.css";
 import popupStyles from "@/styles/placePopup.module.css";
@@ -179,6 +180,8 @@ const PlaceCard: React.FC<{
         name: placeInfo.name,
         address: placeInfo.address,
         rating: placeInfo.rating,
+        lat: placeInfo.lat,
+        lng: placeInfo.lng,
         photoReference: placeInfo.photoReference ?? null,
         city,
         types: placeInfo.types,
@@ -321,6 +324,38 @@ const UserDashboard: React.FC = () => {
   const [searchTarget, setSearchTarget] = useState<{ lat: number; lng: number } | null>(null);
   const position = { lat: 47.3769, lng: 8.5417 };
   const COUNTRY_LABEL_MAX_ZOOM = 6;
+  const [showSavedPlaces, setShowSavedPlaces] = useState(false);
+  const [savedPlaces, setSavedPlaces] = useState<SavedPlace[]>([]);
+
+  type SavedPlace = {
+    id: number;
+    name: string;
+    lat: number;
+    lng: number;
+    types: string[];
+  };
+
+  const CATEGORY_EMOJI: Record<string, string> = {
+    restaurant: "🍽️",
+    cafe: "☕",
+    bar: "🍺",
+    tourist_attraction: "🗽",
+    museum: "🖼️",
+    park: "🌳",
+    shopping_mall: "🏪",
+    store: "🛍️",
+    lodging: "🏨",
+    establishment: "🏛️", 
+  };
+
+  const getEmoji = (types: string[]) => {
+    const meaningful = types.filter(t => t !== "establishment");
+    const lookup = meaningful.length > 0 ? meaningful: types;
+    for (const t of lookup) {
+      if (CATEGORY_EMOJI[t]) return CATEGORY_EMOJI[t];
+    }
+    return "📍";
+  };
 
   const fetchCountryInfo = async (countryCode: string) => {
     const countryRes = await fetch(
@@ -371,7 +406,23 @@ const UserDashboard: React.FC = () => {
     onDone();
   }, [map, target]);
   return null;
-};
+
+  };
+
+  useEffect(() => {
+    if (!showSavedPlaces || !storedUser.value?.id) return;
+    const fetchSaved = async () => {
+      try {
+        const data = await apiService.get<SavedPlace[]>(`/users/${storedUser.value!.id}/savedplaces`);
+        setSavedPlaces(data);
+      } catch {
+        setSavedPlaces([]);
+      }
+    };
+    fetchSaved();
+  }, [showSavedPlaces, storedUser.value?.id, apiService]);
+
+
 
   if (isAllowed === null) return null;
   if (!isAllowed) return null;
@@ -384,7 +435,9 @@ const UserDashboard: React.FC = () => {
       onPlaceSelect={(lat, lng, place) => {
         setSearchTarget({ lat, lng });
         setPlaceInfo(place);
-            }} />
+        }} 
+        onToggleSavedPlaces={setShowSavedPlaces}
+            />
         <main className={styles.main}>
         
           <div style={{ height: "100vh", width: "100vw", position: "relative", overflow: "hidden" }}>
@@ -454,6 +507,33 @@ const UserDashboard: React.FC = () => {
                 />
               </div>
             )}
+
+            {showSavedPlaces && savedPlaces.map((place) => (
+              <div key={place.id} style={{ position: "absolute" }}>
+                {/* @vis.gl/react-google-maps AdvancedMarker */}
+                <AdvancedMarker
+                  position={{ lat: place.lat, lng: place.lng }}
+                  title={place.name}
+                >
+                  <div style={{
+                    fontSize: "25px",
+                    background: "white",
+                    borderRadius: "50%",
+                    width: "36px",
+                    height: "36px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
+                    border: "1.5px solid #e0e0e0",
+                    //filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.4))",
+                    cursor: "pointer",
+                  }}>
+                    {getEmoji(place.types)}
+                  </div>
+                </AdvancedMarker>
+              </div>
+            ))}
           </div>
         
       </main>
