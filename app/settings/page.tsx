@@ -19,6 +19,11 @@ interface CountryApiItem {
   name?: { common?: string };
 }
 
+interface FriendSummary {
+  id: number;
+  username: string;
+}
+
 const SettingsPageInner: React.FC = () => {
   const isAllowed = useProtectedRoute();
   const apiService = new ApiService();
@@ -50,7 +55,6 @@ const SettingsPageInner: React.FC = () => {
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [userPreferences, setUserPreferences] = useState<Record<string, string | null>>({});
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
-  const [savingFriends, setSavingFriends] = useState(false);
 
   // get userId from localStorage
   useEffect(() => {
@@ -97,9 +101,9 @@ const SettingsPageInner: React.FC = () => {
           setImageBase64(nextPreferences.profilePicture);
         }
 
-        // fetch current friends from API
-        //const friends = await apiService.get<{ id: number; username: string }[]>("/friends");
-        //setSelectedFriends(friends.map((f) => String(f.id)));
+        // fetch current friends from API so the search can mark them as selected
+        const friends = await apiService.get<FriendSummary[]>("/friends");
+        setSelectedFriends(friends.map((friend) => String(friend.id)));
       } catch {
         // no preferences yet or error fetching friends
       }
@@ -255,41 +259,67 @@ const SettingsPageInner: React.FC = () => {
     }
   };
 
-  const handleSendFriendRequests = async () => {
-    if (!userId) return;
-    setSavingFriends(true);
+  const handleFriendResultClick = async (user: User) => {
+    if (String(user.id) === userId) return;
+
+    const friendId = String(user.id);
+    const isSelected = selectedFriends.includes(friendId);
+
+    const confirmRemoveFriend = () => {
+      modal.confirm({
+        centered: true,
+        icon: null,
+        title: <span style={{ color: "#0B0696", fontWeight: 800 }}>Remove friend?</span>,
+        content: (
+          <span style={{ color: "#171717" }}>
+            {`Are you sure you want to remove ${user.username} from your friends? This will take effect immediately and can be undone later by sending a new friend request.`}
+          </span>
+        ),
+        okText: "Remove friend",
+        cancelText: "Cancel",
+        okButtonProps: {
+          style: {
+            background: "#0B0696",
+            border: "none",
+            borderRadius: "8px",
+            height: "36px",
+            padding: "0 1.2rem",
+          },
+        },
+        cancelButtonProps: {
+          style: {
+            borderRadius: "8px",
+            border: "1px solid #0B0696",
+            color: "#0B0696",
+            height: "36px",
+            padding: "0 1.2rem",
+          },
+        },
+        onOk: async () => {
+          try {
+            await apiService.delete(`/friends/${user.id}`);
+            setSelectedFriends((prev) => prev.filter((id) => id !== friendId));
+            message.success(`Removed ${user.username} from your friends.`);
+            setFriendSearch("");
+          } catch {
+            message.error("Could not remove friend.");
+          }
+        },
+      });
+    };
+
     try {
-      // Send friend requests for selected users
-      if (selectedFriends.length > 0) {
-        const results = await Promise.allSettled(
-          selectedFriends.map((friendId) =>
-            apiService.post("/friendRequests", {
-              receiverId: Number(friendId),
-            })
-          )
-        );
-
-        const successCount = results.filter((result) => result.status === "fulfilled").length;
-        const failureCount = results.length - successCount;
-
-        if (successCount === results.length) {
-          message.success(`Friend request${selectedFriends.length !== 1 ? 's' : ''} sent successfully!`);
-          setSelectedFriends([]);
-          setFriendSearch("");
-        } else if (successCount > 0) {
-          message.warning(
-            `${successCount} friend request${successCount !== 1 ? "s" : ""} sent, ${failureCount} failed.`
-          );
-          setSelectedFriends([]);
-          setFriendSearch("");
-        } else {
-          message.error("Could not send friend requests.");
-        }
+      if (isSelected) {
+        confirmRemoveFriend();
+      } else {
+        await apiService.post("/friendRequests", {
+          receiverId: Number(user.id),
+        });
+        message.success(`Friend request sent to ${user.username}.`);
       }
+      setFriendSearch("");
     } catch {
-      message.error("Could not send friend requests.");
-    } finally {
-      setSavingFriends(false);
+      message.error(isSelected ? "Could not remove friend." : "Could not send friend request.");
     }
   };
 
@@ -491,11 +521,11 @@ const SettingsPageInner: React.FC = () => {
             />
           </div>
 
-          {/* Send friend requests */}
+          {/* Manage friends */}
           <h2 style={{ color: "#000000", fontWeight: 700, fontSize: "28px", margin: "0 0 16px 0" }}>
-            Send friend requests
+            Manage friends
           </h2>
-          <span style={{ fontWeight: 600, color: "#000", fontSize: "18px" }}>Search for friends by username</span>
+          <span style={{ fontWeight: 600, color: "#000", fontSize: "18px" }}>Search for users by username</span>
           <div style={{ position: "relative", marginTop: "8px", marginBottom: "16px" }}>
             <Input
               placeholder="Search by username"
@@ -521,11 +551,7 @@ const SettingsPageInner: React.FC = () => {
                     return (
                       <div
                         key={user.id}
-                        onClick={() => {
-                          setSelectedFriends((prev) =>
-                            isSelected ? prev.filter((id) => id !== String(user.id)) : [...prev, String(user.id)]
-                          );
-                        }}
+                        onClick={() => void handleFriendResultClick(user)}
                         style={{
                           display: "flex", alignItems: "center", gap: "12px",
                           padding: "10px 16px", cursor: "pointer",
@@ -561,7 +587,15 @@ const SettingsPageInner: React.FC = () => {
                       <span>👤</span>
                     )}
                     {user?.username}
-                    <span style={{ cursor: "pointer", color: "#d9534f", fontWeight: 700 }} onClick={() => setSelectedFriends((prev) => prev.filter((i) => i !== id))}>✕</span>
+                    <span
+                      style={{ cursor: "pointer", color: "#d9534f", fontWeight: 700 }}
+                      onClick={() => {
+                        if (!user) return;
+                        void handleFriendResultClick(user);
+                      }}
+                    >
+                      ✕
+                    </span>
                   </div>
                 );
               })}
@@ -580,14 +614,13 @@ const SettingsPageInner: React.FC = () => {
             </button>
             <button
               type="button"
-              disabled={savingPassword || savingFriends || deletingAccount}
+              disabled={savingPassword || deletingAccount}
               onClick={async () => {
                 if (oldPassword.trim() || newPassword.trim()) await handleChangePassword();
-                await handleSendFriendRequests();
               }}
-              style={{ background: "#0B0696", color: "white", border: "none", borderRadius: "20px", padding: "10px 32px", fontSize: "16px", fontWeight: 600, cursor: (savingPassword || savingFriends || deletingAccount) ? "not-allowed" : "pointer" }}
+              style={{ background: "#0B0696", color: "white", border: "none", borderRadius: "20px", padding: "10px 32px", fontSize: "16px", fontWeight: 600, cursor: (savingPassword || deletingAccount) ? "not-allowed" : "pointer" }}
             >
-              {savingPassword || savingFriends ? "Saving…" : "Save changes"}
+              {savingPassword ? "Saving…" : "Save changes"}
             </button>
           </div>
         </div>
