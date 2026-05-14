@@ -364,7 +364,7 @@ const SettingsPageInner: React.FC = () => {
         background: "#ffffff",
       }}>
         <h1 className={styles.title} style={{ margin: "0 0 32px 0" }}>
-          Settings
+          Profile Settings
         </h1>
 
         {/* ── Change your preferences ── */}

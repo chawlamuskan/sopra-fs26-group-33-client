@@ -296,7 +296,7 @@ export default function HeaderButtons() {
             { label: "Travel Boards", path: `/travelboards` },
             { label: "Community", path: `/community` },//need to change these paths once the pages are implemented
             { label: "Posts", path: `/posts` },//need to change these paths once the pages are implemented
-            { label: "Settings", path: `/settings` },//need to change these paths once the pages are implemented
+            { label: "Profile Settings", path: `/settings` },//need to change these paths once the pages are implemented
           ].map((item) => (
             <div
               key={item.label}
