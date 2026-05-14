@@ -11,7 +11,7 @@ import {
   useMap,
   MapMouseEvent,
 } from "@vis.gl/react-google-maps";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Header from "@/components/Header";
 import { useProtectedRoute } from "@/hooks/useProtectedRoute";
 import { useApi } from "@/hooks/useApi";
@@ -44,34 +44,37 @@ const getColor = (status?: string) => {
 
 function CountryLayer({ savedCountries }: { savedCountries: savedCountry[] | null }) {
   const map = useMap();
+  const geoJsonLoaded = useRef(false);
 
   useEffect(() => {
     if (!map || !savedCountries) return;
+
+    const applyStyle = () => {
+      map.data.setStyle((feature: google.maps.Data.Feature) => {
+        const name = feature.getProperty("name") as string;
+        const match = savedCountries.find((c: savedCountry) => c.countryName === name);
+        return {
+          fillColor: getColor(match?.status),
+          fillOpacity: 1.0,
+          strokeWeight: 0.5,
+          strokeColor: "#e3c8c8",
+          clickable: false,
+        };
+      });
+    };
+
+    if (geoJsonLoaded.current) {
+      applyStyle();
+      return;
+    }
 
     map.data.loadGeoJson(
       "https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson",
       undefined,
 
-      (features: google.maps.Data.Feature[]) => {
-        features.forEach((f) => {
-          const name = f.getProperty("name");
-          const code = f.getProperty("ISO3166-1-Alpha-2");
-          if ((name as string)?.includes("France") || code === "FR") {
-            console.log("France entry:", name, "->", code);
-          }
-        });
-        map.data.setStyle((feature: google.maps.Data.Feature) => {
-
-          const name = feature.getProperty("name") as string;
-          const match = savedCountries.find((c: savedCountry) => c.countryName === name);
-          return {
-            fillColor: getColor(match?.status),
-            fillOpacity: 1.0,
-            strokeWeight: 0.5,
-            strokeColor: "#e3c8c8",
-            clickable: false,
-          };
-        });
+      () => {
+        geoJsonLoaded.current = true;
+        applyStyle();
       }
     );
 
@@ -85,7 +88,7 @@ export default function CountryOverview() {
     const position = {lat: 47.3769, lng: 8.5417}
     const [countryInfo, setCountryInfo] = useState<CountryInfo | null>(null);
     const apiService = useApi();
-    const [savedCountries, setSavedCountries] = useState<savedCountry[] | null>(null);
+  const [savedCountries, setSavedCountries] = useState<savedCountry[]>([]);
     const handleClick = async (event: MapMouseEvent) => {
         if (!event.detail.latLng) return;
         const lat = event.detail.latLng.lat;
@@ -138,11 +141,13 @@ export default function CountryOverview() {
           const data: savedCountry[] = await apiService.get<savedCountry[]>(`/users/${userId}/savedcountries`);
           setSavedCountries(data);
         } catch (error) {
-          if (error instanceof Error) {
-            alert(`Something went wrong while fetching saved places:\n${error.message}`);
-          } else {
-            console.error("An unknown error occurred while fetching saved places.");
+          if (error instanceof Error && error.message === "Preferences not found for this user") {
+            setSavedCountries([]);
+            return;
           }
+
+          console.error("Something went wrong while fetching saved countries:", error);
+          setSavedCountries([]);
         }
       };
       getSavedCountries();
