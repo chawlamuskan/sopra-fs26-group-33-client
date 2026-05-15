@@ -159,7 +159,7 @@ reason).
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
 | **[@chawlamuskan]** | [06.05.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/d32dbd526540ab38a7036090f9e4b2aa6b3f4d72] | [created bell notification icon which shows friend request + travelboard notifications #196 #198] | [user can see bell icon in header with notification count which gets updated + modal pop up that shows friend requests + travelboard invite notifications + user can accept / decline it] |
-|                    | [06.05.2026]   | [] | [] | [] |
+|                    | [06.05.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/2c5813e447719453affecf8aa66dedfb07ea9bf9] | [fixed issues after adding friend request: changed adding friends in settings page + removing friends + displays surrent friends + warning before removing friends #174; ] | [the user is able to add and remove friends; - also fixed issue with deleting travelboard as a owner; fixed issue with fetching no countries after skipping prefrences; added test for checking bell notification] |
 | **[@nadiapan4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@despoinapantazi]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
