@@ -362,6 +362,9 @@ const SavedPlacesAdd: React.FC = () => {
           <button onClick={() => router.back()} style={{ background: "none", border: "1.5px solid #0d1b8e", borderRadius: "20px", padding: "6px 14px", color: "#0d1b8e", fontWeight: "600", cursor: "pointer" }}>
             Go Back
           </button>
+          <button onClick={() => router.push(`/users/${id}`)} style={{ background: "#0d1b8e", border: "1.5px solid #0d1b8e", borderRadius: "20px", padding: "6px 14px", color: "white", fontWeight: "600", cursor: "pointer" }}>
+            Go to Map
+          </button>
         </div>
         <div style={{ backgroundColor: "#76bdd6", borderRadius: "16px", padding: "20px" }}>
           <h2 style={{ color: "#0d1b8e", fontWeight: "700", fontSize: "28px", margin: "0 0 16px 4px" }}>All</h2>

@@ -40,9 +40,10 @@ export default function Header( {onPlaceSelect }: HeaderProps) {
   }
 
   return (
-    <header style ={headerStyle}>
+    <header style={headerStyle}>
       <h1
-        style={titleStyle}
+        style={{ ...titleStyle, cursor: 'pointer' }}
+        title="Go to Map"
         onClick={() => {
           if (storedUser?.id) {
             router.push(`/users/${storedUser.id}`)
