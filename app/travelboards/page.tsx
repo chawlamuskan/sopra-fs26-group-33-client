@@ -158,21 +158,44 @@ const TravelBoardsPage: React.FC = () => {
       });
     }, [boards, isAllowed]);
 
-    const handleSave = async () => {
-    if (!boardName.trim()) {
-      message.warning("Please enter a board name.");
-      return;
-    }
-
-    const payload = {
-      name: boardName,
-      location: location,
-      startDate: dateRange[0] ? dateRange[0].format("YYYY-MM-DD") : null,
-      endDate: dateRange[1] ? dateRange[1].format("YYYY-MM-DD") : null,
-      privacy: privacy,
-      inviteCode: inviteCode || null,
-      invitedUserIds: invitedFriends.map((f) => f.id),
+    const geocodeBounds = async (locationName: string) => {
+  if (!locationName.trim()) return {};
+  try {
+    const res = await fetch(
+      `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(locationName)}&language=en&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
+    );
+    const data = await res.json();
+    const viewport = data.results?.[0]?.geometry?.viewport;
+    if (!viewport) return {};
+    return {
+      latMin: viewport.southwest.lat,
+      latMax: viewport.northeast.lat,
+      lngMin: viewport.southwest.lng,
+      lngMax: viewport.northeast.lng,
     };
+  } catch {
+    return {};
+  }
+};
+
+const handleSave = async () => {
+  if (!boardName.trim()) {
+    message.warning("Please enter a board name.");
+    return;
+  }
+
+  const bounds = await geocodeBounds(location); // ← fetch bounds
+
+  const payload = {
+    name: boardName,
+    location: location,
+    startDate: dateRange[0] ? dateRange[0].format("YYYY-MM-DD") : null,
+    endDate: dateRange[1] ? dateRange[1].format("YYYY-MM-DD") : null,
+    privacy: privacy,
+    inviteCode: inviteCode || null,
+    invitedUserIds: invitedFriends.map((f) => f.id),
+    ...bounds, 
+  };
 
     try {
       const createdBoard = await apiService.post<TravelBoard>("/travelboards", payload);

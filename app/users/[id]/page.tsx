@@ -179,7 +179,9 @@ const PlaceCard: React.FC<{
         address: placeInfo.address,
         rating: placeInfo.rating,
         photoReference: placeInfo.photoReference ?? null,
-        city, // ← send city
+        city, 
+        lat: placeInfo.lat,
+        lng: placeInfo.lng,
       });
       setSavedFeedback("Saved to places!");
     } catch (err: unknown) {

@@ -15,36 +15,33 @@ interface SavedPlace {
   rating: number | null;
   photoReference: string | null;
   city?: string | null;
+  lat?: number | null;
+  lng?: number | null;
 }
 
 interface BoardDetail {
   id: number;
   name: string;
   location: string;
+  latMin?: number | null;
+  latMax?: number | null;
+  lngMin?: number | null;
+  lngMax?: number | null;
 }
 
 const extractCity = (location: string) => location.split(",")[0].trim().toLowerCase();
 
-const isInBoardCity = (place: SavedPlace, boardLocation: string): boolean => {
-  if (!place.city) return true;
+const isInBoardCity = (place: SavedPlace, board: BoardDetail): boolean => {
+  if (place.lat == null || place.lng == null) return true;
+  if (board.latMin == null || board.latMax == null || board.lngMin == null || board.lngMax == null) return true;
 
-  // boardLocation is stored as the local city name e.g. "roma"
-  // place.city is stored as "locality|country" e.g. "roma|italy"
-  const parts = place.city.split("|");
-  const placeLocality = parts[0]?.toLowerCase().trim() ?? "";
-  const placeCountry = parts[1]?.toLowerCase().trim() ?? "";
 
-  const boardParts = boardLocation.split("|");
-  const boardLocality = boardParts[0]?.toLowerCase().trim() ?? "";
-  const boardCountry = boardParts[1]?.toLowerCase().trim() ?? "";
-
-  // If we have country info on both sides, country must match
-  if (placeCountry && boardCountry && placeCountry !== boardCountry) return false;
-
-  // Then check locality
-  if (placeLocality && boardLocality) return placeLocality === boardLocality;
-
-  return true;
+  return (
+    place.lat >= board.latMin &&
+    place.lat <= board.latMax &&
+    place.lng >= board.lngMin &&
+    place.lng <= board.lngMax
+  );
 };
 
 const getPlacePhotoUrl = (photoReference: string) =>
@@ -155,18 +152,17 @@ const ConfirmModal: React.FC<{
 
 const PlaceCard: React.FC<{
   place: SavedPlace;
-  boardCity: string; 
+  board: BoardDetail; 
   cityDisplay: string;
   added: boolean;
   onAdd: (place: SavedPlace) => Promise<void>;
-}> = ({ place, boardCity, cityDisplay, added, onAdd }) => { // ← was boardLocation
+}> = ({ place, board, cityDisplay, added, onAdd }) => { // ← was boardLocation
   const [imgError, setImgError] = useState(false);
   const [adding, setAdding] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
   const photoUrl = place.photoReference && !imgError ? getPlacePhotoUrl(place.photoReference) : null;
-  const matches = isInBoardCity(place, boardCity); 
-  const cityLabel = boardCity.charAt(0).toUpperCase() + boardCity.slice(1); 
+  const matches = isInBoardCity(place, board);
 
 
   const doAdd = async () => {
@@ -377,7 +373,7 @@ const SavedPlacesAdd: React.FC = () => {
                 <PlaceCard
                 key={place.id}
                 place={place}
-                boardCity={boardCity}
+                board={board!}
                 cityDisplay={cityDisplay} // ← add
                 added={addedIds.has(place.id)}
                 onAdd={handleAdd}
