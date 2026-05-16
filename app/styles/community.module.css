@@ -176,6 +176,7 @@
   border-radius: 14px;
   padding: 10px;
   border: 1px solid rgba(255, 255, 255, 0.35);
+  margin-bottom: 18px;
 }
 
 .friendBtn {
@@ -251,6 +252,12 @@
   border-radius: 10px;
   overflow: hidden;
   background: rgba(255,255,255,0.4);
+}
+
+.placePlaceholder {
+  width: 100%;
+  height: 100%;
+  background: rgba(255,255,255,0.35);
 }
 
 /* ---------- BUTTON ---------- */

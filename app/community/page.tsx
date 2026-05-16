@@ -89,7 +89,13 @@ const CommunityPageContent: React.FC = () => {
 
         const enriched = await Promise.all(
           friends.map(async (f) => {
-            const boards = await apiService.get<FriendBoard[]>(`/travelboards/friends`);
+            const allBoards = await apiService.get<FriendBoard[]>(
+              `/travelboards/friends`
+            );
+
+            const boards = allBoards.filter(
+              (b) => b.ownerId === Number(f.id)
+            );
 
             const prefs = await apiService
               .get<Preferences>(`/users/${f.id}/preferences`)
@@ -428,106 +434,111 @@ const CommunityPageContent: React.FC = () => {
 
           {/* PUBLIC VIEW */}
           {activeTab === "all" && (
-              <>
-                {loadingPublic ? (
-                  <p>Loading...</p>
-                ) : publicBoardsWithMembers.length === 0 ? (
-                  <div className={styles.emptyState}>
-                    <p className={styles.emptyTitle}>
-                      No public travel boards yet
-                    </p>
-                    <p className={styles.emptyText}>
-                      Be the first to create or join a public travel board and start exploring together!
-                    </p>
-                  </div>
-                ) : (
-                  <div className={styles.friendsGrid}>
-                    {PublicColumns.map((col, colIndex) => (
-                      <div key={colIndex} className={styles.friendColumnWrapper}>
-                        {col.map((board) => (
-                          <div key={board.id} className={styles.friendColumn}>
-                            {/* BOARD CARD */}
-                            <div className={styles.friendBoardCard}>
-                                
-                              {/* HEADER */}
-                              <div className={styles.friendBoardHeader}>
-                                <span className={styles.friendBoardName}>
-                                  {board.name}
-                                </span>
+            <>
+              {loadingPublic ? (
+                <p>Loading...</p>
+              ) : publicBoardsWithMembers.length === 0 ? (
+                <div className={styles.emptyState}>
+                  <p className={styles.emptyTitle}>
+                    No public travel boards yet
+                  </p>
+                  <p className={styles.emptyText}>
+                    Be the first to create or join a public travel board and start exploring together!
+                  </p>
+                </div>
+              ) : (
+                <div className={styles.friendsGrid}>
+                  {PublicColumns.map((col, colIndex) => (
+                    <div key={colIndex} className={styles.friendColumnWrapper}>
+                      {col.map((board) => (
+                        <div key={board.id} className={styles.friendBoardCard}>
+                          
+                          {/* HEADER */}
+                          <div className={styles.friendBoardHeader}>
+                            <span className={styles.friendBoardName}>
+                              {board.name}
+                            </span>
 
-                                <button
-                                  className={`${styles.inviteBtn} ${styles.inviteBtnSmall}`}
-                                  onClick={() => requestJoinBoard(board)}
-                                >
-                                  Ask to Join
-                                </button>
-                              </div>
+                            <button
+                              className={`${styles.inviteBtn} ${styles.inviteBtnSmall}`}
+                              onClick={() => requestJoinBoard(board)}
+                            >
+                              Ask to Join
+                            </button>
+                          </div>
 
-                              {/* MEMBERS */}
-                              <div className={styles.memberRow}>
-                                <span className={styles.memberLabel}>
-                                  Board members:
-                                </span>
+                          {/* MEMBERS */}
+                          <div className={styles.memberRow}>
+                            <span className={styles.memberLabel}>
+                              Board members:
+                            </span>
 
-                                <div className={styles.memberCircles}>
-                                  {[
-                                    board.ownerId,
-                                    ...Array.isArray(board.memberIds) ? board.memberIds : []
-                                  ]
-                                    .slice(0, 4)
-                                    .map((userId) => {
-                                      const profilePicture =
-                                        memberProfilePictures[userId];
+                            <div className={styles.memberCircles}>
+                              {[
+                                board.ownerId,
+                                ...(Array.isArray(board.memberIds)
+                                  ? board.memberIds
+                                  : [])
+                              ]
+                                .slice(0, 4)
+                                .map((userId) => {
+                                  const profilePicture =
+                                    memberProfilePictures[userId];
 
-                                      return profilePicture ? (
-                                        <img
-                                          key={userId}
-                                          src={profilePicture}
-                                          className={styles.memberCircleImg}
-                                        />
-                                      ) : (
-                                        <div
-                                          key={userId}
-                                          className={styles.memberCircleFallback}
-                                        >
-                                          👤
-                                        </div>
-                                      );
-                                    })}
-                                </div>
-                              </div>
-
-                              {/* PLACES */}
-                              <div className={styles.placesGrid}>
-                                {Array.from({ length: 3 }).map((_, idx) => (
-                                  <div
-                                    key={`public-${board.id}-${idx}`}
-                                    className={styles.placeBox}
-                                  >
-                                    <div className={styles.placePlaceholder} />
-                                  </div>
-                                ))}
-                              </div>
-                                
-                              {/* SEE MORE */}
-                                <div className={styles.seeMoreRow}>
-                                  <a
-                                    className={styles.seeMore}
-                                    onClick={() => {
-                                      sessionStorage.setItem("fromCommunity", "true");
-                                      router.push(`/travelboards/${board.id}`);
-                                    }}
-                                  >see more</a>
-                                </div>
+                                  return profilePicture ? (
+                                    <img
+                                      key={userId}
+                                      src={profilePicture}
+                                      className={styles.memberCircleImg}
+                                    />
+                                  ) : (
+                                    <div
+                                      key={userId}
+                                      className={styles.memberCircleFallback}
+                                    >
+                                      👤
+                                    </div>
+                                  );
+                                })}
                             </div>
                           </div>
-                          ))};
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </>
-            )}
+
+                          {/* PLACES */}
+                          <div className={styles.placesGrid}>
+                            {Array.from({ length: 3 }).map((_, idx) => (
+                              <div
+                                key={`public-${board.id}-${idx}`}
+                                className={styles.placeBox}
+                              >
+                                <div className={styles.placePlaceholder} />
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* SEE MORE */}
+                          <div className={styles.seeMoreRow}>
+                            <a
+                              className={styles.seeMore}
+                              onClick={() => {
+                                sessionStorage.setItem(
+                                  "fromCommunity",
+                                  "true"
+                                );
+
+                                router.push(`/travelboards/${board.id}`);
+                              }}
+                            >
+                              see more
+                            </a>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
     </>
