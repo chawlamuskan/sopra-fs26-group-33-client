@@ -6,5 +6,4 @@ export interface PlaceInfo {
   photoReference: string | null;
   lat: number | null;
   lng: number | null;
-  types: string[];
 }
