@@ -12,9 +12,10 @@ type StoredUser = {
 
 interface HeaderProps {
   onPlaceSelect?: (lat: number, lng: number, place: PlaceInfo) => void;
+  onToggleSavedPlaces?: (enabled: boolean) => void;
 }
 
-export default function Header( {onPlaceSelect }: HeaderProps) {
+export default function Header( {onPlaceSelect, onToggleSavedPlaces }: HeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [storedUser, setStoredUser] = useState<StoredUser | null>(null);
@@ -53,7 +54,7 @@ export default function Header( {onPlaceSelect }: HeaderProps) {
       </h1>
 
       {pathname.startsWith("/users/") && <MapSearchBar onPlaceSelect={onPlaceSelect ?? (() => {})} />}
-      <HeaderButtons />
+      <HeaderButtons onToggleSavedPlaces={onToggleSavedPlaces} />
     </header>
   );
 }

@@ -6,6 +6,7 @@ import useLocalStorage from "@/hooks/useLocalStorage";
 import { useApi } from "@/hooks/useApi";
 import { User } from "@/types/user";
 import { App } from "antd";
+import InfoButton from "@/components/InfoButton";
 
 interface SavedPlace {
   id: number;
@@ -153,6 +154,7 @@ const handleRemovePlace = async (place: SavedPlace) => {
   return (
     <>
       <Header />
+      <InfoButton />
       <main className={styles.main} style={{
         padding: "24px 70px",
         minHeight: "100vh",
