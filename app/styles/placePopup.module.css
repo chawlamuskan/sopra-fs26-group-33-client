@@ -1,10 +1,9 @@
 
 .cardWrapper {
-  position: fixed;        
-  bottom: 36px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1100;
+  position: absolute;
+  top: 15%;
+  right: 10%;
+  z-index: 1000;
   width: 400px;
   max-width: calc(100vw - 32px);
 }

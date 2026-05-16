@@ -14,11 +14,13 @@ import {
   MapMouseEvent,
   useMap,
   useMapsLibrary,
+  AdvancedMarker,
 } from "@vis.gl/react-google-maps";
 import styles from "@/styles/page.module.css";
 import popupStyles from "@/styles/placePopup.module.css";
 import { ApiService } from "@/api/apiService";
 import { PlaceInfo } from "@/types/placeinfo";
+import InfoButton from "@/components/InfoButton";
 
 interface CountryInfo {
   name: string;
@@ -48,11 +50,11 @@ const resolveCity = async (placeId: string): Promise<string | null> => {
     
     const country = components
       .find((c: AddressComponent) => c.types.includes("country"))
-      ?.long_name?.toLowerCase() ?? null;
+      ?.short_name?.toLowerCase() ?? null;
 
     const locality = components
       .find((c: AddressComponent) => c.types.includes("locality"))
-      ?.long_name?.toLowerCase() ?? null;
+      ?.short_name?.toLowerCase() ?? null;
 
     // Store as "locality|country" so we can match on both
     if (locality && country) return `${locality}|${country}`;
@@ -122,6 +124,7 @@ const PlaceClickInterceptor: React.FC<{
             photoReference: data.photos?.[0]?.name ?? null,
             lat: data.location?.latitude ?? null,
             lng: data.location?.longitude ?? null,
+            types: types.filter((t) => ALLOWED_POI_TYPES.has(t)),
           });
         } catch (err) {
           console.error("Failed to fetch place details:", err);
@@ -178,10 +181,11 @@ const PlaceCard: React.FC<{
         name: placeInfo.name,
         address: placeInfo.address,
         rating: placeInfo.rating,
-        photoReference: placeInfo.photoReference ?? null,
-        city, 
         lat: placeInfo.lat,
         lng: placeInfo.lng,
+        photoReference: placeInfo.photoReference ?? null,
+        city,
+        types: placeInfo.types,
       });
       setSavedFeedback("Saved to places!");
     } catch (err: unknown) {
@@ -321,10 +325,42 @@ const UserDashboard: React.FC = () => {
   const [searchTarget, setSearchTarget] = useState<{ lat: number; lng: number } | null>(null);
   const position = { lat: 47.3769, lng: 8.5417 };
   const COUNTRY_LABEL_MAX_ZOOM = 6;
+  const [showSavedPlaces, setShowSavedPlaces] = useState(false);
+  const [savedPlaces, setSavedPlaces] = useState<SavedPlace[]>([]);
 
-  const fetchCountryInfo = async (countryName: string) => {
+  type SavedPlace = {
+    id: number;
+    name: string;
+    lat: number;
+    lng: number;
+    types: string[];
+  };
+
+  const CATEGORY_EMOJI: Record<string, string> = {
+    restaurant: "🍽️",
+    cafe: "☕",
+    bar: "🍺",
+    tourist_attraction: "🗽",
+    museum: "🖼️",
+    park: "🌳",
+    shopping_mall: "🏪",
+    store: "🛍️",
+    lodging: "🏨",
+    establishment: "🏛️", 
+  };
+
+  const getEmoji = (types: string[]) => {
+    const meaningful = types.filter(t => t !== "establishment");
+    const lookup = meaningful.length > 0 ? meaningful: types;
+    for (const t of lookup) {
+      if (CATEGORY_EMOJI[t]) return CATEGORY_EMOJI[t];
+    }
+    return "📍";
+  };
+
+  const fetchCountryInfo = async (countryCode: string) => {
     const countryRes = await fetch(
-      `https://restcountries.com/v3.1/name/${countryName}?fullText=true`
+      `https://restcountries.com/v3.1/alpha/${countryCode}?fullText=true`
     );
     const countryData = await countryRes.json();
     if (!countryData || countryData.status === 404) return;
@@ -348,8 +384,8 @@ const UserDashboard: React.FC = () => {
       );
       const geocodeData = await geocodeReverse.json();
       if (!geocodeData.results || geocodeData.results.length === 0) return;
-      const countryName = geocodeData.results[0].address_components[0].long_name;
-      await fetchCountryInfo(countryName);
+      const countryCode = geocodeData.results[0].address_components[0].short_name;
+      await fetchCountryInfo(countryCode);
     } catch (error) {
       console.error("Error fetching country info:", error);
     }
@@ -362,6 +398,33 @@ const UserDashboard: React.FC = () => {
   const showCountryPopup = countryInfo && currentZoom <= COUNTRY_LABEL_MAX_ZOOM;
   const storedUser = useLocalStorage<User | null>("user", null);
 
+  const MapPanner: React.FC<{ target: { lat: number; lng: number } | null; onDone: () => void;}> = ({ target, onDone }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (!map || !target) return;
+    map.panTo({ lat: target.lat, lng: target.lng });
+    map.setZoom(15);
+    onDone();
+  }, [map, target]);
+  return null;
+
+  };
+
+  useEffect(() => {
+    if (!showSavedPlaces || !storedUser.value?.id) return;
+    const fetchSaved = async () => {
+      try {
+        const data = await apiService.get<SavedPlace[]>(`/users/${storedUser.value!.id}/savedplaces`);
+        setSavedPlaces(data);
+      } catch {
+        setSavedPlaces([]);
+      }
+    };
+    fetchSaved();
+  }, [showSavedPlaces, storedUser.value?.id, apiService]);
+
+
+
   if (isAllowed === null) return null;
   if (!isAllowed) return null;
 
@@ -373,7 +436,10 @@ const UserDashboard: React.FC = () => {
       onPlaceSelect={(lat, lng, place) => {
         setSearchTarget({ lat, lng });
         setPlaceInfo(place);
-            }} />
+        }} 
+        onToggleSavedPlaces={setShowSavedPlaces}
+            />
+      <InfoButton />
         <main className={styles.main}>
         
           <div style={{ height: "100vh", width: "100vw", position: "relative", overflow: "hidden" }}>
@@ -387,12 +453,15 @@ const UserDashboard: React.FC = () => {
             >
               <ZoomTracker onZoomChange={setCurrentZoom} />
               <PlaceClickInterceptor onPlaceClick={handlePlaceClick} />
+              <MapPanner 
+              target={searchTarget}
+              onDone={() => setSearchTarget(null)} />
 
               {showCountryPopup && (
                 <div style={{
-                  position: "absolute", top: "50%", left: "50%",
-                  transform: "translate(-50%, -50%)",
-                  backgroundColor: "#0B0696D1", color: "white",
+                  position: "absolute", top: "40%", right: "10%",
+                  transform: "translateY(-50%)",
+                  backgroundColor: "#0B0696F0", color: "white",
                   borderRadius: "16px", padding: "24px", width: "320px",
                   zIndex: 1000, boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
                 }}>
@@ -440,6 +509,33 @@ const UserDashboard: React.FC = () => {
                 />
               </div>
             )}
+
+            {showSavedPlaces && savedPlaces.map((place) => (
+              <div key={place.id} style={{ position: "absolute" }}>
+                {/* @vis.gl/react-google-maps AdvancedMarker */}
+                <AdvancedMarker
+                  position={{ lat: place.lat, lng: place.lng }}
+                  title={place.name}
+                >
+                  <div style={{
+                    fontSize: "25px",
+                    background: "white",
+                    borderRadius: "50%",
+                    width: "36px",
+                    height: "36px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
+                    border: "1.5px solid #e0e0e0",
+                    //filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.4))",
+                    cursor: "pointer",
+                  }}>
+                    {getEmoji(place.types)}
+                  </div>
+                </AdvancedMarker>
+              </div>
+            ))}
           </div>
         
       </main>

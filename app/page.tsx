@@ -10,6 +10,7 @@ import {
 } from "@vis.gl/react-google-maps";
 import { useState } from "react";
 import Header from "@/components/Header";
+import InfoButton from "@/components/InfoButton";
 
 
 
@@ -63,6 +64,7 @@ export default function Home() {
   return (
   <>
     <Header />
+    <InfoButton />
     <main className={styles.main}>
       <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!} language="en" libraries={["places"]}>
         <div style={{ height: "100vh", width: "100vw" }}>
