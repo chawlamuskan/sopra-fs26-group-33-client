@@ -35,24 +35,131 @@ type BoardDetail = {
   activityLogs?: ActivityLog[];
 };
 
+const RemoveConfirmModal: React.FC<{
+      placeName: string;
+      onConfirm: () => void;
+      onCancel: () => void;
+    }> = ({ placeName, onConfirm, onCancel }) => (
+      <div
+        onClick={onCancel}
+        style={{
+          position: "fixed",
+          inset: 0,
+          backgroundColor: "rgba(0,0,0,0.4)",
+          backdropFilter: "blur(4px)",
+          zIndex: 1000,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <div
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            backgroundColor: "#fff",
+            borderRadius: "16px",
+            padding: "28px 32px",
+            maxWidth: "360px",
+            width: "90%",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
+            display: "flex",
+            flexDirection: "column",
+            gap: "12px",
+          }}
+        >
+          <div style={{
+            width: "44px",
+            height: "44px",
+            borderRadius: "50%",
+            backgroundColor: "#ffe0e0",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontSize: "22px",
+          }}>
+            🗑️
+          </div>
+          <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "700", color: "#0d1b8e" }}>
+            Remove place
+          </h3>
+          <p style={{ margin: 0, fontSize: "13px", color: "#555", lineHeight: "1.5" }}>
+            Are you sure you want to remove <strong>{placeName}</strong> from the board?
+          </p>
+          <div style={{ display: "flex", gap: "10px", marginTop: "4px" }}>
+            <button
+              onClick={onCancel}
+              style={{
+                flex: 1,
+                padding: "10px",
+                borderRadius: "10px",
+                border: "1.5px solid #ddd",
+                backgroundColor: "#fff",
+                color: "#555",
+                fontWeight: "600",
+                fontSize: "13px",
+                cursor: "pointer",
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={onConfirm}
+              style={{
+                flex: 1,
+                padding: "10px",
+                borderRadius: "10px",
+                border: "none",
+                backgroundColor: "#e53935",
+                color: "#fff",
+                fontWeight: "600",
+                fontSize: "13px",
+                cursor: "pointer",
+              }}
+            >
+              Remove
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+
+
+
 const TravelBoardPage: React.FC = () => {
   const isAllowed = useProtectedRoute();
   const { id } = useParams();
   const router = useRouter();
   const apiService = new ApiService();
 
-    const [board, setBoard] = useState<BoardDetail | null>(null);
-    const [savedPlaces, setSavedPlaces] = useState<SavedPlace[]>([]);
-    const [memberPictures, setMemberPictures] = useState<Record<number, string | null>>({});
-    const [memberUsernames, setMemberUsernames] = useState<Record<number, string>>({});
-    const [accessDenied, setAccessDenied] = useState(false);
+  const [board, setBoard] = useState<BoardDetail | null>(null);
+  const [showAllLogs, setShowAllLogs] = useState(false);
+  const [savedPlaces, setSavedPlaces] = useState<SavedPlace[]>([]);
+  const [memberPictures, setMemberPictures] = useState<Record<number, string | null>>({});
+  const [memberUsernames, setMemberUsernames] = useState<Record<number, string>>({}); 
+  const [accessDenied, setAccessDenied] = useState(false);
+  const [isRemoveMode, setIsRemoveMode] = useState(false);
+  const [placeToRemove, setPlaceToRemove] = useState<SavedPlace | null>(null);
 
-    // track if user came from community page
+  // track if user came from community page
     const [fromCommunity, setFromCommunity] = useState(false);
 
     // track current user ID and membership to show only allowed page content 
     const [currentUserId, setCurrentUserId] = useState<number | null>(null);
     const [isMember, setIsMember] = useState(false);
+  
+  const handleRemovePlace = async () => {
+    if (!placeToRemove) return;
+    try {
+      await apiService.delete(`/travelboards/${id}/places/${placeToRemove.id}`);
+      setSavedPlaces((prev) => prev.filter((p) => p.id !== placeToRemove.id));
+      const updatedBoard = await apiService.get<BoardDetail>(`/travelboards/${id}`);
+      setBoard(updatedBoard);
+    } catch (err) {
+      console.error("Could not remove place:", err);
+    } finally {
+      setPlaceToRemove(null);
+    }
+  };
 
   const PlaceImage = ({ place }: { place: SavedPlace }) => {
     const [imgError, setImgError] = useState(false);
@@ -270,19 +377,20 @@ const TravelBoardPage: React.FC = () => {
       ? <img src={pic} alt="member" className={styles.avatar} />
       : <div className={styles.avatarFallback}>👤</div>;
   };
-  // Parse action string into verb + subject
+
+
   const parseAction = (action: string): { verb: string; subject: string; color: string } => {
-    if (action.startsWith("added ")) {
-      return { verb: "added", subject: action.replace("added ", ""), color: "#2e7d32" };
-    }
-    if (action.startsWith("removed ")) {
-      return { verb: "removed", subject: action.replace("removed ", ""), color: "#e53935" };
-    }
-    if (action.includes("joined")) {
-      return { verb: "joined the board", subject: "", color: "#0d1b8e" };
-    }
-    return { verb: action, subject: "", color: "#555" };
-  };
+      if (action.startsWith("added ")) {
+        return { verb: "added", subject: action.replace("added ", ""), color: "#2e7d32" };
+      }
+      if (action.startsWith("removed ")) {
+        return { verb: "removed", subject: action.replace("removed ", ""), color: "#e53935" };
+      }
+      if (action.includes("joined")) {
+        return { verb: "joined the board", subject: "", color: "#0d1b8e" };
+      }
+      return { verb: action, subject: "", color: "#555" };
+    };
 
 
   if (accessDenied) {

@@ -6,6 +6,7 @@ import useLocalStorage from "@/hooks/useLocalStorage";
 import { useApi } from "@/hooks/useApi";
 import { User } from "@/types/user";
 import { App } from "antd";
+import InfoButton from "@/components/InfoButton";
 
 interface SavedPlace {
   id: number;
@@ -153,6 +154,7 @@ const handleRemovePlace = async (place: SavedPlace) => {
   return (
     <>
       <Header />
+      <InfoButton />
       <main className={styles.main} style={{
         padding: "24px 70px",
         minHeight: "100vh",
@@ -217,34 +219,8 @@ const handleRemovePlace = async (place: SavedPlace) => {
               }}
             >
               {savedPlaces.map((place) => (
-                <div
-                  key={place.id}
-                  title={place.name}
-                  style={{
-                    backgroundColor: "#ffffff",
-                    borderRadius: "12px",
-                    aspectRatio: "1 / 1",
-                    cursor: manageMode ? "default": "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: "8px",
-                    textAlign: "center",
-                    fontSize: "11px",
-                    overflow: "hidden",
-                    position: "relative",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!manageMode)
-                      e.currentTarget.style.backgroundColor = "#e8f4fd";
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!manageMode)
-                      e.currentTarget.style.backgroundColor = "#ffffff";
-                  }}
-                >
-                  {place.name}
-
+                <div key={place.id} style={{ position: "relative" }}>
+                  <PlaceCard place={place} />
                   {manageMode && (
                     <button
                       onClick={() => handleRemovePlace(place)}
@@ -260,7 +236,6 @@ const handleRemovePlace = async (place: SavedPlace) => {
                         color: "#ffffff",
                         fontWeight: 700,
                         fontSize: "14px",
-                        lineHeight: "1",
                         cursor: "pointer",
                         display: "flex",
                         alignItems: "center",
@@ -269,7 +244,7 @@ const handleRemovePlace = async (place: SavedPlace) => {
                       }}
                       title={`Remove ${place.name}`}
                     >
-                      -
+                      −
                     </button>
                   )}
                 </div>

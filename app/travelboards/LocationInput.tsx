@@ -26,6 +26,7 @@ const LocationInput = ({
   value: string;
   onChange: (val: string) => void;
 }) => {
+  const [displayValue, setDisplayValue] = useState(value);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [show, setShow] = useState(false);
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -87,7 +88,8 @@ const LocationInput = ({
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDisplayValue(e.target.value);
     onChange(e.target.value);
     if (debounce.current) clearTimeout(debounce.current);
     debounce.current = setTimeout(() => fetchSuggestions(e.target.value), 350);
@@ -98,7 +100,7 @@ const LocationInput = ({
       <Input
         className={styles.input}
         placeholder="Choose location"
-        value={value}
+        value={displayValue}
         onChange={handleChange}
         onBlur={() => setTimeout(() => setShow(false), 150)}
         onFocus={() => suggestions.length && setShow(true)}
@@ -116,6 +118,7 @@ const LocationInput = ({
               key={s.placeId}
               onMouseDown={async () => {
                 const localCity = await resolveLocalCityName(s.label);
+                setDisplayValue(s.label);
                 onChange(localCity);
                 setShow(false);
               }}

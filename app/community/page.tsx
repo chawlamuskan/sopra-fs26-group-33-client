@@ -9,6 +9,7 @@ import { User, Preferences } from "@/types/user";
 import { App, Button } from "antd";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import InfoButton from "@/components/InfoButton";
 
 interface TravelBoard {
   id: number;
@@ -232,6 +233,7 @@ const CommunityPageContent: React.FC = () => {
   return (
     <>
       <Header />
+      <InfoButton />
 
       <div className={styles.page}>
         <div className={styles.headerRow}>
