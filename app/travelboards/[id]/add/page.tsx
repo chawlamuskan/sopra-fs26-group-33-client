@@ -6,45 +6,29 @@ import useLocalStorage from "@/hooks/useLocalStorage";
 import { useApi } from "@/hooks/useApi";
 import { User } from "@/types/user";
 import { useParams, useRouter } from "next/dist/client/components/navigation";
+import PlaceSearchBar from "@/components/PlaceSearchBar";
+import {SavedPlace} from "@/types/savedplace";
 
-interface SavedPlace {
-  id: number;
-  externalPlaceId: string;
-  name: string;
-  address: string;
-  rating: number | null;
-  photoReference: string | null;
-  city?: string | null;
-}
 
 interface BoardDetail {
   id: number;
   name: string;
   location: string;
+  latMin?: number | null;
+  latMax?: number | null;
+  lngMin?: number | null;
+  lngMax?: number | null;
 }
 
-const extractCity = (location: string) => location.split(",")[0].trim().toLowerCase();
-
-const isInBoardCity = (place: SavedPlace, boardLocation: string): boolean => {
-  if (!place.city) return true;
-
-  // boardLocation is stored as the local city name e.g. "roma"
-  // place.city is stored as "locality|country" e.g. "roma|italy"
-  const parts = place.city.split("|");
-  const placeLocality = parts[0]?.toLowerCase().trim() ?? "";
-  const placeCountry = parts[1]?.toLowerCase().trim() ?? "";
-
-  const boardParts = boardLocation.split("|");
-  const boardLocality = boardParts[0]?.toLowerCase().trim() ?? "";
-  const boardCountry = boardParts[1]?.toLowerCase().trim() ?? "";
-
-  // If we have country info on both sides, country must match
-  if (placeCountry && boardCountry && placeCountry !== boardCountry) return false;
-
-  // Then check locality
-  if (placeLocality && boardLocality) return placeLocality === boardLocality;
-
-  return true;
+const isInBoardCity = (place: SavedPlace, board: BoardDetail): boolean => {
+  if (place.lat == null || place.lng == null) return true;
+  if (board.latMin == null || board.latMax == null || board.lngMin == null || board.lngMax == null) return true;
+  return (
+    place.lat >= board.latMin &&
+    place.lat <= board.latMax &&
+    place.lng >= board.lngMin &&
+    place.lng <= board.lngMax
+  );
 };
 
 const getPlacePhotoUrl = (photoReference: string) =>
@@ -63,7 +47,6 @@ const ConfirmModal: React.FC<{
   onConfirm: () => void;
   onCancel: () => void;
 }> = ({ placeName, cityLabel, onConfirm, onCancel }) => (
-  // Backdrop
   <div
     onClick={onCancel}
     style={{
@@ -77,7 +60,6 @@ const ConfirmModal: React.FC<{
       justifyContent: "center",
     }}
   >
-    {/* Card — stop click from bubbling to backdrop */}
     <div
       onClick={(e) => e.stopPropagation()}
       style={{
@@ -92,7 +74,6 @@ const ConfirmModal: React.FC<{
         gap: "12px",
       }}
     >
-      {/* Icon */}
       <div style={{
         width: "44px",
         height: "44px",
@@ -105,16 +86,12 @@ const ConfirmModal: React.FC<{
       }}>
         ⚠️
       </div>
-
-      {/* Text */}
       <h3 style={{ margin: 0, fontSize: "16px", fontWeight: "700", color: "#0d1b8e" }}>
         Outside {cityLabel}
       </h3>
       <p style={{ margin: 0, fontSize: "13px", color: "#555", lineHeight: "1.5" }}>
         <strong>{placeName}</strong> is not in {cityLabel}. Are you sure you want to add it to this board?
       </p>
-
-      {/* Buttons */}
       <div style={{ display: "flex", gap: "10px", marginTop: "4px" }}>
         <button
           onClick={onCancel}
@@ -155,19 +132,17 @@ const ConfirmModal: React.FC<{
 
 const PlaceCard: React.FC<{
   place: SavedPlace;
-  boardCity: string; 
+  board: BoardDetail;
   cityDisplay: string;
   added: boolean;
   onAdd: (place: SavedPlace) => Promise<void>;
-}> = ({ place, boardCity, cityDisplay, added, onAdd }) => { // ← was boardLocation
+}> = ({ place, board, cityDisplay, added, onAdd }) => {
   const [imgError, setImgError] = useState(false);
   const [adding, setAdding] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
   const photoUrl = place.photoReference && !imgError ? getPlacePhotoUrl(place.photoReference) : null;
-  const matches = isInBoardCity(place, boardCity); 
-  const cityLabel = boardCity.charAt(0).toUpperCase() + boardCity.slice(1); 
-
+  const matches = isInBoardCity(place, board);
 
   const doAdd = async () => {
     setShowConfirm(false);
@@ -182,27 +157,23 @@ const PlaceCard: React.FC<{
   const handleAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (added || adding) return;
-
     if (!matches) {
-      setShowConfirm(true); // ← open modal to confirm place that is not in the same city
+      setShowConfirm(true);
       return;
     }
-
     doAdd();
   };
 
   return (
     <>
-      
       {showConfirm && (
         <ConfirmModal
-            placeName={place.name}
-            cityLabel={cityDisplay} 
-            onConfirm={doAdd}
-            onCancel={() => setShowConfirm(false)}
+          placeName={place.name}
+          cityLabel={cityDisplay}
+          onConfirm={doAdd}
+          onCancel={() => setShowConfirm(false)}
         />
       )}
-
       <div style={{
         backgroundColor: "#ffffff",
         borderRadius: "12px",
@@ -317,9 +288,18 @@ const SavedPlacesAdd: React.FC = () => {
   const apiService = useApi();
   const [board, setBoard] = useState<BoardDetail | null>(null);
   const [addedIds, setAddedIds] = useState<Set<number>>(new Set());
+  const [searchQuery, setSearchQuery] = useState("");
+
   const boardCity = board?.location ?? "";
   const cityLabel = boardCity.split("|")[0];
   const cityDisplay = cityLabel.charAt(0).toUpperCase() + cityLabel.slice(1);
+
+  const filteredPlaces = searchQuery
+    ? savedPlaces.filter((p) =>
+        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.address?.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : savedPlaces;
 
   useEffect(() => {
     if (!storedUser.value?.id || !id) return;
@@ -366,26 +346,38 @@ const SavedPlacesAdd: React.FC = () => {
           <button onClick={() => router.back()} style={{ background: "none", border: "1.5px solid #0d1b8e", borderRadius: "20px", padding: "6px 14px", color: "#0d1b8e", fontWeight: "600", cursor: "pointer" }}>
             Go Back
           </button>
+          <button onClick={() => router.push(`/users/${id}`)} style={{ background: "#0d1b8e", border: "1.5px solid #0d1b8e", borderRadius: "20px", padding: "6px 14px", color: "white", fontWeight: "600", cursor: "pointer" }}>
+            Go to Map
+          </button>
         </div>
+
         <div style={{ backgroundColor: "#76bdd6", borderRadius: "16px", padding: "20px" }}>
-          <h2 style={{ color: "#0d1b8e", fontWeight: "700", fontSize: "28px", margin: "0 0 16px 4px" }}>All</h2>
-          {loading ? <p>Loading…</p> : savedPlaces.length === 0 ? (
-            <p style={{ color: "#0d1b8e" }}>No saved places yet.</p>
-          ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(8, 1fr)", gap: "14px" }}>
-              {savedPlaces.map((place) => (
-                <PlaceCard
+        <div style={{ display: "flex", alignItems: "center", gap: "16px", marginBottom: "16px" }}>
+          <h2 style={{ color: "#0d1b8e", fontWeight: "700", fontSize: "28px", margin: 0 }}>All</h2>
+          <PlaceSearchBar
+            savedPlaces={savedPlaces}
+            onQueryChange={(q) => setSearchQuery(q)}
+            onPlaceSelect={(lat, lng, place) => setSearchQuery(place.name)}
+          />
+        </div>
+
+        {loading ? <p>Loading…</p> : filteredPlaces.length === 0 ? (
+          <p style={{ color: "#0d1b8e" }}>No saved places found.</p>
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(8, 1fr)", gap: "14px" }}>
+            {filteredPlaces.map((place) => (
+              <PlaceCard
                 key={place.id}
                 place={place}
-                boardCity={boardCity}
-                cityDisplay={cityDisplay} // ← add
+                board={board!}
+                cityDisplay={cityDisplay}
                 added={addedIds.has(place.id)}
                 onAdd={handleAdd}
-                />
+              />
             ))}
-            </div>
-          )}
-        </div>
+          </div>
+        )}
+</div>
       </main>
     </>
   );
