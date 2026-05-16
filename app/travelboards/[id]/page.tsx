@@ -42,6 +42,7 @@ const TravelBoardPage: React.FC = () => {
   const apiService = new ApiService();
 
   const [board, setBoard] = useState<BoardDetail | null>(null);
+  const [showAllLogs, setShowAllLogs] = useState(false);
   const [savedPlaces, setSavedPlaces] = useState<SavedPlace[]>([]);
   const [memberPictures, setMemberPictures] = useState<Record<number, string | null>>({});
   const [memberUsernames, setMemberUsernames] = useState<Record<number, string>>({}); // ← new
@@ -252,66 +253,58 @@ const TravelBoardPage: React.FC = () => {
 
             {/* RIGHT PANEL */}
             <div className={styles.rightPanel}>
-              <p className={styles.sectionLabel}>Activities Log:</p>
-              <div className={styles.activityList}>
-                {(board.activityLogs ?? []).length === 0 && (
-                  <p style={{ color: "#888", fontSize: "13px" }}>No activity yet.</p>
-                )}
-                {(board.activityLogs ?? []).map((log) => {
-                  const pic = memberPictures[log.userId];
-                  const username = memberUsernames[log.userId] ?? `User ${log.userId}`;
-                  const { verb, subject, color } = parseAction(log.action);
+            <p className={styles.sectionLabel}>Activities Log:</p>
+            <div className={styles.activityList}>
+              {(board.activityLogs ?? []).length === 0 && (
+                <p style={{ color: "#888", fontSize: "13px" }}>No activity yet.</p>
+              )}
+              {(showAllLogs ? (board.activityLogs ?? []) : (board.activityLogs ?? []).slice(0, 8)).map((log) => {
+                const pic = memberPictures[log.userId];
+                const username = memberUsernames[log.userId] ?? `User ${log.userId}`;
+                const { verb, subject, color } = parseAction(log.action);
 
-                  return (
-                    <div key={log.id} style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                      padding: "10px 0",
-                      borderBottom: "1px solid rgba(0,0,0,0.06)",
-                    }}>
-                      {/* Avatar */}
-                      {pic ? (
-                        <img
-                          src={pic}
-                          alt={username}
-                          style={{
-                            width: "32px", height: "32px",
-                            borderRadius: "50%", objectFit: "cover", flexShrink: 0,
-                          }}
-                        />
-                      ) : (
-                        <div style={{
-                          width: "32px", height: "32px", borderRadius: "50%",
-                          backgroundColor: "#e8e8f0", display: "flex",
-                          alignItems: "center", justifyContent: "center",
-                          fontSize: "16px", flexShrink: 0,
-                        }}>👤</div>
-                      )}
-
-                      {/* Text */}
-                      <div style={{ fontSize: "12px", lineHeight: "1.5", color: "#333" }}>
-                        <span style={{ fontWeight: "700", color: "#0d1b8e" }}>
-                          {username}
-                        </span>
-                        {" "}
-                        <span style={{ fontWeight: "600", color }}>
-                          {verb}
-                        </span>
-                        {subject && (
-                          <>
-                            {" "}
-                            <span style={{ color: "#555", fontStyle: "italic" }}>
-                              {subject}
-                            </span>
-                          </>
-                        )}
-                      </div>
+                return (
+                  <div key={log.id} style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    padding: "10px 0",
+                    borderBottom: "1px solid rgba(0,0,0,0.06)",
+                  }}>
+                    {pic ? (
+                      <img src={pic} alt={username} style={{ width: "32px", height: "32px", borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />
+                    ) : (
+                      <div style={{ width: "32px", height: "32px", borderRadius: "50%", backgroundColor: "#e8e8f0", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px", flexShrink: 0 }}>👤</div>
+                    )}
+                    <div style={{ fontSize: "12px", lineHeight: "1.5", color: "#333" }}>
+                      <span style={{ fontWeight: "700", color: "#0d1b8e" }}>{username}</span>
+                      {" "}
+                      <span style={{ fontWeight: "600", color }}>{verb}</span>
+                      {subject && <> <span style={{ color: "#555", fontStyle: "italic" }}>{subject}</span></>}
                     </div>
-                  );
-                })}
-              </div>
+                  </div>
+                );
+              })}
+
+              {(board.activityLogs ?? []).length > 8 && (
+                <button
+                  onClick={() => setShowAllLogs(!showAllLogs)}
+                  style={{
+                    marginTop: "8px",
+                    background: "none",
+                    border: "none",
+                    color: "#0d1b8e",
+                    fontWeight: "600",
+                    fontSize: "12px",
+                    cursor: "pointer",
+                    padding: "4px 0",
+                  }}
+                >
+                  {showAllLogs ? "Show less" : `See more (${(board.activityLogs ?? []).length - 8} more)`}
+                </button>
+              )}
             </div>
+          </div>
           </div>
         )}
       </div>
