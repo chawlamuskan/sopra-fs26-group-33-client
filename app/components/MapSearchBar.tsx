@@ -4,6 +4,7 @@ import { Input } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import { PlaceInfo } from "@/types/placeinfo";
+import { ALLOWED_POI_TYPES } from "@/constants/placeCategories";
 
 interface PlacePrediction {
   place_id: string;
@@ -79,12 +80,8 @@ export default function MapSearchBar({ onPlaceSelect }: MapSearchBarProps) {
         },
       }
     );
-    const ALLOWED_POI_TYPES = new Set([
-      "restaurant", "cafe", "bar", "tourist_attraction", "museum",
-      "park", "shopping_mall", "store", "lodging", "establishment",
-    ]);
     const data = await response.json();
-    const types: string[] = data.types ?? [];
+    const types: string[] = data.types || [];
     if (data.location) {
       onPlaceSelect(data.location.latitude, data.location.longitude, {
         name: data.displayName?.text ?? "Unknown Place",
@@ -94,7 +91,7 @@ export default function MapSearchBar({ onPlaceSelect }: MapSearchBarProps) {
         photoReference: data.photos?.[0]?.name ?? null,
         lat: data.location?.latitude ?? null,
         lng: data.location?.longitude ?? null,
-        types: types.filter((t) => ALLOWED_POI_TYPES.has(t)),
+        types: types.filter((t) => ALLOWED_POI_TYPES.includes(t as any)),
       });
     }
   } catch (err) {

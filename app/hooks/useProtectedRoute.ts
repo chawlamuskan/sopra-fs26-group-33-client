@@ -20,7 +20,7 @@ export const useProtectedRoute = () => {
 
       if (!token || !storedUser?.id) {
         setIsAllowed(false);
-        router.push("/"); // redirect to landing page if not authenticated
+        router.replace("/"); // redirect to landing page if not authenticated
         return;
       }
       
@@ -31,7 +31,7 @@ export const useProtectedRoute = () => {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       setIsAllowed(false);
-      router.push("/");
+      router.replace("/");
     }
   };
   validate();

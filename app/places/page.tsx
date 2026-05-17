@@ -1,5 +1,6 @@
 "use client";
-import React, { useEffect, useState } from "react";
+
+import React, { useEffect, useMemo, useState } from "react";
 import Header from "@/components/Header";
 import styles from "@/styles/page.module.css";
 import useLocalStorage from "@/hooks/useLocalStorage";
@@ -7,6 +8,12 @@ import { useApi } from "@/hooks/useApi";
 import { User } from "@/types/user";
 import { App } from "antd";
 import InfoButton from "@/components/InfoButton";
+import { useRouter } from "next/navigation";
+import {
+  ALLOWED_POI_TYPES,
+  CATEGORY_LABELS,
+  CATEGORY_ROUTES,
+} from "@/constants/placeCategories";
 
 interface SavedPlace {
   id: number;
@@ -14,14 +21,16 @@ interface SavedPlace {
   name: string;
   address: string;
   rating: number | null;
-  photoReference: string | null; 
+  photoReference: string | null;
+  types: string[];
 }
 
-// Build the Google Places photo URL from a photo_reference
+export const filterAllowedTypes = (types: string[] = []) =>
+  types.filter((t) => ALLOWED_POI_TYPES.includes(t as any));
+
 const getPlacePhotoUrl = (photoReference: string) =>
   `https://places.googleapis.com/v1/${photoReference}/media?maxWidthPx=400&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`;
 
-// Fallback when no photo is available
 const PlaceholderIcon = () => (
   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#76bdd6" strokeWidth="1.5">
     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
@@ -29,15 +38,24 @@ const PlaceholderIcon = () => (
   </svg>
 );
 
-const PlaceCard: React.FC<{ place: SavedPlace }> = ({ place }) => {
+const PlaceCard: React.FC<{ place: SavedPlace; userId?: string }> = ({
+  place,
+  userId,
+}) => {
+  const router = useRouter();
   const [imgError, setImgError] = useState(false);
-  const photoUrl = place.photoReference && !imgError
-    ? getPlacePhotoUrl(place.photoReference)
-    : null;
+
+  const photoUrl =
+    place.photoReference && !imgError
+      ? getPlacePhotoUrl(place.photoReference)
+      : null;
 
   return (
     <div
       title={place.name}
+      onClick={() =>
+        router.push(`/users/${userId}?placeId=${place.externalPlaceId}`)
+      }
       style={{
         backgroundColor: "#ffffff",
         borderRadius: "12px",
@@ -45,7 +63,6 @@ const PlaceCard: React.FC<{ place: SavedPlace }> = ({ place }) => {
         cursor: "pointer",
         display: "flex",
         flexDirection: "column",
-        alignItems: "center",
         justifyContent: "flex-end",
         overflow: "hidden",
         position: "relative",
@@ -60,7 +77,6 @@ const PlaceCard: React.FC<{ place: SavedPlace }> = ({ place }) => {
         e.currentTarget.style.boxShadow = "none";
       }}
     >
-      {/* Photo or placeholder */}
       {photoUrl ? (
         <img
           src={photoUrl}
@@ -75,37 +91,125 @@ const PlaceCard: React.FC<{ place: SavedPlace }> = ({ place }) => {
           }}
         />
       ) : (
-        <div style={{
-          position: "absolute",
-          inset: 0,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: "#eaf5fb",
-        }}>
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "#eaf5fb",
+          }}
+        >
           <PlaceholderIcon />
         </div>
       )}
 
-      {/* Name label at bottom */}
-      <div style={{
-        position: "relative",
-        zIndex: 1,
-        width: "100%",
-        background: "linear-gradient(transparent, rgba(0,0,0,0.6))",
-        color: "#fff",
-        fontSize: "10px",
-        fontWeight: "600",
-        padding: "16px 6px 6px",
-        textAlign: "center",
-        lineHeight: "1.2",
-        // Clamp to 2 lines
-        display: "-webkit-box",
-        WebkitLineClamp: 2,
-        WebkitBoxOrient: "vertical",
-        overflow: "hidden",
-      }}>
+      <div
+        style={{
+          position: "relative",
+          zIndex: 1,
+          width: "100%",
+          background: "linear-gradient(transparent, rgba(0,0,0,0.6))",
+          color: "#fff",
+          fontSize: "10px",
+          fontWeight: 600,
+          padding: "16px 6px 6px",
+          textAlign: "center",
+        }}
+      >
         {place.name}
+      </div>
+    </div>
+  );
+};
+
+interface CategoryBoardProps {
+  title: string;
+  category: string;
+  places: SavedPlace[];
+}
+
+const CategoryBoard: React.FC<CategoryBoardProps> = ({
+  title,
+  category,
+  places,
+}) => {
+  const router = useRouter();
+  const storedUser = useLocalStorage<User | null>("user", null);
+
+  const userId = storedUser.value?.id;
+  const previewPlaces = places.slice(0, 9);
+
+  return (
+    <div
+      style={{
+        background: "#D6E4F5",
+        borderRadius: "20px",
+        padding: "18px",
+        breakInside: "avoid",
+      }}
+    >
+      {/* HEADER */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "14px",
+        }}
+      >
+        <div>
+          <h2 style={{ color: "#0d1b8e", fontWeight: 700, margin: 0 }}>
+            {title}
+          </h2>
+          <p style={{ margin: 0, color: "#0d1b8e", opacity: 0.8 }}>
+            {places.length} saved places
+          </p>
+        </div>
+
+        <button
+          onClick={() =>
+            router.push(
+              category === "All"
+                ? "/places/all"
+                : `/places/${CATEGORY_ROUTES[category]}`
+            )
+          }
+          style={{
+            border: "none",
+            borderRadius: "999px",
+            background: "#fff",
+            color: "#0d1b8e",
+            padding: "8px 14px",
+            fontWeight: 600,
+            cursor: "pointer",
+            boxShadow: "0 3px 10px rgba(0,0,0,0.15)",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "scale(1.04)";
+            e.currentTarget.style.boxShadow = "0 6px 20px rgba(0,0,0,0.15)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "scale(1)";
+            e.currentTarget.style.boxShadow = "none";
+          }}
+        >
+          See More
+        </button>
+      </div>
+
+      {/* GRID */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: "6px",
+        }}
+      >
+        {previewPlaces.map((place) => (
+          <PlaceCard key={place.id} place={place} userId={userId} />
+        ))}
       </div>
     </div>
   );
@@ -113,150 +217,98 @@ const PlaceCard: React.FC<{ place: SavedPlace }> = ({ place }) => {
 
 const SavedPlaces: React.FC = () => {
   const storedUser = useLocalStorage<User | null>("user", null);
+  const router = useRouter();
+  const apiService = useApi();
+
   const [savedPlaces, setSavedPlaces] = useState<SavedPlace[]>([]);
   const [loading, setLoading] = useState(true);
-  const [manageMode, setManageMode] = useState(false);
-  const apiService = useApi();
-  const { message, modal } = App.useApp();
+
+  const userId = storedUser.value?.id;
 
   useEffect(() => {
-    if (!storedUser.value?.id) return;
-    apiService.get<SavedPlace[]>(`/users/${storedUser.value.id}/savedplaces`)
-      .then((data) => setSavedPlaces(data))
+    if (storedUser.value === null) return;
+
+    if (!userId) {
+      router.replace("/");
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    apiService
+      .get<SavedPlace[]>(`/users/${userId}/savedplaces`)
+      .then(setSavedPlaces)
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [storedUser.value?.id]);
+  }, [userId]);
 
-const handleRemovePlace = async (place: SavedPlace) => {
-  modal.confirm({
-    title: `Remove ${place.name} from Saved Places`,
-    content: `Are you sure you want to remove ${place.name} from your saved places?`,
-    okText: "Remove",
-    okButtonProps: { danger: true },
-    cancelText: "Cancel",
-    onOk: async () => {
-      try {
-        await apiService.delete(`/users/${storedUser.value?.id}/savedplaces/${place.id}`);
-        setSavedPlaces((prev) => prev.filter((p) => p.id != place.id));
-        message.success(`${place.name} removed from saved places.`);
+  const groupedPlaces = useMemo(() => {
+    const groups: Record<string, SavedPlace[]> = {
+      All: savedPlaces,
+    };
 
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-            message.error(error.message);
-          } else {
-            message.error(`An unknown error occurred while removing ${place.name} from the saved places.`);
-          }
-      }
-    }
-  })
-};
+    savedPlaces.forEach((place) => {
+      const filteredTypes =
+        place.types?.filter((t) => ALLOWED_POI_TYPES.includes(t as any)) ??
+        [];
+
+      filteredTypes.forEach((type) => {
+        if (!groups[type]) groups[type] = [];
+        if (!groups[type].some((p) => p.id === place.id)) {
+          groups[type].push(place);
+        }
+      });
+    });
+
+    return groups;
+  }, [savedPlaces]);
+
+  const boardEntries = useMemo(() => {
+    return Object.entries(groupedPlaces).sort((a, b) => {
+      if (a[0] === "All") return -1;
+      if (b[0] === "All") return 1;
+      return b[1].length - a[1].length;
+    });
+  }, [groupedPlaces]);
+
+  const columns: [string, SavedPlace[]][][] = [[], [], []];
+  boardEntries.forEach((entry, i) => columns[i % 3].push(entry));
 
   return (
     <>
       <Header />
       <InfoButton />
-      <main className={styles.main} style={{
-        padding: "24px 70px",
-        minHeight: "100vh",
-        boxSizing: "border-box",
-        overflow: "visible",
-      }}>
-        <h1 className={styles.title} style={{ margin: "0 0 24px 0" }}>
-          Saved Places
-        </h1>
-        <div 
-          style={{ 
-            backgroundColor: "#76bdd6", 
-            borderRadius: "16px", 
-            padding: "20px" }}
-        >
-          <div 
-            style={{
-              display: "flex", 
-              justifyContent: "space-between", 
-              alignItems: "center", 
-              marginBottom: "16px",}}
-          >
-            <h2 
-              style={{ 
-                color: "#0d1b8e", 
-                fontWeight: "700", 
-                fontSize: "28px", 
-                margin: "0 0 16px 4px" }}
-            >
-              All
-            </h2>
-            {savedPlaces.length > 0 && (
-              <button 
-                onClick={() => setManageMode((prev) => !prev)}
-                style={{
-                  padding: "8px 20px",
-                  borderRadius: "20px",
-                  border: "none",
-                  background: manageMode ? "#0d1b8e" : "#ffffff",
-                  color: manageMode ? "#ffffff" : "#0d1b8e",
-                  fontWeight: 600,
-                  fontSize: "14px",
-                  fontFamily: "DM Sans",
-                  cursor: "pointer",
-                }}
-              >
-                {manageMode ? "Done" : "Manage"}
-              </button>
-            )}
-          </div>
 
-          {loading ? (
-            <p>Loading...</p>
-          ) : savedPlaces.length === 0 ? (
-            <p style={{ color: "#0d1b8e" }}>No saved places yet.</p>
-          ) : (
-            <div 
-              style={{ 
-                display: "grid", 
-                gridTemplateColumns: "repeat(8, 1fr)", 
-                gap: "14px" 
-              }}
-            >
-              {savedPlaces.map((place) => (
-                <div key={place.id} style={{ position: "relative" }}>
-                  <PlaceCard place={place} />
-                  {manageMode && (
-                    <button
-                      onClick={() => handleRemovePlace(place)}
-                      style={{
-                        position: "absolute",
-                        top: "4px",
-                        right: "4px",
-                        width: "20px",
-                        height: "20px",
-                        borderRadius: "50%",
-                        border: "none",
-                        background: "#d9534f",
-                        color: "#ffffff",
-                        fontWeight: 700,
-                        fontSize: "14px",
-                        cursor: "pointer",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        padding: 0,
-                      }}
-                      title={`Remove ${place.name}`}
-                    >
-                      −
-                    </button>
-                  )}
-                </div>
-              ))}
-              {savedPlaces.length === 0 && (
-                <p style={{ gridColumn: "1 / -1", color: "#0d1b8e" }}>
-                  No saved places yet.
-                </p>
-              )}
-            </div>
-          )}
-        </div>
+      <main className={styles.main} style={{ padding: "24px 70px" }}>
+        <h1 className={styles.title}>Saved Places</h1>
+
+        {loading ? (
+          <p>Loading...</p>
+        ) : savedPlaces.length === 0 ? (
+          <p>No saved places yet.</p>
+        ) : (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              gap: "12px",
+            }}
+          >
+            {columns.map((col, i) => (
+              <div key={i} style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                {col.map(([category, places]) => (
+                  <CategoryBoard
+                    key={category}
+                    category={category}
+                    title={category === "All" ? "All" : CATEGORY_LABELS[category] ?? category}
+                    places={places}
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
       </main>
     </>
   );
