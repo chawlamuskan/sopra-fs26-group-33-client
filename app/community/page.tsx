@@ -66,17 +66,23 @@ const CommunityPageContent: React.FC = () => {
 
   const requestJoinBoard = async (board: FriendBoard) => {
     try {
-      await apiService.post(`/joinRequests/${board.id}`, {
-        receiverId: board.ownerId,
-      });
-      message.success(`Request sent to join "${board.name}"`);
+        await apiService.post(`/joinRequests/${board.id}`, {});
+        message.success(`Request sent to join "${board.name}". The board owner will be notified.`);
     } catch (error) {
-      console.error("Error sending join request:", error);
-      if (error instanceof Error) {
-        message.error(error.message);
-      } else {
-        message.error("Failed to send join request. Please try again.");
-      }
+        const appError = error as { status?: number; message?: string };
+        if (appError.status === 409) {
+            // ADDED: check if already a member or already sent request
+            const msg = appError.message ?? "";
+            if (msg.includes("already a member")) {
+                message.info(`Good news! You are already a member of "${board.name}".`);
+            } else {
+                message.info(`You already sent a join request to "${board.name}". Please wait for the owner to respond.`);
+            }
+        } else if (error instanceof Error) {
+            message.error(error.message);
+        } else {
+            message.error("Failed to send join request. Please try again.");
+        }
     }
   };
   
@@ -162,13 +168,33 @@ const CommunityPageContent: React.FC = () => {
 
         const currentUserId = Number(userId);
 
-        const cleanedBoards: FriendBoard[] = boards
-          .filter((b) => b.ownerId !== currentUserId)
-          .map((b) => ({
-            ...b,
-            memberIds: Array.isArray(b.memberIds) ? b.memberIds : [],
-            places: [],
-          }));
+        const cleanedBoards: FriendBoard[] = await Promise.all(
+          boards
+            .filter((b) => b.ownerId !== currentUserId)
+            .map(async (b) => {
+              try {
+                const places = await apiService.get<
+                  { id: number; name: string; photoReference?: string | null }[]
+                >(`/travelboards/${b.id}/places`);
+
+                return {
+                  ...b,
+                  memberIds: Array.isArray(b.memberIds) ? b.memberIds : [],
+                  places: (places ?? []).slice(0, 6).map((p) => ({
+                    id: p.id,
+                    name: p.name,
+                    photoReference: p.photoReference ?? null,
+                  })),
+                };
+              } catch {
+                return {
+                  ...b,
+                  memberIds: Array.isArray(b.memberIds) ? b.memberIds : [],
+                  places: [],
+                };
+              }
+            })
+        );
 
         setPublicBoardsWithMembers(cleanedBoards);
       } finally {
@@ -507,14 +533,34 @@ const CommunityPageContent: React.FC = () => {
 
                           {/* PLACES */}
                           <div className={styles.placesGrid}>
-                            {Array.from({ length: 3 }).map((_, idx) => (
-                              <div
-                                key={`public-${board.id}-${idx}`}
-                                className={styles.placeBox}
-                              >
-                                <div className={styles.placePlaceholder} />
-                              </div>
-                            ))}
+                            {Array.from({ length: 3 }).map((_, idx) => {
+                              const place = board.places?.[idx];
+
+                              const photoUrl = place?.photoReference
+                                ? `https://places.googleapis.com/v1/${place.photoReference}/media?maxWidthPx=200&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
+                                : null;
+
+                              return (
+                                <div
+                                  key={`public-${board.id}-${idx}`}
+                                  className={styles.placeBox}
+                                >
+                                  {photoUrl ? (
+                                    <img
+                                      src={photoUrl}
+                                      alt={place?.name ?? ""}
+                                      style={{
+                                        width: "100%",
+                                        height: "100%",
+                                        objectFit: "cover",
+                                      }}
+                                    />
+                                  ) : (
+                                    <div className={styles.placePlaceholder} />
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
 
                           {/* SEE MORE */}

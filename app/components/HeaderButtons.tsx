@@ -17,21 +17,21 @@ type InvitationNotification = {
   senderUsername: string;
 };
 
+type JoinRequestNotification = {
+    id: number;
+    boardId: number;
+    senderId: number;
+    senderUsername: string;
+    boardName: string;
+    status: string;
+};
+
 type FriendRequest = {
   id: number;
   senderId: number;
   receiverId: number;
   status: string;
   senderUsername: string;
-};
-
-type JoinRequestNotification = {
-  id: number;
-  boardId: number;
-  requesterId: number;
-  requesterUsername: string;
-  boardName: string;
-  status: string;
 };
 
 interface HeaderButtonsProps {
@@ -49,86 +49,77 @@ export default function HeaderButtons( {onToggleSavedPlaces}: HeaderButtonsProps
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const [isBellModalOpen, setIsBellModalOpen] = useState(false);
-  const [invitationNotifications, setInvitationNotifications] = useState<InvitationNotification[]>([]);
-  const [joinRequests, setJoinRequests] = useState<JoinRequestNotification[]>([]);
+  const [joinNotifications, setJoinNotifications] = useState<InvitationNotification[]>([]);
   const [notifAvatars, setNotifAvatars] = useState<Record<number, string | null>>({});
-  const [joinRequestAvatars, setJoinRequestAvatars] = useState<Record<number, string | null>>({});
   const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
   const [friendRequestAvatars, setFriendRequestAvatars] = useState<Record<number, string | null>>({});
-  const totalNotifications = invitationNotifications.length + joinRequests.length + friendRequests.length;
   const [showSavedPlaces, setShowSavedPlaces] = useState(false);
+
+  const [joinRequests, setJoinRequests] = useState<JoinRequestNotification[]>([]);
+  const [joinRequestAvatars, setJoinRequestAvatars] = useState<Record<number, string | null>>({});
 
   const loadNotifications = async () => {
     try {
       const [invitationData, friendReqData, joinReqData] = await Promise.all([
-      apiService.get<InvitationNotification[]>("/invitations"),
-      apiService.get<FriendRequest[]>("/friendRequests"),
-      apiService.get<JoinRequestNotification[]>("/joinRequests"),
+          apiService.get<InvitationNotification[]>("/invitations"),
+          apiService.get<FriendRequest[]>("/friendRequests"),
+          apiService.get<JoinRequestNotification[]>("/joinRequests"),
       ]);
 
-      setInvitationNotifications(invitationData);
-      setJoinRequests(joinReqData);
+      setJoinNotifications(invitationData);
       setFriendRequests(friendReqData);
-      
-      // Invitation avatars
-      const avatarEntries = await Promise.all(
-        invitationData.map(async (notif) => {
-          try {
-            const prefs = await apiService.get<{ profilePicture?: string | null }>(
-              `/users/${notif.senderId}/preferences`
-            );
+      setJoinRequests(joinReqData);
 
-            return [notif.senderId, prefs.profilePicture ?? null] as const;
-          } catch {
-            return [notif.senderId, null] as const;
-          }
-        })
+      // existing avatar fetching for invitations...
+      const avatarEntries = await Promise.all(
+          invitationData.map(async (notif) => {
+              try {
+                  const prefs = await apiService.get<{ profilePicture?: string | null }>(
+                      `/users/${notif.senderId}/preferences`
+                  );
+                  return [notif.senderId, prefs.profilePicture ?? null] as const;
+              } catch {
+                  return [notif.senderId, null] as const;
+              }
+          })
       );
       setNotifAvatars(Object.fromEntries(avatarEntries));
 
-      // Friend request avatars
+      // existing friend request avatars...
       const friendAvatarEntries = await Promise.all(
-        friendReqData.map(async (req) => {
-          try {
-            const prefs = await apiService.get<{ profilePicture?: string | null }>(
-              `/users/${req.senderId}/preferences`
-            );
-
-            return [req.senderId, prefs.profilePicture ?? null] as const;
-          } catch {
-            return [req.senderId, null] as const;
-          }
-        })
+          friendReqData.map(async (req) => {
+              try {
+                  const prefs = await apiService.get<{ profilePicture?: string | null }>(
+                      `/users/${req.senderId}/preferences`
+                  );
+                  return [req.senderId, prefs.profilePicture ?? null] as const;
+              } catch {
+                  return [req.senderId, null] as const;
+              }
+          })
       );
       setFriendRequestAvatars(Object.fromEntries(friendAvatarEntries));
-      
-      // Join request avatars
-      const joinRequestAvatarEntries = await Promise.all(
-        joinReqData.map(async (req) => {
-          try {
-            const prefs = await apiService.get<{ profilePicture?: string | null }>(
-              `/users/${req.requesterId}/preferences`
-            );
 
-            return [req.requesterId, prefs.profilePicture ?? null] as const;
-          } catch {
-            return [req.requesterId, null] as const;
-          }
-        })
+      const joinAvatarEntries = await Promise.all(
+          joinReqData.map(async (req) => {
+              try {
+                  const prefs = await apiService.get<{ profilePicture?: string | null }>(
+                      `/users/${req.senderId}/preferences`
+                  );
+                  return [req.senderId, prefs.profilePicture ?? null] as const;
+              } catch {
+                  return [req.senderId, null] as const;
+              }
+          })
       );
-      setJoinRequestAvatars(Object.fromEntries(joinRequestAvatarEntries));
-
+      setJoinRequestAvatars(Object.fromEntries(joinAvatarEntries));
     } catch {
-      setInvitationNotifications([]);
-      setJoinRequests([]);
+      setJoinNotifications([]);
       setFriendRequests([]);
-      setNotifAvatars({});
-      setFriendRequestAvatars({});
-      setJoinRequestAvatars({});
+      setJoinRequests([]);
     }
   };
   
-
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
     if (storedUser?.id) {
@@ -169,7 +160,7 @@ export default function HeaderButtons( {onToggleSavedPlaces}: HeaderButtonsProps
   const handleAcceptInvite = async (notif: InvitationNotification) => {
     try {
       await apiService.put(`/invitations/${notif.id}/accept`, {});
-      setInvitationNotifications((prev) => prev.filter((n) => n.id !== notif.id));
+      setJoinNotifications((prev) => prev.filter((n) => n.id !== notif.id));
       await loadNotifications();
       message.success(`You joined "${notif.boardName}".`);
     } catch {
@@ -180,7 +171,7 @@ export default function HeaderButtons( {onToggleSavedPlaces}: HeaderButtonsProps
   const handleDeclineInvite = async (notif: InvitationNotification) => {
     try {
       await apiService.put(`/invitations/${notif.id}/decline`, {});
-      setInvitationNotifications((prev) => prev.filter((n) => n.id !== notif.id));
+      setJoinNotifications((prev) => prev.filter((n) => n.id !== notif.id));
       await loadNotifications();
       message.success(`You declined the invitation to "${notif.boardName}".`);
     } catch {
@@ -215,7 +206,7 @@ export default function HeaderButtons( {onToggleSavedPlaces}: HeaderButtonsProps
       await apiService.put(`/joinRequests/${req.id}/accept`, {});
       setJoinRequests((prev) => prev.filter((r) => r.id !== req.id));
       await loadNotifications();
-      message.success(`${req.requesterUsername} joined "${req.boardName}".`);
+      message.success(`${req.senderUsername} has been added to "${req.boardName}".`);
     } catch {
       message.error("Could not accept join request.");
     }
@@ -226,11 +217,12 @@ export default function HeaderButtons( {onToggleSavedPlaces}: HeaderButtonsProps
       await apiService.put(`/joinRequests/${req.id}/decline`, {});
       setJoinRequests((prev) => prev.filter((r) => r.id !== req.id));
       await loadNotifications();
-      message.success(`Declined join request for "${req.boardName}".`);
+      message.success(`You declined ${req.senderUsername}'s request to join "${req.boardName}".`);
     } catch {
       message.error("Could not decline join request.");
     }
   };
+
   const handleToggle = () => {
     const next = !showSavedPlaces;
     setShowSavedPlaces(next);
@@ -341,7 +333,7 @@ export default function HeaderButtons( {onToggleSavedPlaces}: HeaderButtonsProps
                   cursor: "pointer",
                 }}
               />
-              {totalNotifications > 0 && (
+              {joinNotifications.length + friendRequests.length + joinRequests.length > 0 && (
                 <span style={{
                   position: "absolute",
                   top: "-8px",
@@ -358,7 +350,7 @@ export default function HeaderButtons( {onToggleSavedPlaces}: HeaderButtonsProps
                   textAlign: "center",
                   boxShadow: "0 1px 4px rgba(0,0,0,0.25)",
                 }}>
-                  {totalNotifications}
+                  {joinNotifications.length + friendRequests.length + joinRequests.length}
                 </span>
               )}
             </div>
@@ -516,11 +508,11 @@ export default function HeaderButtons( {onToggleSavedPlaces}: HeaderButtonsProps
         {/* Travelboard Notifications section */}
         <p style={{ color: "#0B0696", fontWeight: 700, fontSize: "1rem", marginBottom: "0.75rem" }}>Travelboard Invitations</p>
 
-        {invitationNotifications.length === 0 ? (
+        {joinNotifications.length === 0 ? (
           <p style={{ color: "#030000", fontSize: "0.9rem", marginBottom: "1.5rem" }}>No pending invitations.</p>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "1.5rem" }}>
-            {invitationNotifications.map((notif) => (
+            {joinNotifications.map((notif) => (
               <div key={notif.id} style={{
                 display: "flex", alignItems: "center", gap: "0.75rem",
                 background: "#f4ebeb", borderRadius: "30px", padding: "0.5rem 1rem"
@@ -539,7 +531,7 @@ export default function HeaderButtons( {onToggleSavedPlaces}: HeaderButtonsProps
                   }}>👤</div>
                 )}
                 <span style={{ flex: 1, fontSize: "0.9rem", fontStyle: "italic" }}>
-                  <strong>{notif.senderUsername}</strong> invited you to "{notif.boardName}"
+                  <strong>{notif.senderUsername}</strong> invited you to &quot;{notif.boardName}&quot;
                 </span>
                 <Button
                   size="small"
@@ -556,58 +548,60 @@ export default function HeaderButtons( {onToggleSavedPlaces}: HeaderButtonsProps
           </div>
         )}
 
-        {/* Join Requests section */}
-        <p style={{ color: "#0B0696", fontWeight: 700, fontSize: "1rem", marginBottom: "0.75rem" }}>
-          Join Requests
-        </p>
+        {/* Join Requests section - visible to board owners */}
+        <p style={{ color: "#0B0696", fontWeight: 700, fontSize: "1rem", marginBottom: "0.75rem" }}>Travelboard Join Requests</p>
 
         {joinRequests.length === 0 ? (
-          <p style={{ color: "#030000", fontSize: "0.9rem", marginBottom: "1.5rem" }}>
-            No pending join requests.
-          </p>
+            <p style={{ color: "#030000", fontSize: "0.9rem", marginBottom: "1.5rem" }}>No pending join requests.</p>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginBottom: "1.5rem" }}>
             {joinRequests.map((req) => (
-              <div
-                key={req.id}
-                style={{
+              <div key={req.id} style={{
                   display: "flex",
                   alignItems: "center",
                   gap: "0.75rem",
                   background: "#f4ebeb",
                   borderRadius: "30px",
-                  padding: "0.5rem 1rem"
-                }}
-              >
+                  padding: "0.5rem 1rem",
+              }}>
+                {joinRequestAvatars[req.senderId] ? (
+                  <img
+                    src={joinRequestAvatars[req.senderId]!}
+                    alt={req.senderUsername}
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                      flexShrink: 0,
+                    }}
+                  />
+                ) : (
+                  <div style={{
+                    width: "36px",
+                    height: "36px",
+                    borderRadius: "50%",
+                    background: "#d6cece",
+                    flexShrink: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 16,
+                  }}>👤</div>
+                )}
                 <span style={{ flex: 1, fontSize: "0.9rem", fontStyle: "italic" }}>
-                  <strong>{req.requesterUsername}</strong> requested to join "{req.boardName}"
+                    <strong>{req.senderUsername}</strong> wants to join &quot;{req.boardName}&quot;
                 </span>
-
                 <Button
-                  size="small"
-                  onClick={() => handleAcceptJoinRequest(req)}
-                  style={{
-                    background: "#0B0696",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "20px"
-                  }}
-                >
-                  Accept
-                </Button>
-
+                    size="small"
+                    onClick={() => handleAcceptJoinRequest(req)}
+                    style={{ background: "#0B0696", color: "white", border: "none", borderRadius: "20px", }}
+                >Accept</Button>
                 <Button
                   size="small"
                   onClick={() => handleDeclineJoinRequest(req)}
-                  style={{
-                    background: "#0B0696",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "20px"
-                  }}
-                >
-                  Decline
-                </Button>
+                  style={{ background: "#0B0696", color: "white", border: "none", borderRadius: "20px", }}
+                >Decline</Button>
               </div>
             ))}
           </div>
