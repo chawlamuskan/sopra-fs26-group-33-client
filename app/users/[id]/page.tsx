@@ -38,6 +38,19 @@ interface AddressComponent {
   short_name: string;
 }
 
+interface TravelBoard {
+  id: number;
+  name: string;
+  location?: string | null;
+  privacy?: string;
+  ownerId?: number;
+}
+
+interface PublicBoardPreview extends TravelBoard {
+  previewPhotoReference?: string | null;
+  ownerProfilePicture?: string | null;
+}
+
 
 const resolveCity = async (placeId: string): Promise<string | null> => {
   try {
@@ -64,6 +77,9 @@ const resolveCity = async (placeId: string): Promise<string | null> => {
     return null;
   }
 };
+
+const getPlacePhotoUrl = (photoReference: string) =>
+  `https://places.googleapis.com/v1/${photoReference}/media?maxWidthPx=400&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`;
 
 const ZoomTracker: React.FC<{ onZoomChange: (zoom: number) => void }> = ({
   onZoomChange,
@@ -166,6 +182,61 @@ const PlaceCard: React.FC<{
   const [showBoardSelector, setShowBoardSelector] = useState(false);
   const [travelBoards, setTravelBoards] = useState<{ id: number; name: string }[]>([]);
   const [boardFeedback, setBoardFeedback] = useState<string | null>(null);
+  const [publicBoards, setPublicBoards] = useState<PublicBoardPreview[]>([]);
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchPublicBoardsForPlace = async () => {
+      try {
+        const boards = await apiService.get<TravelBoard[]>("/travelboards/public");
+        const matchingBoards: PublicBoardPreview[] = [];
+        for (const board of boards) {
+          try {
+            const places = await apiService.get<{ 
+              externalPlaceId: string;
+              photoReference?: string | null; 
+            }[]>(`/travelboards/${board.id}/places`);
+
+            const containsClickedPlace = places.some(
+              (place) => place.externalPlaceId === placeInfo.placeId
+            );
+            
+            if (containsClickedPlace) {
+              let ownerProfilePicture: string | null = null;
+
+              if (board.ownerId) {
+                try {
+                  const owner = await apiService.get<{ profilePicture?: string | null }>(
+                    `/users/${board.ownerId}/preferences`
+                  );
+                  ownerProfilePicture = owner.profilePicture ?? null;
+                } catch {
+                  ownerProfilePicture = null;
+                }
+              }
+
+              const previewPhotoReference =
+                places.find((place) => place.photoReference)?.photoReference ?? null;
+            
+              matchingBoards.push({
+                ...board,
+                previewPhotoReference,
+                ownerProfilePicture,
+              });
+            }
+          } catch {
+            // ignore boards where places cannot be fetched
+          }
+        }
+
+        setPublicBoards([...matchingBoards].sort((a, b) => b.id - a.id)); //show the latest 6 boards
+      } catch {
+        setPublicBoards([]);
+      }
+    };
+
+    fetchPublicBoardsForPlace();
+  }, [apiService, placeInfo.placeId]);
 
   const handleAddToSaved = async () => {
     if (!userId) {
@@ -284,20 +355,104 @@ const PlaceCard: React.FC<{
       </div>
       <p className={popupStyles.address}>📍 {placeInfo.address}</p>
       <div className={popupStyles.gridSection}>
-        <div className={popupStyles.gridLabel}>Featured in these posts</div>
-        <div className={popupStyles.imageGrid}>
-          {Array(4).fill(null).map((_, i) => (
-            <div key={i} className={popupStyles.imgPlaceholder} />
-          ))}
-        </div>
-      </div>
-      <div className={popupStyles.gridSection}>
-        <div className={popupStyles.gridLabel}>Featured in these boards</div>
-        <div className={popupStyles.imageGrid}>
-          {Array(4).fill(null).map((_, i) => (
-            <div key={i} className={popupStyles.imgPlaceholder} />
-          ))}
-        </div>
+        <div className={popupStyles.gridLabel}>Featured in these public boards</div>       
+        {publicBoards.length === 0 ? (
+          <div
+            style={{
+              backgroundColor: "rgba(255,255,255,0.25)",
+              borderRadius: "12px",
+              padding: "14px",
+              color: "white",
+              fontWeight: 600,
+              width: "100%",
+            }}
+          >
+            No public boards feature this place yet.
+          </div>
+        ) : (
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: "12px",  
+          }}>
+            {publicBoards.slice(0, 6).map((board) => {
+              const photoUrl = board.previewPhotoReference
+                ? getPlacePhotoUrl(board.previewPhotoReference)
+                : null;
+            
+              return (
+                <div
+                  key={board.id}
+                  onClick={() => router.push(`/travelboards/${board.id}`)}
+                  style={{
+                    backgroundImage: photoUrl ? `url(${photoUrl})` : undefined,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    color: "white",
+                    borderRadius: "14px",
+                    minHeight: "115px",
+                    cursor: "pointer",
+                    overflow: "hidden",
+                    display: "flex",
+                    position: "relative",
+                  }}
+                >
+                  {board.ownerProfilePicture ? (
+                    <img
+                      src={board.ownerProfilePicture}
+                      alt="Board owner"
+                      style={{
+                        position: "absolute",
+                        top: "8px",
+                        right: "8px",
+                        width: "42px",
+                        height: "42px",
+                        borderRadius: "50%",
+                        objectFit: "cover",
+                        border: "2px solid white",
+                        zIndex: 2,
+                      }}
+                    />
+                ) : (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "8px",
+                      right: "8px",
+                      width: "42px",
+                      height: "42px",
+                      borderRadius: "50%",
+                      backgroundColor: "#D6CECE",
+                      color: "#0B0696",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "18px",
+                      border: "2px solid white",
+                      zIndex: 2,
+                    }}
+                  >
+                    👤
+                  </div>
+                )}
+                  <div
+                    style={{
+                      width: "100%",
+                      padding: "10px",
+                      background: "linear-gradient(transparent, rgba(0,0,0,0.75))",
+                      display: "flex",
+                      alignItems: "flex-end",
+                      fontWeight: 700,
+                      fontSize: "13px",
+                    }}
+                  >
+                    {board.name}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
       <div className={popupStyles.divider} />
       <div className={popupStyles.ratingSection}>
