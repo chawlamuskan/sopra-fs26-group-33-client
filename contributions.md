@@ -166,8 +166,8 @@ reason).
 |                    | [17.05.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/eed30af001a4afe8c3573758e175375f79cfbbd4] | [Modify Saved places page so the places are distributed based on categories, create a corresponding page for each category to view and manage saved places #120 #129 #130 #122] | [Enable the categorization of the saved places in the initial Saved places page, View the saved places separately in their categories to facilitate their management (removal)] |
 | **[@nsavas8]** | [13.05.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/eb8421e5462107360b8a0127cbdf4842ae51e03a] | [Added toggle button to main map, so users can switch map views] | [To ensure that users can see their saved places on the map, we implemented a toggle button, that shows saved places by category, but it can be switched off as well] |
 |                    | [17.05.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/3ef6a8fb98f96ac12d955b78678b3709e300c192] | [Service integration tests for saved places] | [To test the full functionality for saving places, getting all places and deleting places] |
-| **[@yalini-siva]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@yalini-siva]** | [16.05.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/ead3ed204bb13ebb579ae1d7331232fa511867de] | [Added service tests] | [Ensures backend features work correctly and return the expected results] |
+|                    | [17.05.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/bdd3c50af10e36de8f4d3693615f7fe112df430c] | [Adjusted location popup to show board preview cards with the first place picture, board owner, and board name] | [Lets users quickly see which public boards feature the selected place] |
 
 
 ---
