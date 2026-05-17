@@ -164,8 +164,8 @@ reason).
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@despoinapantazi]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-| **[@nsavas8]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@nsavas8]** | [13.05.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-client/commit/eb8421e5462107360b8a0127cbdf4842ae51e03a] | [Added toggle button to main map, so users can switch map views] | [To ensure that users can see their saved places on the map, we implemented a toggle button, that shows saved places by category, but it can be switched off as well] |
+|                    | [17.05.2026]   | [https://github.com/chawlamuskan/sopra-fs26-group-33-server/commit/3ef6a8fb98f96ac12d955b78678b3709e300c192] | [Service integration tests for saved places] | [To test the full functionality for saving places, getting all places and deleting places] |
 | **[@yalini-siva]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 
