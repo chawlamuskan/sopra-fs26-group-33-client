@@ -10,7 +10,6 @@ import { App } from "antd";
 import InfoButton from "@/components/InfoButton";
 import { useRouter } from "next/navigation";
 import {
-  ALLOWED_POI_TYPES,
   CATEGORY_LABELS,
   CATEGORY_ROUTES,
   isAllowedPoiType,
@@ -26,7 +25,7 @@ interface SavedPlace {
   types: string[];
 }
 
-export const filterAllowedTypes = (types: string[] = []) =>
+const filterAllowedTypes = (types: string[] = []) =>
   types.filter(isAllowedPoiType);
 
 const getPlacePhotoUrl = (photoReference: string) =>
