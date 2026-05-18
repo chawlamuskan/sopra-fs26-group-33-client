@@ -16,6 +16,14 @@ const Register: React.FC = () => {
   const apiService = useApi();
   const { message } = App.useApp();
   const [form] = Form.useForm();
+  const password = Form.useWatch("password", form) || "";
+
+  const passwordChecks = {
+    length: password.length >= 8,
+    uppercase: /[A-Z]/.test(password),
+    lowercase: /[a-z]/.test(password),
+    number: /[0-9]/.test(password),
+  };
 
   const { set: setToken } = useLocalStorage<string>("token", "");
 
@@ -106,10 +114,46 @@ const Register: React.FC = () => {
 
           <Form.Item
             name="password"
-            label={<span className={styles.fieldLabel}>Password </span>}
-            rules={[{ required: true, message: "Please input your password!" }]}
+            label={<span className={styles.fieldLabel}>Password</span>}
+            rules={[
+              { required: true, message: "Please input your password!" },
+            ]}
+            extra={
+              <div
+                style={{
+                  fontSize: "12px",
+                  lineHeight: "1.4",
+                  marginTop: "6px",
+                }}
+              >
+                Password must contain at least:
+                <ul style={{ margin: "4px 0 0 18px", padding: 0 }}>
+                  <li
+                    style={{ color: passwordChecks.length ? "green" : "#959595", }}
+                  >8 characters
+                  </li>
+                  <li
+                    style={{ color: passwordChecks.uppercase ? "green" : "#959595", }}
+                  >1 uppercase letter
+                  </li>
+                  <li
+                    style={{ color: passwordChecks.lowercase ? "green" : "#959595", }}
+                  >1 lowercase letter
+                  </li>
+                  <li
+                    style={{ color: passwordChecks.number ? "green" : "#959595", }}
+                  >1 number
+                  </li>
+                </ul>
+              </div>
+            }
           >
-            <Input.Password placeholder="Enter password" className={styles.inputField} style={{ width: "100%" }} variant="borderless" />
+            <Input.Password
+              placeholder="Enter password"
+              className={styles.inputField}
+              style={{ width: "100%" }}
+              variant="borderless"
+            />
           </Form.Item>
           </div>
 
