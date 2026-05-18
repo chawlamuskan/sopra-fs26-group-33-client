@@ -256,6 +256,6 @@ This feature would transform travel boards from simple collections into fully st
 
 ### Acknowledgements
 
-The authors would like to thank the SOPRA team for their help during the project length, and the group that provided feedback during beta testing.
+The authors would like to thank the SOPRA team for their help during the semester, and the group that provided feedback during beta testing.
 
 ## License
