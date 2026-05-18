@@ -249,7 +249,7 @@ const handleSave = async () => {
       icon: null,
       okButtonProps: {
         style: {
-          background: "#0B0696",
+          background: "#e53935",
           border: "none",
           borderRadius: "8px",
           height: "36px",

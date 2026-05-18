@@ -10,6 +10,11 @@ export const ALLOWED_POI_TYPES = [
   "lodging",
 ] as const;
 
+export type AllowedPoiType = (typeof ALLOWED_POI_TYPES)[number];
+
+export const isAllowedPoiType = (type: string): type is AllowedPoiType =>
+  (ALLOWED_POI_TYPES as readonly string[]).includes(type);
+
 export const CATEGORY_LABELS: Record<string, string> = {
   restaurant: "Restaurants",
   cafe: "Cafés",

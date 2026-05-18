@@ -10,9 +10,9 @@ import { App } from "antd";
 import InfoButton from "@/components/InfoButton";
 import { useRouter } from "next/navigation";
 import {
-  ALLOWED_POI_TYPES,
   CATEGORY_LABELS,
   CATEGORY_ROUTES,
+  isAllowedPoiType,
 } from "@/constants/placeCategories";
 
 interface SavedPlace {
@@ -25,8 +25,8 @@ interface SavedPlace {
   types: string[];
 }
 
-export const filterAllowedTypes = (types: string[] = []) =>
-  types.filter((t) => ALLOWED_POI_TYPES.includes(t as any));
+const filterAllowedTypes = (types: string[] = []) =>
+  types.filter(isAllowedPoiType);
 
 const getPlacePhotoUrl = (photoReference: string) =>
   `https://places.googleapis.com/v1/${photoReference}/media?maxWidthPx=400&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`;
@@ -250,7 +250,7 @@ const SavedPlaces: React.FC = () => {
 
     savedPlaces.forEach((place) => {
       const filteredTypes =
-        place.types?.filter((t) => ALLOWED_POI_TYPES.includes(t as any)) ??
+        place.types?.filter(isAllowedPoiType) ??
         [];
 
       filteredTypes.forEach((type) => {
