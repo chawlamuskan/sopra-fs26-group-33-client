@@ -70,6 +70,7 @@ The backend must be running locally or accessible via a configured API endpoint 
 ### Committing changes
 The project followed a branch workflow. Each team member worked on a dedicated branch and pushed changes there first. Once a feature or fix was completed, a pull request (PR) was created to merge the changes into the main branch.
 All pull requests were reviewed by at least one other team member before being merged, ensuring code quality and consistency across the project.  
+
 Typical workflow: 
 
 - Moving to own branch
@@ -92,6 +93,109 @@ git push origin your-branch-name
 
 
 ## Illustrations
+
+
+This section describes the main user flows of the application. The map serves as the central entry point, from which users navigate to different features such as saved places, travel boards, and community interactions. 
+
+### Logged out users
+
+#### Map:
+Logged-out users can explore a simplified 2D map displaying only the main geographical features. By clicking on a country, they can access an overview containing basic statistics and information about that country. 
+
+#### Registration and Preferences: 
+New users can register with the dedicated page. After signing up, they are prompted to set up their profile preferences, which include:
+
+- Writing a bio
+- Selecting a profile picture
+- Choosing countries they have visited or want to visit
+- Adding friends by username
+
+These steps are optional and can be skipped or completed later via the Settings page.
+
+### Logged in users
+
+#### Login: 
+
+Users can login with their username or email, and their password. 
+After login, the map becomes the home page. Navigation to other pages is available via the user profile icon in the top-right corner. The Worldtura logo redirects users back to the main map view.
+
+#### Map:
+Logged-in users have access to a more interactive experience. In addition to the country overview, users can view popular places within the app that are located in the selected country. As users zoom in, individual landmarks, establishments, and attractions become visible on the map. 
+Clicking on a place opens a pop-up containing details such as the address, with options to:
+
+- Save the place
+- Add it to a travel board
+- View public travel boards containing the place
+
+A search bar allows users to find specific locations. Additionally, a “Saved Places Mode” toggle displays all saved places on the map using emoji-based category markers.
+
+#### Country Overview
+This page shows the user’s visited and “want to visit” countries on a simplified world map, while all other countries are displayed in grey.
+
+Clicking on a country opens a pop-up similar to the main map overview. However, instead of popular places, it displays travel boards associated with that country.
+
+#### Saved Places
+This page displays all places saved by the user, organized into categories (plus an “All” category).
+
+Only up to 9 places are shown per category, with a “See more” option to view the full list. Inside the full view, users can also remove saved places.
+
+#### Travel Boards
+This page allows users to create, manage, and join travel boards. 
+
+**Creating a board:**
+
+Users can create a board via a pop-up form where they must provide a name and location, and optionally select a date range. Boards can be set to one of three privacy levels:
+
+- Private (only owner and members can view)
+- Friends (friends of the owner can also view)
+- Public (visible to all users)
+
+Users can also invite others either via a generated code or directly (if they are friends).
+
+**Managing boards:**
+
+In “Manage Mode”, users can rename or delete boards they own, and leave boards they are members of. Changes are finalized by clicking “Done”. 
+
+**Joining a board:**
+
+Users receive invitations via notifications accessible from the bell icon in the header. Alternatively, they can join using an invitation code. 
+
+#### Individual Travel Board
+Selecting a travel board opens its dedicated page, which displays:
+
+- Board name
+- Member profile pictures
+- Selected date range (if applicable)
+
+The page is divided into two sections:
+
+- Saved places
+- Activity log
+
+Places can be added either from the map or via the “Add a place” option in Saved Places. This opens a filtered view showing relevant places based on location. Non-matching places are greyed out, but can still be added with confirmation.
+
+Places can be removed individually, triggering a confirmation step.
+
+All updates are reflected in real time in the activity log, allowing all members to track changes within the board.
+
+#### Community
+The Community page is split into two tabs: 
+
+**Friends tab**
+Displays friends’ profiles and their travel boards, unless those boards are set to private. 
+
+**Public tab**
+Displays all public travel boards. Users can view these boards in guest mode, where editing is disabled, and can request to join them. 
+
+#### Profile Settings
+In this page, users can update:
+
+- Profile information and preferences
+- Password
+- Friends list
+
+Users can also delete their account. In this case, all associated data, including saved places and travel boards, is permanently removed.
+
 
 ## Roadmaps
 
