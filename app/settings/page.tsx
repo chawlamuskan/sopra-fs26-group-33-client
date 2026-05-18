@@ -44,6 +44,7 @@ const SettingsPageInner: React.FC = () => {
     visitedCountries: string[];
     wishlistCountries: string[];
   } | null>(null);
+  const [visitedCountries, setVisitedCountries] = useState<string[]>([]);
 
   // password change
   const [oldPassword, setOldPassword] = useState("");
@@ -96,6 +97,9 @@ const SettingsPageInner: React.FC = () => {
           countries_wishlist: nextPreferences.wishlistCountries,
         });
         setInitialPreferences(nextPreferences);
+
+        setVisitedCountries(nextPreferences.visitedCountries);
+
         if (nextPreferences.profilePicture) {
           setPreviewUrl(nextPreferences.profilePicture);
           setImageBase64(nextPreferences.profilePicture);
@@ -381,6 +385,11 @@ const SettingsPageInner: React.FC = () => {
     );
   });
 
+  const wishlistOptions = countryOptions.map((option) => ({
+    ...option,
+    disabled: visitedCountries.includes(option.value),
+  }));
+
   if (isAllowed === null || !isAllowed || !userId) return null;
 
   return (
@@ -478,14 +487,58 @@ const SettingsPageInner: React.FC = () => {
             name="countries_visited"
             label={<span style={{ fontWeight: 600, color: "#000", fontSize: "18px" }}>Select countries you have visited</span>}
           >
-            <Select mode="multiple" placeholder="Select countries" options={countryOptions} showSearch style={{ width: "100%", fontSize: "16px" }} styles={{ popup: { root: { background: "#ffffff" } } }} />
+            <Select 
+              mode="multiple" 
+              placeholder="Select countries" 
+              options={countryOptions} 
+              showSearch 
+              style={{ width: "100%", fontSize: "16px" }} 
+              styles={{ popup: { root: { background: "#ffffff" } } }} 
+              onChange={(selected: string[]) => {
+                setVisitedCountries(selected);
+
+                const currentWishlist: string[] =
+                  form.getFieldValue("countries_wishlist") ?? [];
+                const filteredWishlist = currentWishlist.filter(
+                  (c) => !selected.includes(c)
+                );
+                form.setFieldValue("countries_wishlist", filteredWishlist);
+              }}/>
           </Form.Item>
 
           <Form.Item
             name="countries_wishlist"
             label={<span style={{ fontWeight: 600, color: "#000", fontSize: "18px" }}>Select countries you want to visit</span>}
           >
-            <Select mode="multiple" placeholder="Select countries" options={countryOptions} showSearch style={{ width: "100%", fontSize: "16px" }} styles={{ popup: { root: { background: "#ffffff" } } }} />
+            <Select 
+              mode="multiple" 
+              placeholder="Select countries" 
+              options={wishlistOptions} 
+              showSearch 
+              style={{ width: "100%", fontSize: "16px" }} 
+              styles={{ popup: { root: { background: "#ffffff" } } }}
+              optionRender={(option) => (
+                <span
+                  title={
+                    visitedCountries.includes(option.value as string)
+                      ? "Already in visited countries"
+                      : undefined
+                  }
+                  style={{
+                    color: visitedCountries.includes(option.value as string)
+                        ? "#bbb"
+                        : undefined,
+                    cursor: visitedCountries.includes(option.value as string)
+                        ? "default"
+                        : "pointer",
+                    display: "block",
+                    width: "100%",
+                }}
+                >
+                  {option.label}
+                </span>
+              )}
+            />
           </Form.Item>
 
           <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "8px" }}>
@@ -505,20 +558,40 @@ const SettingsPageInner: React.FC = () => {
           {/* Change password */}
           <span style={{ fontWeight: 600, color: "#000", fontSize: "18px" }}>Change password</span>
           <div style={{ display: "flex", gap: "24px", marginTop: "8px", marginBottom: "24px" }}>
-            <Input.Password
-              placeholder="Insert old password"
-              value={oldPassword}
-              onChange={(e) => setOldPassword(e.target.value)}
-              style={{ flex: 1, background: "#F4EBEB", border: "none", borderRadius: "12px", fontSize: "16px", height: "48px" }}
-              variant="borderless"
-            />
-            <Input.Password
-              placeholder="Insert new password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              style={{ flex: 1, background: "#F4EBEB", border: "none", borderRadius: "12px", fontSize: "16px", height: "48px" }}
-              variant="borderless"
-            />
+              <Input.Password
+                  placeholder="Insert old password"
+                  value={oldPassword}
+                  onChange={(e) => setOldPassword(e.target.value)}
+                  style={{ flex: 1, background: "#F4EBEB", border: "none", borderRadius: "12px", fontSize: "16px", height: "48px" }}
+                  variant="borderless"
+              />
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "6px" }}>
+                  <Input.Password
+                      placeholder="Insert new password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      style={{ background: "#F4EBEB", border: "none", borderRadius: "12px", fontSize: "16px", height: "48px" }}
+                      variant="borderless"
+                  />
+                  {/* password hint */}
+                  <div style={{ fontSize: "12px", lineHeight: "1.4", color: "#8e8e8e" }}>
+                      Password must contain at least:
+                      <ul style={{ margin: "4px 0 0 18px", padding: 0 }}>
+                          <li style={{ color: newPassword.length >= 8 ? "green" : "#8e8e8e" }}>
+                              8 characters
+                          </li>
+                          <li style={{ color: /[A-Z]/.test(newPassword) ? "green" : "#8e8e8e" }}>
+                              1 uppercase letter
+                          </li>
+                          <li style={{ color: /[a-z]/.test(newPassword) ? "green" : "#8e8e8e" }}>
+                              1 lowercase letter
+                          </li>
+                          <li style={{ color: /[0-9]/.test(newPassword) ? "green" : "#8e8e8e" }}>
+                              1 number
+                          </li>
+                      </ul>
+                  </div>
+              </div>
           </div>
 
           {/* Manage friends */}
