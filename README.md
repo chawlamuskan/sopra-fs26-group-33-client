@@ -1,394 +1,268 @@
-# Getting Started
+# 🌍 Worldtura Information - Client Side
 
-### MacOS, Linux and WSL
-
-If you are using MacOS, Linux or WSL(Windows-Subsystem-Linux), you can skip
-directly to the
-[installation part](https://github.com/HASEL-UZH/sopra-fs26-template-client?tab=readme-ov-file#installation)
-
-### Windows
-
-If you are using Windows, you first need to install
-WSL(Windows-Subsystem-Linux). You might need to reboot your computer for the
-installation, therefore, save and close all your other work and programs
-
-1. Download the following [powershell script](./windows.ps1)\
-   ![downloadWindowsScript](https://github.com/user-attachments/assets/7372e029-8bed-41e4-80b7-b7079b0856be)
+Travel planning can be overwhelming, with information scattered across multiple websites and
+platforms, making it hard to find reliable tips and personalized recommendations. Our project
+aims to create an interactive and collaborative web application that centralizes travel information while encouraging community contributions. Users explore destinations through an
+interactive world map, they can create and share travel boards, plan itineraries, and discover popular or highly rated places.
 
 
----
-2. Open a new powershell terminal **with admin privileges** and run the following command and follow the instructions. Make sure that you open the powershell terminal at the path where you have downloaded the powershell script, otherwise the command will not work because it can not find the script. You can list currently accessible files in the powershell terminal with ```dir``` and you can use ```cd``` to navigate between directories
-   ```shell
-   C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy Bypass -File .\windows.ps1
-   ```
----
+## Technologies Used
 
-3. If you experience any issues, try re-running the script a couple of times. If
-   the installation remains unsuccessful, follow this
-   [youtube tutorial](https://youtu.be/GIYOoMDfmkM) or post your question in the
-   OLAT forum
+## High-Level Components
 
----
-4. After successful installation, you can open WSL/Ubuntu. You will need to choose a username and password, although no characters will be shown on the screen when typing the password but the system recognizes your input, no worries :) After these four steps your setup should look similar to this
-![initialUbuntuScreen](https://github.com/user-attachments/assets/ecd4d4c2-1239-4717-87af-a476e425d734)
+Our project has a few main components that make up the majority of the user experience. 
 
-<br>
-<br>
-<br>
+### Map:
+The map is one of the app’s core features and serves as the first page users interact with, either as logged-out users  [(see page)](https://github.com/chawlamuskan/sopra-fs26-group-33-client/blob/aff108930eb840b1761b111e6bb32dc571a796b9/app/page.tsx) or after registering/logging in [(see page)](https://github.com/chawlamuskan/sopra-fs26-group-33-client/blob/aff108930eb840b1761b111e6bb32dc571a796b9/app/users/%5Bid%5D/page.tsx).
+The map uses the [Google Maps API](https://mapsplatform.google.com/lp/maps-apis/) for the rendering of the map, the [REST Countries API](https://restcountries.com/) to fetch the information about the individual countries for their respective popups, and the [Google Places API](https://developers.google.com/maps/documentation/places/web-service/overview) to fetch the information regarding individual places. 
+The page also communicates extensively with the backend. Its primary backend interactions include saving places, retrieving existing travel boards, and managing the relationship between saved locations and user-generated travel content. 
 
-# Installation
-1. Open a new MacOS, Linux or WSL(Windows-Subsystem-Linux) terminal. Make sure you have git installed, you can check that by running
-   ```shell
-   git --version
-   ```
-   The output should be something similar to ```git version X.XX.X```, if not, try to install git in one of the following ways
-   #### MacOS
-   ```shell
-   brew install --formulae git
-   ```
-   #### Linux/WSL
-   ```shell
-   sudo apt-get install git
-   ```
-   If you are not using Ubuntu, you will need to install git with your package manager of choice
----
+### Saved Places:
+The Saved Places page contains all locations that the user has saved from the map [(see page)](https://github.com/chawlamuskan/sopra-fs26-group-33-client/blob/aff108930eb840b1761b111e6bb32dc571a796b9/app/places/page.tsx). 
+Places are organised into categories, based on the ones provided by the [Google Places API](https://developers.google.com/maps/documentation/places/web-service/overview). This page communicates with the database to fetch the places saved by the logged in user, and to remove places from the saved list. 
 
-2. Clone the repository with git using the following command
-   ```shell
-   git clone https://github.com/YOUR_USERNAME/YOUR-CLIENT-REPO
-   ```
-
----
-3. Navigate to the cloned directory in the terminal, in example with ```cd sopra-fs26-student-client```
----
-
-4. Inside the repository folder (with `ls` you can list files) there is a bash
-   script _setup.sh_ that will install everything you need, according to the
-   system you are using. Run the following command and follow the instructions
-   ```shell
-   source setup.sh
-   ```
-
-The screenshot below shows an example of how this looks
-![sourceScript](https://github.com/user-attachments/assets/9f804291-85b2-4a49-8da0-c6c95db390f3)
+### Travel Board:
+The Travel Boards component lets users create, join and collaborate on trip collections. Main page [(see page)](https://github.com/chawlamuskan/sopra-fs26-group-33-client/blob/aff108930eb840b1761b111e6bb32dc571a796b9/app/travelboards/page.tsx), location input component [(see page)](https://github.com/chawlamuskan/sopra-fs26-group-33-client/blob/aff108930eb840b1761b111e6bb32dc571a796b9/app/travelboards/LocationInput.tsx), and individual board view [(see page)](https://github.com/chawlamuskan/sopra-fs26-group-33-client/blob/aff108930eb840b1761b111e6bb32dc571a796b9/app/travelboards/%5Bid%5D/page.tsx).
+Users can create and manage boards with a name, location, optional date range, and privacy settings (`PRIVATE|FRIENDS|PUBLIC`). The component supports invite and join flows via generated codes, notifications, and direct friend invites. Places can be added from the map or Saved Places, with all changes tracked in real-time activity logs. Board owners can rename or delete boards, while members can leave at any time.
 
 
-The installation script _setup.sh_ can take a few minutes, please be patient and
-do not abort the process. If you encounter any issues, please close the terminal
-and open a new one and try to run the command again
+## Launch & Deployment
 
-<br>
-<br>
-<br>
+To be able to work on this directory locally, developers should first clone the repository using either HTTPS or SSH:
 
-# Troubleshooting the installation
+**HTTPS**: 
+```bash
+git clone https://github.com/chawlamuskan/sopra-fs26-group-33-client.git
+```
+**SSH**: 
+```bash
+git clone git@github.com:chawlamuskan/sopra-fs26-group-33-client.git
+```
+### Installing dependencies:
+Developers should make sure to have the latest version of Node.js installed. 
+Required dependencies can be installed using the command 
+```bash
+npm install
+```
+### External services:
+This project relies on the following external APIs:
+- Google Maps API (map rendering)
+- Google Places API (place data)
+- REST Countries API (country information)
 
-If the four steps above did not work for you and re-running the setup.sh script
-a couple of times did not help, try running the following steps manually
-
-1. Open a new MacOS, Linux or WSL(Windows-Subsystem-Linux) terminal and navigate
-   to the repository with `cd`. Then ensure that curl is installed
-   ```shell
-   curl --version
-   ```
-   The output should be something similar to `curl X.X.X`, if not, try to
-   install curl in one of the following ways
-   #### MacOS
-   ```shell
-   brew install --formulae curl
-   ```
-   #### Linux/WSL
-   ```shell
-   sudo apt-get install curl
-   ```
-   If you are not using Ubuntu, you will need to install curl with your package
-   manager of choice
-
----
-2. Download Determinate Nix
-   ```shell
-   curl --proto '=https' --tlsv1.2 -ssf --progress-bar -L https://install.determinate.systems/nix -o install-nix.sh
-   ```
----
-
-3. Install Determinate Nix
-   ```shell
-   sh install-nix.sh install --determinate --no-confirm --verbose
-   ```
-
----
-4. Install direnv using nix
-   ```shell
-   nix profile install nixpkgs#direnv
-   ```
-   If you encounter a permission error, try running with sudo
-   ```shell
-   sudo nix profile install nixpkgs#direnv
-   ```
----
-
-5. Find out what shell you are using
-   ```shell
-   echo $SHELL
-   ```
-
----
-6. Hook direnv into your shell according to [this guide](https://github.com/direnv/direnv/blob/master/docs/hook.md)
----
-
-7. Allow direnv to access the repository
-   ```shell
-   direnv allow
-   ```
-
-If all troubleshooting steps above still did not work for you, try the following
-as a **last resort**: Open a new terminal and navigate to the client repository
-with `cd`. Run the command. Close the terminal again and do this for each of the
-six commands above, running each one in its own terminal, one after the other.
-
-<br>
-<br>
-<br>
-
-# Available commands after successful installation
-
-With the installation steps above your system now has all necessary tools for
-developing and running the sopra frontend application. Amongst others, two
-javascript runtimes have been installed for running the app:
-
-- [NodeJS](https://nodejs.org)
-- [Deno](https://deno.com)
-
-Runtimes is what your system needs to compile
-[typescript](https://www.typescriptlang.org) code (used in this project) to
-javascript and execute the application. You can use either runtime for this
-project, according to your preference. Both come with an included package
-manager, `npm` for nodejs and `deno` for deno. Thereby, the
-[package.json](./package.json) file defines possible commands that can be
-executed (using either `deno` or `npm`). The following commands are available in
-this repository:
-
-1. **Running the development server** - This will start the application in
-   development mode, meaning that changes to the code are instantly visible live
-   on [http://localhost:3000](http://localhost:3000) in the browser
-   ```bash
-   deno task dev
-   ```
-2. **Building a production-ready application** - This will create an optimized
-   production build that is faster and takes up less space. It is a static
-   build, meaning that changes to the code will only be included when the
-   command is run again
-   ```bash
-   deno task build
-   ```
-3. **Running the production application** - This will start the optimized
-   production build and display it on
-   [http://localhost:3000](http://localhost:3000) in the browser. This command
-   can only be run _after_ a production build has been created with the command
-   above and will not preview live code changes
-   ```bash
-   deno task start
-   ```
-4. **Linting the entire codebase** - This command allows to check the entire
-   codebase for mistakes, errors and warnings
-   ```bash
-   deno task lint
-   ```
-5. **Formatting the entire codebase** - This command will ensure that proper
-   indentation, spacing and further styling is applied to the code. This ensures
-   that the code looks uniform and the same across your team members, it is best
-   to run this command _every time before pushing changes to your repository_!
-   ```bash
-   deno task fmt
-   ```
-
-All of the above mentioned commands can also be run using the nodejs runtime by
-substituting `deno task` with `npm run`, i.e
-
+### Setting up local environment:
+Developers must configure API keys in environment variables (e.g. `.env.local`), such as:
+```bash
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_key_here 
+```
+### Running the client locally
+The client can run locally with the following command:
 ```bash
 npm run dev
 ```
+And it will be accessible on the link [http://localhost:3000/](http://localhost:3000/) 
 
-<br>
-<br>
-<br>
+### Backend dependency
+This application communicates with a backend service responsible for:
+- User authentication
+- Saving and retrieving saved places
+- Managing travel boards
 
-# Docker
+The backend must be running locally or accessible via a configured API endpoint in environment variables. For more information on setting up the server, readers should refer to the [README of the server directory](https://github.com/chawlamuskan/sopra-fs26-group-33-server/blob/855ebcd724ef9f865a163ada4145ff5ce00c175e/README.md).
 
-### Introduction
-This year Docker will be used to ease the process of deployment.\
-Docker is a tool that uses containers as isolated environments, ensuring that the application runs consistently and uniformly across different devices.\
-Everything in this repository is already set up to minimize your effort for deployment.\
-All changes to the main branch will automatically be pushed to dockerhub and optimized for production.
+### Committing changes
+The project followed a branch workflow. Each team member worked on a dedicated branch and pushed changes there first. Once a feature or fix was completed, a pull request (PR) was created to merge the changes into the main branch.
+All pull requests were reviewed by at least one other team member before being merged, ensuring code quality and consistency across the project.  
 
-### Setup
-1. **One** member of the team should create an account on [dockerhub](https://hub.docker.com/), _incorporating the group number into the account name_, for example, `SoPra_group_XX`.\
-2. This account then creates a repository on dockerhub with the _same name as the group's Github repository name_.\
-3. Finally, the person's account details need to be added as [secrets](https://docs.github.com/en/actions/security-guides/using-secrets-in-github-actions#creating-secrets-for-a-repository) to the group's repository:
-    - dockerhub_username (the username of the dockerhub account from step 1, for example, `SoPra_group_XX`)
-    - dockerhub_password (a generated PAT([personal access token](https://docs.docker.com/docker-hub/access-tokens/)) of the account with read and write access)
-    - dockerhub_repo_name (the name of the dockerhub repository from step 2)
+Typical workflow: 
 
-### Pull and run
-Once the image is created and has been successfully pushed to dockerhub, the image can be run on any machine.\
-Ensure that [Docker](https://www.docker.com/) is installed on the machine you wish to run the container.\
-First, pull (download) the image with the following command, replacing your username and repository name accordingly.
+- Moving to own branch
+```bash
+git checkout your-branch-name
+```
+- State changes
+```bash
+git add .
+```
+- Commit changes
+```bash
+git commit -m “Description of changes”
+```
+- Pushing branch to remote
 
-```docker pull <dockerhub_username>/<dockerhub_repo_name>```
-
-Then, run the image in a container with the following command, again replacing _<dockerhub_username>_ and _<dockerhub_repo_name>_ accordingly.
-
-```docker run -p 3000:3000 <dockerhub_username>/<dockerhub_repo_name>```
-
-<br>
-<br>
-<br>
-
-# Installing additional software by modifying [flake.nix](./flake.nix)
-
-As this project uses Determinate Nix for managing development software,
-installing additional tools you might need is straightforward. You only need to
-adjust the section `nativeBuildInputs = with pkgs;` in the
-[nix flake](./flake.nix) with the package you would like to install. For
-example, if you want to use docker (the [Dockerfile](./Dockerfile) and
-[.dockerignore](./.dockerignore) are already included in this repo) you can
-simply add:
-
-```nix
-nativeBuildInputs = with pkgs;
-  [
-    nodejs
-    git
-    deno
-    watchman
-    docker ### <- added docker here
-  ]
-  ++ lib.optionals stdenv.isDarwin [
-    xcodes
-  ]
-  ++ lib.optionals (system == "aarch64-linux") [
-    qemu
-  ];
+```bash
+git push origin your-branch-name
 ```
 
-and add the package path to the `shellHook''` section
 
-```nix
-        devShells.default = pkgs.mkShell {
-          inherit nativeBuildInputs;
+## Illustrations
 
-          shellHook = ''
-            export HOST_PROJECT_PATH="$(pwd)"
-            export COMPOSE_PROJECT_NAME=sopra-fs26-template-client
-            
-            export PATH="${pkgs.nodejs}/bin:$PATH"
-            export PATH="${pkgs.git}/bin:$PATH"
-            export PATH="${pkgs.deno}/bin:$PATH"
-            export PATH="${pkgs.watchman}/bin:$PATH"
-            export PATH="${pkgs.docker}/bin:$PATH" ### <- added docker path here
-            
-            ### rest of code ###
-        };
-```
 
-and finally do `direnv reload` in your terminal inside the repository folder. If
-you need a specific version of a package, you can override it in the `overlays`
-section
+This section describes the main user flows of the application. The map serves as the central entry point, from which users navigate to different features such as saved places, travel boards, and community interactions. 
 
-```nix
-overlays = [
-  (self: super: {
-    nodejs = super.nodejs_23; ### <- changed to nodejs 23
-  })
-];
-```
+### Logged out users
 
-<br>
-<br>
-<br>
+#### Map:
+Logged-out users can explore a simplified 2D map displaying only the main geographical features. By clicking on a country, they can access an overview containing basic statistics and information about that country. 
 
-# Miscellaneous
+#### Registration and Preferences: 
+New users can register with the dedicated page. After signing up, they are prompted to set up their profile preferences, which include:
 
-This project uses
-[`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts)
-to automatically optimize and load [Geist](https://vercel.com/font), a new font
-family for Vercel.
+- Writing a bio
+- Selecting a profile picture
+- Choosing countries they have visited or want to visit
+- Adding friends by username
 
-## Learn More
+These steps are optional and can be skipped or completed later via the Settings page.
 
-To learn more about Next.js, take a look at the following resources:
+### Logged in users
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js
-  features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+#### Login: 
 
-You can check out
-[the Next.js GitHub repository](https://github.com/vercel/next.js) - your
-feedback and contributions are welcome!
+Users can login with their username or email, and their password. 
+After login, the map becomes the home page. Navigation to other pages is available via the user profile icon in the top-right corner. The Worldtura logo redirects users back to the main map view.
 
-## Deploy on Vercel
+#### Map:
+Logged-in users have access to a more interactive experience. In addition to the country overview, users can view popular places within the app that are located in the selected country. As users zoom in, individual landmarks, establishments, and attractions become visible on the map. 
+Clicking on a place opens a pop-up containing details such as the address, with options to:
 
-The easiest way to deploy your Next.js app is to use the
-[Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme)
-from the creators of Next.js.
+- Save the place
+- Add it to a travel board
+- View public travel boards containing the place
 
-Check out our
-[Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying)
-for more details.
+A search bar allows users to find specific locations. Additionally, a “Saved Places Mode” toggle displays all saved places on the map using emoji-based category markers.
 
-## Windows users
+#### Country Overview
+This page shows the user’s visited and “want to visit” countries on a simplified world map, while all other countries are displayed in grey.
 
-Please ensure that the repository folder is inside the WSL2 filesystem
-(otherwise, the disk IO performance will be horrible). If you followed the
-tutorial closely, this is already the case. If for whatever reason you deviated
-from the instructions, please take the time now to ensure the repo is on the WSL
-filesystem. You can do this either by
+Clicking on a country opens a pop-up similar to the main map overview. However, instead of popular places, it displays travel boards of the user.
 
-1. _Cloning the repository again with git in a WSL/Ubuntu terminal using the
-   following command and deleting the repository on the windows filesystem_
-   ```shell
-   git clone https://github.com/HASEL-UZH/sopra-fs26-template-client
-   ```
-2. _Using the Windows explorer to move the repository from the windows
-   filesystem to WSL filesystem_ In the left overview of all folders and drives
-   there should be a new filesystem called Linux (also check in the network
-   tab). Open the Linux drive and open the folder named "home", followed by your
-   username. Copy the whole repository folder from your current location to the
-   Linux folder /home/your-username (note that the folder will initially be
-   empty). Finally, delete the folder from your current location such that you
-   only have the folder inside the Linux filesystem.
-3. _Using the command line in WSL to move the repo_ Open a new Ubuntu / WSL2
-   terminal window. This will automatically open your home folder of the Linux
-   file system. You then need to locate where the repository / folder that you
-   have downloaded resides. You can use the `cp -ar` command to copy the folder
-   from the Windows drive to the Linux filesystem. The command takes the
-   following arguments: cp **source_file** _target_file_. Thus we need to
-   specify **source_file** the folder we want to copy from Windows filesystem
-   and the _target_file_ where to copy the folder to in the Linux filesystem. As
-   visible in this screenshot
-   ![copyFolderToUbuntu](https://github.com/user-attachments/assets/363c2098-beca-48bc-bdff-582b83c96618)
+#### Saved Places
+This page displays all places saved by the user, organized into categories (plus an “All” category).
 
-   the repository folder resides under the C drive in /mnt/c/. If your file is
-   not on your C drive, the folder path will be something like /mnt/d/. In the
-   screenshot, the downloaded repository folder is in the Downloads folder of
-   the current user on the C drive, thus the path for **source_file** is
-   `/mnt/c/Users/immol/Downloads`. The terminal in the screenshot is currently
-   in the home directory, indicated by ~ in the path in blue. As we want to copy
-   the folder to the home folder (/home/your-username) we can specify the
-   current directory (.) as the _target_file_, thus the dot at the end of the
-   command. If you happen to not be in the home folder, you can also run the
-   command with explicitly copying to the home folder as such:
-   ```bash
-   cp -ar /mnt/c/your-path /home/your-username
-   ```
-   Else you can run
-   ```bash
-   cp -ar /mnt/c/your-path .
-   ```
-   with . indicating to copy to the current path (in this case your home
-   folder). You can check if the repository was successfully copied over using
-   `ls` to list folders and files, as visible in the screenshot. You can then
-   delete the downloaded folder / repository from the Windows filesystem in the
-   explorer.
+Only up to 9 places are shown per category, with a “See more” option to view the full list. Inside the full view, users can also remove saved places.
 
-add for vercel and environment variables 
+#### Travel Boards
+This page allows users to create, manage, and join travel boards. 
+
+**- Creating a board:**
+
+Users can create a board via a pop-up form where they must provide a name and location, and optionally select a date range. Boards can be set to one of three privacy levels:
+
+- Private (only owner and members can view)
+- Friends (friends of the owner can also view)
+- Public (visible to all users)
+
+Users can also invite others either via a generated code or directly (if they are friends).
+
+**- Managing boards:**
+
+In “Manage Mode”, users can rename or delete boards they own, and leave boards they are members of. Changes are finalized by clicking “Done”. 
+
+**- Joining a board:**
+
+Users receive invitations via notifications accessible from the bell icon in the header. Alternatively, they can join using an invitation code. 
+
+#### Individual Travel Board
+Selecting a travel board opens its dedicated page, which displays:
+
+- Board name
+- Member profile pictures
+- Selected date range (if applicable)
+
+The page is divided into two sections:
+
+- Saved places
+- Activity log
+
+Places can be added either from the map or via the “Add a place” option in Saved Places. This opens a filtered view showing relevant places based on location. Non-matching places are greyed out, but can still be added with confirmation.
+
+Places can be removed individually, triggering a confirmation step.
+
+All updates are reflected in real time in the activity log, allowing all members to track changes within the board.
+
+#### Community
+The Community page is split into two tabs: 
+
+**- Friends tab**
+
+Displays friends’ profiles and their travel boards, unless those boards are set to private. 
+
+**- Public tab**
+
+Displays all public travel boards. Users can view these boards in guest mode, where editing is disabled, and can request to join them. 
+
+#### Profile Settings
+In this page, users can update:
+
+- Profile information and preferences
+- Password
+- Friends list (adding and removing friends)
+
+Users can also delete their account. In this case, all associated data, including saved places and travel boards, is permanently removed.
+
+
+## Roadmaps
+
+This section outlines the top features that future contributors could implement to extend the functionality of the project. These features were planned but could not be completed due to time constraints. 
+
+### Posts
+A key planned feature is a Posts system, where users can share their travel experiences in a social format.
+
+Users would be able to:
+
+- Write posts about their trips or experiences
+- Associate a post with a specific travel board or place
+- Share travel stories with the community
+- Comment on other posts
+- Save posts to read later
+
+These posts would then be integrated into the platform by:
+
+- Displaying them in the dedicated Posts page
+- Displaying them in the Community page together with popular travel boards
+- Showing them in map pop-ups linked to countries or specific places
+
+This feature would significantly enhance the social aspect of the application.
+
+### Reviews, Ratings, and Personalised Recommendations
+While the application currently uses Google Maps ratings for places, a future improvement would be to implement an internal review and rating system.
+
+This would allow users to:
+
+- Leave detailed reviews for places
+- Rate locations within the application itself
+- Contribute to a community-driven feedback system
+
+In addition, these ratings could be used to:
+- Improve place recommendations
+- Provide personalised suggestions based on user preferences and community feedback
+
+This would make the platform more dynamic and tailored to individual users.
+
+### Itinerary mode in the travel boards
+Another planned enhancement is an Itinerary Mode within travel boards.
+Currently, users can collect places in a board. In itinerary mode, users would be able to:
+
+- Organise selected places by specific travel dates
+- Structure their trip in a day-by-day format
+- Mark places as visited using checkmarks
+
+This feature would transform travel boards from simple collections into fully structured trip planners.
+
+
+## Authors and Acknowledgements
+
+### Team members
+
+- [Muskan Chawla](https://github.com/chawlamuskan)
+- [Nadia Pandolfo](https://github.com/nadiapan4)
+- [Despoina Pantazi](https://github.com/despoinapantazi)
+- [Nina Jael Savas](https://github.com/nsavas8)
+- [Yalini Sivapathasundaram](https://github.com/yalini-siva)
+
+### Acknowledgements
+
+The authors would like to thank the SOPRA team for their help during the semester, and the group that provided feedback during beta testing.
+
+## License

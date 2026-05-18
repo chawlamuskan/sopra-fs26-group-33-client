@@ -1,7 +1,7 @@
 "use client";
 import { useLogout } from "@/hooks/useLogout";
 import React, { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { User } from "@/types/user";
@@ -482,6 +482,7 @@ const UserDashboard: React.FC = () => {
   const COUNTRY_LABEL_MAX_ZOOM = 6;
   const [showSavedPlaces, setShowSavedPlaces] = useState(false);
   const [savedPlaces, setSavedPlaces] = useState<SavedPlace[]>([]);
+  const searchParams = useSearchParams();
 
   type SavedPlace = {
     id: number;
@@ -554,15 +555,14 @@ const UserDashboard: React.FC = () => {
   const storedUser = useLocalStorage<User | null>("user", null);
 
   const MapPanner: React.FC<{ target: { lat: number; lng: number } | null; onDone: () => void;}> = ({ target, onDone }) => {
-  const map = useMap();
-  useEffect(() => {
-    if (!map || !target) return;
-    map.panTo({ lat: target.lat, lng: target.lng });
-    map.setZoom(15);
-    onDone();
-  }, [map, target]);
-  return null;
-
+    const map = useMap();
+    useEffect(() => {
+      if (!map || !target) return;
+      map.panTo({ lat: target.lat, lng: target.lng });
+      map.setZoom(15);
+      onDone();
+    }, [map, target]);
+    return null;
   };
 
   useEffect(() => {
@@ -578,7 +578,43 @@ const UserDashboard: React.FC = () => {
     fetchSaved();
   }, [showSavedPlaces, storedUser.value?.id, apiService]);
 
-
+  useEffect(() => {
+    const placeId = searchParams.get("placeId");
+    if (!placeId) return;
+    const fetchPlace = async () => {
+      try {
+        const response = await fetch(
+          `https://places.googleapis.com/v1/places/${placeId}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Goog-Api-Key":
+                process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!,
+              "X-Goog-FieldMask":
+                "displayName,formattedAddress,rating,types,photos.name,location",
+            },
+          }
+        );
+        const data = await response.json();
+        const place: PlaceInfo = {
+          name: data.displayName?.text ?? "Unknown Place",
+          address: data.formattedAddress ?? "",
+          rating: data.rating ?? null,
+          placeId,
+          photoReference: data.photos?.[0]?.name ?? null,
+          lat: data.location?.latitude ?? null,
+          lng: data.location?.longitude ?? null,
+          types: data.types ?? [],
+        };
+        setSearchTarget({lat: place.lat!,lng: place.lng!,});
+        setPlaceInfo(place);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchPlace();
+  }, [searchParams]);
 
   if (isAllowed === null) return null;
   if (!isAllowed) return null;
