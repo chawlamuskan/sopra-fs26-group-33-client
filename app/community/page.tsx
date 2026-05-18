@@ -71,7 +71,6 @@ const CommunityPageContent: React.FC = () => {
     } catch (error) {
         const appError = error as { status?: number; message?: string };
         if (appError.status === 409) {
-            // ADDED: check if already a member or already sent request
             const msg = appError.message ?? "";
             if (msg.includes("already a member")) {
                 message.info(`Good news! You are already a member of "${board.name}".`);
@@ -364,6 +363,16 @@ const CommunityPageContent: React.FC = () => {
                                   <button
                                     className={`${styles.inviteBtn} ${styles.inviteBtnSmall}`}
                                     onClick={() => requestJoinBoard(board)}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.transform = "scale(1.04)";
+                                        e.currentTarget.style.boxShadow =
+                                        "0 6px 18px rgba(0,0,0,0.25)";
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.transform = "scale(1)";
+                                        e.currentTarget.style.boxShadow =
+                                        "0 3px 10px rgba(0,0,0,0.15)";
+                                    }}
                                   >
                                     Ask to join
                                   </button>

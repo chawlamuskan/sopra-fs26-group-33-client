@@ -93,7 +93,7 @@ export default function CategoryPage() {
     <>
       <Header />
 
-      <main style={{ padding: "24px 30px" }}>
+      <main style={{ padding: "24px 70px" }}>
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <h1 style={{ color: "#0d1b8e", margin: 0 }}>{title}</h1>
 
@@ -167,7 +167,7 @@ export default function CategoryPage() {
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
-                gap: "6px",
+                gap: "16px",
               }}
             >
               {filteredPlaces.map((place) => (
