@@ -301,7 +301,7 @@ const CommunityPageContent: React.FC = () => {
               ) : friendsData.length === 0 ? (
                 <div className={styles.emptyState}>
                   <p className={styles.emptyTitle}>
-                    You don't have friends yet
+                    You do not have friends yet
                   </p>
                   <p className={styles.emptyText}>
                     Add friends in your profile settings to see their travel boards here!

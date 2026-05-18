@@ -4,7 +4,7 @@ import { Input } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import { PlaceInfo } from "@/types/placeinfo";
-import { ALLOWED_POI_TYPES } from "@/constants/placeCategories";
+import { isAllowedPoiType } from "@/constants/placeCategories";
 
 interface PlacePrediction {
   place_id: string;
@@ -91,7 +91,7 @@ export default function MapSearchBar({ onPlaceSelect }: MapSearchBarProps) {
         photoReference: data.photos?.[0]?.name ?? null,
         lat: data.location?.latitude ?? null,
         lng: data.location?.longitude ?? null,
-        types: types.filter((t) => ALLOWED_POI_TYPES.includes(t as any)),
+        types: types.filter(isAllowedPoiType),
       });
     }
   } catch (err) {
