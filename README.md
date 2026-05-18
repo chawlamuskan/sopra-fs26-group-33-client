@@ -1,4 +1,4 @@
-# 🌍 Worldtura Information
+# 🌍 Worldtura Information - Client Side
 
 Travel planning can be overwhelming, with information scattered across multiple websites and
 platforms, making it hard to find reliable tips and personalized recommendations. Our project
