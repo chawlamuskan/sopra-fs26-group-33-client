@@ -21,9 +21,12 @@ The page also communicates extensively with the backend. Its primary backend int
 The Saved Places page contains all locations that the user has saved from the map [(see page)](https://github.com/chawlamuskan/sopra-fs26-group-33-client/blob/aff108930eb840b1761b111e6bb32dc571a796b9/app/places/page.tsx). 
 Places are organised into categories, based on the ones provided by the [Google Places API](https://developers.google.com/maps/documentation/places/web-service/overview). This page communicates with the database to fetch the places saved by the logged in user, and to remove places from the saved list. 
 
+### Travel Board:
+The Travel Boards component lets users create, join and collaborate on trip collections. Main page [(see page)](https://github.com/chawlamuskan/sopra-fs26-group-33-client/blob/aff108930eb840b1761b111e6bb32dc571a796b9/app/travelboards/page.tsx), location input component [(see page)](https://github.com/chawlamuskan/sopra-fs26-group-33-client/blob/aff108930eb840b1761b111e6bb32dc571a796b9/app/travelboards/LocationInput.tsx), and individual board view [(see page)](https://github.com/chawlamuskan/sopra-fs26-group-33-client/blob/aff108930eb840b1761b111e6bb32dc571a796b9/app/travelboards/%5Bid%5D/page.tsx).
+Users can create and manage boards with a name, location, optional date range, and privacy settings (`PRIVATE|FRIENDS|PUBLIC`). The component supports invite and join flows via generated codes, notifications, and direct friend invites. Places can be added from the map or Saved Places, with all changes tracked in real-time activity logs. Board owners can rename or delete boards, while members can leave at any time.
 
 
-## Launch & Deployment 
+## Launch & Deployment
 
 To be able to work on this directory locally, developers should first clone the repository using either HTTPS or SSH:
 
@@ -132,7 +135,7 @@ A search bar allows users to find specific locations. Additionally, a “Saved P
 #### Country Overview
 This page shows the user’s visited and “want to visit” countries on a simplified world map, while all other countries are displayed in grey.
 
-Clicking on a country opens a pop-up similar to the main map overview. However, instead of popular places, it displays travel boards associated with that country.
+Clicking on a country opens a pop-up similar to the main map overview. However, instead of popular places, it displays travel boards of the user.
 
 #### Saved Places
 This page displays all places saved by the user, organized into categories (plus an “All” category).
@@ -194,7 +197,7 @@ In this page, users can update:
 
 - Profile information and preferences
 - Password
-- Friends list
+- Friends list (adding and removing friends)
 
 Users can also delete their account. In this case, all associated data, including saved places and travel boards, is permanently removed.
 
@@ -252,7 +255,11 @@ This feature would transform travel boards from simple collections into fully st
 
 ### Team members
 
+- [Muskan Chawla](https://github.com/chawlamuskan)
 - [Nadia Pandolfo](https://github.com/nadiapan4)
+- [Despoina Pantazi](https://github.com/despoinapantazi)
+- [Nina Jael Savas](https://github.com/nsavas8)
+- [Yalini Sivapathasundaram](https://github.com/yalini-siva)
 
 ### Acknowledgements
 
