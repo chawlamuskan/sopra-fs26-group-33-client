@@ -181,10 +181,12 @@ All updates are reflected in real time in the activity log, allowing all members
 #### Community
 The Community page is split into two tabs: 
 
-**Friends tab**
+**- Friends tab**
+
 Displays friends’ profiles and their travel boards, unless those boards are set to private. 
 
-**Public tab**
+**- Public tab**
+
 Displays all public travel boards. Users can view these boards in guest mode, where editing is disabled, and can request to join them. 
 
 #### Profile Settings
