@@ -142,7 +142,7 @@ Only up to 9 places are shown per category, with a “See more” option to view
 #### Travel Boards
 This page allows users to create, manage, and join travel boards. 
 
-**Creating a board:**
+**- Creating a board:**
 
 Users can create a board via a pop-up form where they must provide a name and location, and optionally select a date range. Boards can be set to one of three privacy levels:
 
@@ -152,11 +152,11 @@ Users can create a board via a pop-up form where they must provide a name and lo
 
 Users can also invite others either via a generated code or directly (if they are friends).
 
-**Managing boards:**
+**- Managing boards:**
 
 In “Manage Mode”, users can rename or delete boards they own, and leave boards they are members of. Changes are finalized by clicking “Done”. 
 
-**Joining a board:**
+**- Joining a board:**
 
 Users receive invitations via notifications accessible from the bell icon in the header. Alternatively, they can join using an invitation code. 
 
