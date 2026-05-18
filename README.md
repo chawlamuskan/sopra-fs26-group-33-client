@@ -25,6 +25,69 @@ Places are organised into categories, based on the ones provided by the [Google 
 
 ## Launch & Deployment 
 
+To be able to work on this directory locally, developers should first clone the repository using either HTTPS or SSH:
+
+**HTTPS**: 
+```bash
+git clone https://github.com/chawlamuskan/sopra-fs26-group-33-client.git
+```
+**SSH**: 
+```bash
+git clone git@github.com:chawlamuskan/sopra-fs26-group-33-client.git
+```
+### Installing dependencies:
+Developers should make sure to have the latest version of Node.js installed. 
+Required dependencies can be installed using the command 
+```bash
+npm install
+```
+### External services:
+This project relies on the following external APIs:
+- Google Maps API (map rendering)
+- Google Places API (place data)
+- REST Countries API (country information)
+
+### Setting up local environment:
+Developers must configure API keys in environment variables (e.g. `.env.local`), such as:
+```bash
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_key_here 
+```
+### Running the client locally
+The client can run locally with the following command:
+```bash
+npm run dev
+```
+And it will be accessible on the link [http://localhost:3000/](http://localhost:3000/) 
+
+### Backend dependency
+This application communicates with a backend service responsible for:
+- User authentication
+- Saving and retrieving saved places
+- Managing travel boards
+
+### Committing changes
+The project followed a branch workflow. Each team member worked on a dedicated branch and pushed changes there first. Once a feature or fix was completed, a pull request (PR) was created to merge the changes into the main branch.
+All pull requests were reviewed by at least one other team member before being merged, ensuring code quality and consistency across the project.  
+Typical workflow: 
+Moving to own branch
+```bash
+git checkout your-branch-name
+```
+State changes
+```bash
+git add .
+```
+Commit changes
+```bash
+git commit -m “Description of changes”
+```
+Pushing branch to remote
+
+```bash
+git push origin your-branch-name
+```
+
+
 ## Illustrations
 
 ## Roadmaps
