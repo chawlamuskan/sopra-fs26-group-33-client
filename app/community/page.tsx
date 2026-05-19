@@ -95,14 +95,10 @@ const CommunityPageContent: React.FC = () => {
 
         const enriched = await Promise.all(
           friends.map(async (f) => {
-            const allBoards = await apiService.get<FriendBoard[]>(
-              `/travelboards/friends`
-            );
-
-            const boards = allBoards.filter(
-              (b) => b.ownerId === Number(f.id)
-            );
-
+            const boards = await apiService
+              .get<FriendBoard[]>(`/users/${f.id}/travelboards/visible`)
+              .catch(() => []);
+            
             const prefs = await apiService
               .get<Preferences>(`/users/${f.id}/preferences`)
               .catch(() => null);
@@ -144,9 +140,7 @@ const CommunityPageContent: React.FC = () => {
           })
         );
 
-        setFriendsData(
-          enriched.filter((f) => f.boards.length > 0)
-        );
+        setFriendsData(enriched);
       } finally {
         setLoadingFriends(false);
       }
@@ -341,19 +335,45 @@ const CommunityPageContent: React.FC = () => {
                           </div>
 
                           {/* BIO */}
-                          {f.bio && <p className={styles.bio}>{f.bio}</p>}
-
-                          {/* SECTION TITLE */}
-                          <div className={styles.sectionTitle}>
-                            Recent Travel Boards
-                          </div>
-
+                          {f.bio && 
+                            <p
+                              style={{ 
+                                  color: "#0d1b8e", 
+                                  fontSize: "13px", 
+                                  fontStyle: "italic", 
+                                  margin: "8px 0" 
+                                }}
+                            >
+                              {f.bio}
+                            </p>
+                          }
+                          {f.boards.length !== 0 && (
+                            <>
+                              {/* SECTION TITLE */}
+                              <div className={styles.sectionTitle}>
+                                Recent Travel Boards
+                              </div>
+                            </>
+                          )}
                           {/* BOARDS */}
                           <div className={styles.friendBoards}>
-                            {(f.boards).map((board) => (
-                              <div key={board.id}
-                                className={styles.friendBoardCard}
+                            {f.boards.length === 0 ? (
+                              // when friend has no boards
+                              <p 
+                                style={{ 
+                                  color: "#0d1b8e", 
+                                  fontSize: "13px", 
+                                  fontStyle: "italic", 
+                                  margin: "8px 0" 
+                                }}
                               >
+                                {f.name} has no travel boards yet.
+                              </p>
+                            ) : (
+                              f.boards).map((board) => (
+                                <div key={board.id}
+                                  className={styles.friendBoardCard}
+                                >
                                 {/* HEADER */}
                                 <div className={styles.friendBoardHeader}>
                                   <span className={styles.friendBoardName}>

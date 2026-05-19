@@ -30,7 +30,7 @@ const Preferences: React.FC = () => {
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [countryOptions, setCountryOptions] = useState<{ label: string; value: string }[]>([]);
-
+  const [visitedCountries, setVisitedCountries] = useState<string[]>([]);
   const { set: setToken } = useLocalStorage<string>("token", "");
 
   useEffect(() => {
@@ -190,6 +190,11 @@ const Preferences: React.FC = () => {
       user.id !== storedUser.id
     );
   });
+
+  const wishlistOptions = countryOptions.map((option) => ({
+    ...option,
+    disabled: visitedCountries.includes(option.value),
+  }));
 
   return (
     <ConfigProvider
@@ -370,6 +375,15 @@ const Preferences: React.FC = () => {
                   style={{ width: "100%" }}
                   showSearch
                   className={styles.countrySelect}
+                  onChange={(selected: string[]) => {
+                      setVisitedCountries(selected);
+                      const currentWishlist: string[] =
+                        form.getFieldValue("countries_wishlist") ?? [];
+                      const filteredWishlist = currentWishlist.filter(
+                        (c) => !selected.includes(c)
+                      );
+                      form.setFieldValue("countries_wishlist", filteredWishlist);
+                    }}
                 />
               </Form.Item>
 
@@ -381,10 +395,31 @@ const Preferences: React.FC = () => {
                 <Select
                   mode="multiple"
                   placeholder="Select countries"
-                  options={countryOptions}
+                  options={wishlistOptions}
                   style={{ width: "100%" }}
                   showSearch
                   className={styles.countrySelect}
+                  optionRender={(option) => (
+                    <span
+                      title={
+                        visitedCountries.includes(option.value as string)
+                          ? "Already in visited countries"
+                          : undefined
+                      }
+                      style={{
+                        color: visitedCountries.includes(option.value as string)
+                            ? "#bbb"
+                            : undefined,
+                        cursor: visitedCountries.includes(option.value as string)
+                            ? "default"
+                            : "pointer",
+                        display: "block",
+                        width: "100%",
+                    }}
+                    >
+                      {option.label}
+                    </span>
+                    )}
                 />
               </Form.Item>
             </div>
