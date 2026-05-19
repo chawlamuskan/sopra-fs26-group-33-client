@@ -18,6 +18,7 @@ type TravelBoard = {
   id: number;
   name: string;
   location: string;
+  countryCode?: string | null;
   startDate: string | null;
   endDate: string | null;
   privacy: string;
@@ -159,20 +160,32 @@ const TravelBoardsPage: React.FC = () => {
       });
     }, [boards, isAllowed]);
 
-    const geocodeBounds = async (locationName: string) => {
+    const geocodeBoundsAndCountry = async (locationName: string) => {
   if (!locationName.trim()) return {};
   try {
     const res = await fetch(
       `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(locationName)}&language=en&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
     );
     const data = await res.json();
-    const viewport = data.results?.[0]?.geometry?.viewport;
-    if (!viewport) return {};
+    const result = data.results?.[0];
+
+    if (!result) return {};
+
+    const viewport = result.geometry?.viewport;
+
+    const countryCode =
+      result.address_components
+        ?.find((component: { types: string[]; short_name: string }) =>
+          component.types.includes("country")
+        )
+        ?.short_name ?? null;
+
     return {
       latMin: viewport.southwest.lat,
       latMax: viewport.northeast.lat,
       lngMin: viewport.southwest.lng,
       lngMax: viewport.northeast.lng,
+      countryCode
     };
   } catch {
     return {};
@@ -185,7 +198,7 @@ const handleSave = async () => {
     return;
   }
 
-  const bounds = await geocodeBounds(location); // ← fetch bounds
+  const locationData = await geocodeBoundsAndCountry(location); // ← fetch bounds
 
   const payload = {
     name: boardName,
@@ -195,7 +208,7 @@ const handleSave = async () => {
     privacy: privacy,
     inviteCode: inviteCode || null,
     invitedUserIds: invitedFriends.map((f) => f.id),
-    ...bounds, 
+    ...locationData, 
   };
 
     try {
