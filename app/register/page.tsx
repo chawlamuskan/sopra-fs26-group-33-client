@@ -124,24 +124,25 @@ const Register: React.FC = () => {
                   fontSize: "12px",
                   lineHeight: "1.4",
                   marginTop: "6px",
+                  color: "#8e8e8e"
                 }}
               >
                 Password must contain at least:
                 <ul style={{ margin: "4px 0 0 18px", padding: 0 }}>
                   <li
-                    style={{ color: passwordChecks.length ? "green" : "#959595", }}
+                    style={{ color: passwordChecks.length ? "green" : "#8e8e8e", }}
                   >8 characters
                   </li>
                   <li
-                    style={{ color: passwordChecks.uppercase ? "green" : "#959595", }}
+                    style={{ color: passwordChecks.uppercase ? "green" : "#8e8e8e", }}
                   >1 uppercase letter
                   </li>
                   <li
-                    style={{ color: passwordChecks.lowercase ? "green" : "#959595", }}
+                    style={{ color: passwordChecks.lowercase ? "green" : "#8e8e8e", }}
                   >1 lowercase letter
                   </li>
                   <li
-                    style={{ color: passwordChecks.number ? "green" : "#959595", }}
+                    style={{ color: passwordChecks.number ? "green" : "#8e8e8e", }}
                   >1 number
                   </li>
                 </ul>
