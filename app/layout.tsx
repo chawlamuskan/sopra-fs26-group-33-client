@@ -21,20 +21,15 @@ const dmSans = DM_Sans({
   weight: ["400", "700"],
 });
 
-
 export const metadata: Metadata = {
   title: "Worldtura",
   description: "sopra-fs26-template-client",
-  viewport: "width=device-width, initial-scale=1",
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1
 };
-
-
-
 
 export default function RootLayout({
   children,
