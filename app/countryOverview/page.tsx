@@ -330,7 +330,7 @@ export default function CountryOverview() {
                                   backgroundColor: "rgba(255, 255, 255, 0.16)",
                                   borderRadius: "14px",
                                   padding: "10px 12px",
-                                  height: boardsForSelectedCountry.length === 1 ? "150" : "125px",
+                                  height: boardsForSelectedCountry.length === 1 ? "150px" : "125px",
                                   cursor: "pointer",
                                   display: "flex",
                                   justifyContent: "center",
