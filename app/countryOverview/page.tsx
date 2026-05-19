@@ -24,11 +24,25 @@ interface CountryInfo {
   population: number;
   flag: string;
   languages: string[];
+  countryCode: string;
 }
 
 interface savedCountry {
   countryName: string;
   status: "visited" | "wishlist";
+}
+
+interface TravelBoard {
+  id: number;
+  name: string;
+  location: string | null;
+  privacy: string;
+  ownerId: number;
+  latMin?: number | null;
+  latMax?: number | null;
+  lngMin?: number | null;
+  lngMax?: number | null;
+  countryCode?: string | null;
 }
 
 // coloring logic for colored map
@@ -89,7 +103,9 @@ export default function CountryOverview() {
     const position = {lat: 47.3769, lng: 8.5417}
     const [countryInfo, setCountryInfo] = useState<CountryInfo | null>(null);
     const apiService = useApi();
-  const [savedCountries, setSavedCountries] = useState<savedCountry[]>([]);
+    const [savedCountries, setSavedCountries] = useState<savedCountry[]>([]);
+    const [travelBoards, setTravelBoards] = useState<TravelBoard[]>([]);
+    const [boardPlaces, setBoardPlaces] = useState<Record<number, { photoReference?: string | null; name: string }[]>>({});
     const handleClick = async (event: MapMouseEvent) => {
         if (!event.detail.latLng) return;
         const lat = event.detail.latLng.lat;
@@ -113,12 +129,18 @@ export default function CountryOverview() {
             }
             const country = countryData[0];
 
+            const countryCode = geocodeData.results[0].address_components.find(
+              (component: { types: string[]; short_name: string }) =>
+                component.types.includes("country")
+            )?.short_name;
+
             setCountryInfo({
                 name: country.name.common,
                 capital: country.capital?.[0] ?? "N/A",
                 population: country.population,
                 flag: country.flag,
                 languages: Object.values(country.languages ?? {}),
+                countryCode: countryCode ?? "",
             });
         } catch (error) {
             console.error("Error fetching country info:", error);
@@ -153,6 +175,48 @@ export default function CountryOverview() {
       };
       getSavedCountries();
     }, [apiService]);
+
+    useEffect(() => {
+      const fetchTravelBoards = async () => {
+        try {
+          const data = await apiService.get<TravelBoard[]>("/travelboards");
+          setTravelBoards(data);
+        } catch {
+          setTravelBoards([]);
+        }
+      };
+    
+      fetchTravelBoards();
+    }, [apiService, isAllowed]);
+
+    const boardsForSelectedCountry = countryInfo
+      ? travelBoards.filter(
+          (board) => board.countryCode === countryInfo.countryCode
+        )
+      : [];
+
+    useEffect(() => {
+      boardsForSelectedCountry.forEach(async (board) => {
+        if (boardPlaces[board.id]) return;
+      
+        try {
+          const places = await apiService.get<{ id: number; name: string; photoReference?: string | null }[]>(
+            `/travelboards/${board.id}/places`
+          );
+        
+          setBoardPlaces((prev) => ({
+            ...prev,
+            [board.id]: places,
+          }));
+        } catch {
+          setBoardPlaces((prev) => ({
+            ...prev,
+            [board.id]: [],
+          }));
+        }
+      });
+    }, [boardsForSelectedCountry]);
+
     if (isAllowed === null) return null;
     if (!isAllowed) return null;
 
@@ -226,25 +290,63 @@ export default function CountryOverview() {
                       </div>
                     </div>
                     <div style={{ marginTop: "12px" }}>
-                      <p style={{ textAlign: "center", fontWeight: "bold" }}>Recommended Places</p>
-                      <div style={{
-                        backgroundColor: "#1a3a8f",
-                        borderRadius: "8px",
-                        padding: "10px",
-                        textAlign: "center",
-                        marginBottom: "8px"
-                      }}>
-                        Content coming soon
-                      </div>
-                      <p style={{ textAlign: "center", fontWeight: "bold" }}>Community Posts</p>
-                      <div style={{
-                        backgroundColor: "#1a3a8f",
-                        borderRadius: "8px",
-                        padding: "10px",
-                        textAlign: "center"
-                      }}>
-                        Content coming soon
-                      </div>
+                      <p style={{ textAlign: "center", fontWeight: "bold" }}>
+                        Your travel boards
+                      </p>
+
+                      {boardsForSelectedCountry.length === 0 ? (
+                        <div
+                          style={{
+                            backgroundColor: "#1a3a8f",
+                            borderRadius: "8px",
+                            padding: "10px",
+                            textAlign: "center",
+                          }}
+                        >
+                          No travel boards yet
+                        </div>
+                      ) : (
+                        <div style={{ 
+                          display: "grid",
+                          gridTemplateColumns: boardsForSelectedCountry.length === 1 ? "1fr" : "repeat(2, 1fr)", 
+                          gap: "12px", 
+                          marginTop: "10px" }}>
+                          {boardsForSelectedCountry.slice(0, 4).map((board) => {
+                            const previewPlace = boardPlaces[board.id]?.find((place) => place.photoReference);
+                            const photoUrl = previewPlace?.photoReference
+                              ? `https://places.googleapis.com/v1/${previewPlace.photoReference}/media?maxWidthPx=400&key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}`
+                              : null;
+                          
+                            return (
+                              <div
+                                key={board.id}
+                                onClick={() => router.push(`/travelboards/${board.id}`)}
+                                style={{
+                                  backgroundImage: photoUrl
+                                    ? `linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.55)), url(${photoUrl})`
+                                    : undefined,
+                                  backgroundSize: "cover",
+                                  backgroundPosition: "center",
+                                  backgroundColor: "rgba(255, 255, 255, 0.16)",
+                                  borderRadius: "14px",
+                                  padding: "10px 12px",
+                                  height: boardsForSelectedCountry.length === 1 ? "150" : "125px",
+                                  cursor: "pointer",
+                                  display: "flex",
+                                  justifyContent: "center",
+                                  alignItems: "self-end",
+                                }}
+                              >
+                                <div>
+                                  <div style={{ fontWeight: 650, fontSize: boardsForSelectedCountry.length === 1 ? "20px" : "16px"}}>
+                                    {board.name}
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
