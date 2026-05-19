@@ -9,6 +9,7 @@ import { ApiService } from "@/api/apiService";
 import { User } from "@/types/user";
 import { useRouter } from "next/navigation";
 
+
 interface FormFieldProps {
   bio: string;
   countries_visited: string[];
@@ -224,6 +225,10 @@ const SettingsPageInner: React.FC = () => {
       return;
     }
     if (!/[^a-zA-Z0-9]/.test(newPassword)) {
+      message.error("Password must contain at least one special character.");
+      return;
+    }
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(newPassword)) {
       message.error("Password must contain at least one special character.");
       return;
     }
@@ -575,21 +580,24 @@ const SettingsPageInner: React.FC = () => {
                   />
                   {/* password hint */}
                   <div style={{ fontSize: "12px", lineHeight: "1.4", color: "#8e8e8e" }}>
-                      Password must contain at least:
-                      <ul style={{ margin: "4px 0 0 18px", padding: 0 }}>
-                          <li style={{ color: newPassword.length >= 8 ? "green" : "#8e8e8e" }}>
-                              8 characters
-                          </li>
-                          <li style={{ color: /[A-Z]/.test(newPassword) ? "green" : "#8e8e8e" }}>
-                              1 uppercase letter
-                          </li>
-                          <li style={{ color: /[a-z]/.test(newPassword) ? "green" : "#8e8e8e" }}>
-                              1 lowercase letter
-                          </li>
-                          <li style={{ color: /[0-9]/.test(newPassword) ? "green" : "#8e8e8e" }}>
-                              1 number
-                          </li>
-                      </ul>
+                    Password must contain at least:
+                    <ul style={{ margin: "4px 0 0 18px", padding: 0 }}>
+                      <li style={{ color: newPassword.length >= 8 ? "green" : "#8e8e8e" }}>
+                        8 characters
+                      </li>
+                      <li style={{ color: /[A-Z]/.test(newPassword) ? "green" : "#8e8e8e" }}>
+                        1 uppercase letter
+                      </li>
+                      <li style={{ color: /[a-z]/.test(newPassword) ? "green" : "#8e8e8e" }}>
+                        1 lowercase letter
+                      </li>
+                      <li style={{ color: /[0-9]/.test(newPassword) ? "green" : "#8e8e8e" }}>
+                        1 number
+                      </li>
+                      <li style={{ color: /[!@#$%^&*(),.?":{}|<>]/.test(newPassword) ? "green" : "#8e8e8e",}}>
+                        1 special character
+                      </li>
+                    </ul>
                   </div>
               </div>
           </div>
