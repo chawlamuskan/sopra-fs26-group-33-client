@@ -287,7 +287,7 @@ const SavedPlacesAdd: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const apiService = useApi();
   const [board, setBoard] = useState<BoardDetail | null>(null);
-  const [addedIds, setAddedIds] = useState<Set<number>>(new Set());
+  const [addedPlaceIds, setAddedPlaceIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
 
   const boardCity = board?.location ?? "";
@@ -313,7 +313,7 @@ const SavedPlacesAdd: React.FC = () => {
         ]);
         setSavedPlaces(places);
         setBoard(boardData);
-        setAddedIds(new Set(boardPlaces.map((p) => p.id)));
+        setAddedPlaceIds(new Set(boardPlaces.map((p) => p.externalPlaceId)));
       } catch (err) {
         console.error(err);
       } finally {
@@ -332,7 +332,7 @@ const SavedPlacesAdd: React.FC = () => {
       rating: place.rating,
       photoReference: place.photoReference,
     });
-    setAddedIds((prev) => new Set([...prev, place.id]));
+    setAddedPlaceIds((prev) => new Set([...prev, place.externalPlaceId]));
   };
 
   return (
@@ -371,7 +371,7 @@ const SavedPlacesAdd: React.FC = () => {
                 place={place}
                 board={board!}
                 cityDisplay={cityDisplay}
-                added={addedIds.has(place.id)}
+                added={addedPlaceIds.has(place.externalPlaceId)}
                 onAdd={handleAdd}
               />
             ))}
