@@ -20,6 +20,7 @@ interface CountryInfo {
   population: number;
   flag: string;
   languages: string[];
+  countryCode: string;
 }
 
 export default function Home() {
@@ -38,13 +39,13 @@ export default function Home() {
       );
       const geocodeData = await geocodeReverse.json();
       if (!geocodeData.results || geocodeData.results.length === 0) return;
-      const countryName = geocodeData.results[0].address_components[0].long_name;
+      const countryCode = geocodeData.results[0].address_components[0].short_name;
       const countryRes = await fetch(
-        `https://restcountries.com/v3.1/name/${countryName}?fullText=true`
+        `https://restcountries.com/v3.1/alpha/${countryCode}?fullText=true`
         );
       const countryData = await countryRes.json();
       if (!countryData || countryData.status === 404) {
-        console.error("Country not found:", countryName);
+        console.error("Country not found:", countryCode);
         return;
       }
       const country = countryData[0];
@@ -55,6 +56,7 @@ export default function Home() {
         population: country.population,
         flag: country.flag,
         languages: Object.values(country.languages ?? {}),
+        countryCode,
       });
     } catch (error) {
       console.error("Error fetching country info:", error);
