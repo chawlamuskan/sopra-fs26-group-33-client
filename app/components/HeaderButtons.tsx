@@ -409,9 +409,8 @@ export default function HeaderButtons( {onToggleSavedPlaces}: HeaderButtonsProps
             { label: "Countries Overview", path: `/countryOverview` },
             { label: "Saved Places", path: `/places` },
             { label: "Travel Boards", path: `/travelboards` },
-            { label: "Community", path: `/community` },//need to change these paths once the pages are implemented
-            { label: "Posts", path: `/posts` },//need to change these paths once the pages are implemented
-            { label: "Profile Settings", path: `/settings` },//need to change these paths once the pages are implemented
+            { label: "Community", path: `/community` },
+            { label: "Profile Settings", path: `/settings` },
           ].map((item) => (
             <div
               key={item.label}
