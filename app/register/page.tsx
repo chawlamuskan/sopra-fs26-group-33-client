@@ -23,7 +23,7 @@ const Register: React.FC = () => {
     uppercase: /[A-Z]/.test(password),
     lowercase: /[a-z]/.test(password),
     number: /[0-9]/.test(password),
-    special: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+    special: /[!@#$%^&*(),.?":{}|<>/']/.test(password),
   };
 
   const { set: setToken } = useLocalStorage<string>("token", "");
@@ -148,7 +148,7 @@ const Register: React.FC = () => {
                   </li>
                   <li
                     style={{ color: passwordChecks.special ? "green" : "#8e8e8e" }}
-                  >1 special character
+                  >1 special character (e.g. ! @ # / ')
                   </li>
                 </ul>
               </div>

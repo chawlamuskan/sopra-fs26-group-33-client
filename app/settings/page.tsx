@@ -224,12 +224,8 @@ const SettingsPageInner: React.FC = () => {
       message.error("Password must contain at least one number.");
       return;
     }
-    if (!/[^a-zA-Z0-9]/.test(newPassword)) {
-      message.error("Password must contain at least one special character.");
-      return;
-    }
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(newPassword)) {
-      message.error("Password must contain at least one special character.");
+    if (!/[!@#$%^&*(),.?":{}|<>/'\\]/.test(newPassword)) {
+      message.error("Password must contain at least one special character (/ or ').");
       return;
     }
 
@@ -594,8 +590,8 @@ const SettingsPageInner: React.FC = () => {
                       <li style={{ color: /[0-9]/.test(newPassword) ? "green" : "#8e8e8e" }}>
                         1 number
                       </li>
-                      <li style={{ color: /[!@#$%^&*(),.?":{}|<>]/.test(newPassword) ? "green" : "#8e8e8e",}}>
-                        1 special character
+                      <li style={{ color: /[!@#$%^&*(),.?":{}|<>/']/.test(newPassword) ? "green" : "#8e8e8e",}}>
+                        1 special character (e.g. ! @ # / ')
                       </li>
                     </ul>
                   </div>
