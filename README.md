@@ -72,7 +72,7 @@ The backend must be running locally or accessible via a configured API endpoint 
 
 ### Committing changes
 The project followed a branch workflow. Each team member worked on a dedicated branch and pushed changes there first. Once a feature or fix was completed, a pull request (PR) was created to merge the changes into the main branch.
-All pull requests were reviewed by at least one other team member before being merged, ensuring code quality and consistency across the project.  
+All pull requests were reviewed by at least one other team member before being merged, ensuring code quality and consistency across the project. Deployment needs to be manually triggered.
 
 Typical workflow: 
 
