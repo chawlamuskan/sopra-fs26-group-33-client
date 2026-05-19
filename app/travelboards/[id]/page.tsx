@@ -183,8 +183,10 @@ const TravelBoardPage: React.FC = () => {
             const places = await apiService.get<SavedPlace[]>(`/travelboards/${id}/places`);
             if (!cancelled) { setSavedPlaces(places); }
 
-        } catch (err: any) {
-            if (err.status === 401 || err.status === 403) {
+        } catch (err: unknown) {
+            const error = err as { status?: number };
+
+            if (error.status === 401 || error.status === 403) {
                 try {
                     const publicBoard = await apiService.get<BoardDetail>(`/travelboards/${id}/public`);
                     if (cancelled) return;
@@ -194,8 +196,9 @@ const TravelBoardPage: React.FC = () => {
                     const places = await apiService.get<SavedPlace[]>(`/travelboards/${id}/places`);
                     if (!cancelled) { setSavedPlaces(places); }
                     
-                } catch (e: any) {
-                    if (e.status === 403) {
+                } catch (e: unknown) {
+                    const error = e as { status?: number };
+                    if (error.status === 403) {
                         setAccessState("denied");
                     } else {
                         console.error(e);
