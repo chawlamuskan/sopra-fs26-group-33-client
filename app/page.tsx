@@ -115,22 +115,13 @@ export default function Home() {
                   </div>
                 </div>
                 <div style={{ marginTop: "12px" }}>
-                  <p style={{ textAlign: "center", fontWeight: "bold" }}>Recommended Places</p>
+                  <p style={{ textAlign: "center", fontWeight: "bold" }}>Popular Places</p>
                   <div style={{
                     backgroundColor: "#1a3a8f",
                     borderRadius: "8px",
                     padding: "10px",
                     textAlign: "center",
                     marginBottom: "8px"
-                  }}>
-                    Please <span style={{ textDecoration: "underline", cursor: "pointer" }} onClick={() => router.push("/login")}>Login</span> or <span style={{ textDecoration: "underline", cursor: "pointer" }} onClick={() => router.push("/register")}>Register</span> to view
-                  </div>
-                  <p style={{ textAlign: "center", fontWeight: "bold" }}>Community Posts</p>
-                  <div style={{
-                    backgroundColor: "#1a3a8f",
-                    borderRadius: "8px",
-                    padding: "10px",
-                    textAlign: "center"
                   }}>
                     Please <span style={{ textDecoration: "underline", cursor: "pointer" }} onClick={() => router.push("/login")}>Login</span> or <span style={{ textDecoration: "underline", cursor: "pointer" }} onClick={() => router.push("/register")}>Register</span> to view
                   </div>

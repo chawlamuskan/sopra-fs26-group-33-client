@@ -28,9 +28,15 @@ interface CountryInfo {
   population: number;
   flag: string;
   languages: string[];
+  countryCode: string;
 }
 
-
+interface PopularPlace {
+  externalPlaceId: string;
+  name: string;
+  photoReference?: string | null;
+  count: number;
+}
 
 interface AddressComponent {
   types: string[];
@@ -42,6 +48,7 @@ interface TravelBoard {
   id: number;
   name: string;
   location?: string | null;
+  countryCode?: string | null;
   privacy?: string;
   ownerId?: number;
 }
@@ -483,6 +490,7 @@ const UserDashboard: React.FC = () => {
   const [showSavedPlaces, setShowSavedPlaces] = useState(false);
   const [savedPlaces, setSavedPlaces] = useState<SavedPlace[]>([]);
   const searchParams = useSearchParams();
+  const [popularCountryPlaces, setPopularCountryPlaces] = useState<PopularPlace[]>([]);
 
   type SavedPlace = {
     id: number;
@@ -527,6 +535,7 @@ const UserDashboard: React.FC = () => {
       population: country.population,
       flag: country.flag,
       languages: Object.values(country.languages ?? {}),
+      countryCode,
     });
   };
 
@@ -616,6 +625,58 @@ const UserDashboard: React.FC = () => {
     fetchPlace();
   }, [searchParams]);
 
+  useEffect(() => {
+    if (!countryInfo?.countryCode) return;
+
+    const fetchPopularPlacesForCountry = async () => {
+      try {
+        const boards = await apiService.get<TravelBoard[]>("/travelboards/public");
+
+        const countryBoards = boards.filter(
+          (board) => board.countryCode === countryInfo.countryCode
+        );
+
+        const placeMap: Record<string, PopularPlace> = {};
+
+        for (const board of countryBoards) {
+          try {
+            const places = await apiService.get<{
+              externalPlaceId: string;
+              name: string;
+              photoReference?: string | null;
+            }[]>(`/travelboards/${board.id}/places`);
+
+            for (const place of places) {
+              if (!placeMap[place.externalPlaceId]) {
+                placeMap[place.externalPlaceId] = {
+                  externalPlaceId: place.externalPlaceId,
+                  name: place.name,
+                  photoReference: place.photoReference ?? null,
+                  count: 0,
+                };
+              }
+
+              placeMap[place.externalPlaceId].count += 1;
+            }
+          } catch {
+            // ignore boards whose places cannot be fetched
+          }
+        }
+
+        const popularPlaces = Object.values(placeMap)
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 9);
+
+        setPopularCountryPlaces(popularPlaces);
+      } catch {
+        setPopularCountryPlaces([]);
+      }
+    };
+
+    fetchPopularPlacesForCountry();
+  }, [apiService, countryInfo?.countryCode]);
+
+
   if (isAllowed === null) return null;
   if (!isAllowed) return null;
 
@@ -676,14 +737,87 @@ const UserDashboard: React.FC = () => {
                     </div>
                   </div>
                   <div style={{ marginTop: "12px" }}>
-                    <p style={{ textAlign: "center", fontWeight: "bold" }}>Recommended Places</p>
-                    <div style={{ backgroundColor: "#1a3a8f", borderRadius: "8px", padding: "10px", textAlign: "center", marginBottom: "8px" }}>
-                      Content coming soon
+                  <p style={{ textAlign: "center", fontWeight: "bold" }}>
+                    Popular Places
+                  </p>
+
+                  {popularCountryPlaces.length === 0 ? (
+                    <div
+                      style={{
+                        backgroundColor: "#1a3a8f",
+                        borderRadius: "8px",
+                        padding: "10px",
+                        textAlign: "center",
+                      }}
+                    >
+                      No popular places yet
                     </div>
-                    <p style={{ textAlign: "center", fontWeight: "bold" }}>Community Posts</p>
-                    <div style={{ backgroundColor: "#1a3a8f", borderRadius: "8px", padding: "10px", textAlign: "center" }}>
-                      Content coming soon
+                  ) : (
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(3, 1fr)",
+                        gap: "8px",
+                        marginTop: "10px",
+                      }}
+                    >
+                      {popularCountryPlaces.map((place) => {
+                        const photoUrl = place.photoReference
+                          ? getPlacePhotoUrl(place.photoReference)
+                          : null;
+                      
+                        return (
+                          <div
+                            key={place.externalPlaceId}
+                            onClick={() => router.push(`/users/${storedUser.value?.id}?placeId=${place.externalPlaceId}`)}
+                            style={{
+                              backgroundImage: photoUrl
+                                ? `linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.45)), url(${photoUrl})`
+                                : undefined,
+                              backgroundSize: "cover",
+                              backgroundPosition: "center",
+                              backgroundColor: "rgba(255,255,255,0.16)",
+                              borderRadius: "12px",
+                              height: "90px",
+                              cursor: "pointer",
+                              position: "relative",
+                              overflow: "hidden",
+                              display: "flex",
+                              alignItems: "flex-end",
+                              padding: "8px",
+                            }}
+                          >
+                            {!photoUrl && (
+                              <div
+                                style={{
+                                  position: "absolute",
+                                  inset: 0,
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  fontSize: "30px",
+                                  opacity: 0.25,
+                                }}
+                              >
+                                📍
+                              </div>
+                            )}
+                            <div style={{ zIndex: 1 }}>
+                              <div
+                                style={{
+                                  fontWeight: 650,
+                                  fontSize: "12px",
+                                  lineHeight: "1.1",
+                                }}
+                              >
+                                {place.name}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
+                  )}
                   </div>
                 </div>
               )}
