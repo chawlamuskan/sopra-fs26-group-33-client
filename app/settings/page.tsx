@@ -225,7 +225,7 @@ const SettingsPageInner: React.FC = () => {
       return;
     }
     if (!/[!@#$%^&*(),.?":{}|<>/'\\]/.test(newPassword)) {
-      message.error("Password must contain at least one special character (/ or ').");
+      message.error("Password must contain at least one special character.");
       return;
     }
 
@@ -591,7 +591,7 @@ const SettingsPageInner: React.FC = () => {
                         1 number
                       </li>
                       <li style={{ color: /[!@#$%^&*(),.?":{}|<>/']/.test(newPassword) ? "green" : "#8e8e8e",}}>
-                        1 special character (e.g. ! @ # / ')
+                        1 special character (e.g. ! @ # / &apos;)
                       </li>
                     </ul>
                   </div>

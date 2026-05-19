@@ -148,7 +148,7 @@ const Register: React.FC = () => {
                   </li>
                   <li
                     style={{ color: passwordChecks.special ? "green" : "#8e8e8e" }}
-                  >1 special character (e.g. ! @ # / ')
+                  >1 special character (e.g. ! @ # / &apos;)
                   </li>
                 </ul>
               </div>
